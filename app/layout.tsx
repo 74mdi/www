@@ -13,17 +13,6 @@ import Navbar from '@/components/navbar'
 import { getCommandPaletteItems } from '@/lib/command-palette-items'
 import './globals.css'
 
-const themePresetScript = `
-  (function () {
-    try {
-      var preset = localStorage.getItem('qaiik-theme-preset');
-      if (preset === 'paper' || preset === 'mist' || preset === 'graphite') {
-        document.documentElement.setAttribute('data-theme-preset', preset);
-      }
-    } catch {}
-  })();
-`
-
 const sans = localFont({
   src: './_fonts/InterVariable.woff2',
   preload: true,
@@ -66,9 +55,6 @@ export default async function RootLayout({
 
   return (
     <html lang='en' className='overflow-x-hidden touch-manipulation'>
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: themePresetScript }} />
-      </head>
       <body
         className={cn(
           sans.variable,
