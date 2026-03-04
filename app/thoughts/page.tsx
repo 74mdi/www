@@ -1,38 +1,13 @@
-import { promises as fs } from 'fs'
 import Link from 'next/link'
-import path from 'path'
+
+import { getThoughtArticles } from '@/app/thoughts/articles'
 
 export const metadata = {
   title: 'qaiik',
 }
 
-// In the future we can have a pagination here e.g. /1/*.mdx
-const articlesDirectory = path.join(
-  process.cwd(),
-  'app',
-  'thoughts',
-  '_articles'
-)
-
 export default async function Page() {
-  const articles = await fs.readdir(articlesDirectory)
-
-  const items = []
-  for (const article of articles) {
-    if (!article.endsWith('.mdx')) continue
-    const module = await import('./_articles/' + article)
-
-    if (!module.metadata) throw new Error('Missing `metadata` in ' + article)
-    if (module.metadata.draft) continue
-
-    items.push({
-      slug: article.replace(/\.mdx$/, ''),
-      title: module.metadata.title,
-      date: module.metadata.date || '-',
-      sort: Number(module.metadata.date?.replaceAll('.', '') || 0),
-    })
-  }
-  items.sort((a, b) => b.sort - a.sort)
+  const items = await getThoughtArticles()
 
   if (items.length === 0) {
     return <p className='text-rurikon-300'>All posts are in draft.</p>

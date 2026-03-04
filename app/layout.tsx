@@ -8,7 +8,9 @@ import cn from 'clsx'
 import localFont from 'next/font/local'
 import 'katex/dist/katex.min.css'
 
+import CommandPalette from '@/components/command-palette'
 import Navbar from '@/components/navbar'
+import { getCommandPaletteItems } from '@/lib/command-palette-items'
 import './globals.css'
 
 const sans = localFont({
@@ -44,11 +46,13 @@ export const viewport: Viewport = {
   themeColor: '#fcfcfc',
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const commandPaletteItems = await getCommandPaletteItems()
+
   return (
     <html lang='en' className='overflow-x-hidden touch-manipulation'>
       <body
@@ -74,6 +78,7 @@ export default function RootLayout({
             </ViewTransition>
           </main>
         </div>
+        <CommandPalette items={commandPaletteItems} />
         <Analytics />
       </body>
     </html>
