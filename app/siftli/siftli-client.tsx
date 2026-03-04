@@ -7,12 +7,14 @@ import {
   useRef,
   useState,
   type ClipboardEvent,
+  type DragEvent,
   type FormEvent,
   type KeyboardEvent,
 } from 'react'
 import cn from 'clsx'
 import {
   ArrowPathIcon,
+  Bars3Icon,
   CheckCircleIcon,
   DocumentTextIcon,
   ExclamationTriangleIcon,
@@ -58,7 +60,6 @@ type SendResponseBody = {
 const MAX_CHARS = 4000
 const MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024
 const MAX_VISIBLE_UPLOAD_PROGRESS_FILES = 4
-const MAX_VISIBLE_SELECTED_FILES = 8
 const TEXTAREA_MIN_HEIGHT = 50
 const TEXTAREA_MAX_HEIGHT = 420
 const CHANNEL_KEYS: ChannelKey[] = ['telegram', 'discord']
@@ -140,6 +141,28 @@ function parseResponseBody(rawBody: string): SendResponseBody {
   }
 }
 
+function moveFileInArray(files: File[], fromIndex: number, toIndex: number): File[] {
+  if (
+    fromIndex === toIndex ||
+    fromIndex < 0 ||
+    toIndex < 0 ||
+    fromIndex >= files.length ||
+    toIndex >= files.length
+  ) {
+    return files
+  }
+
+  const next = [...files]
+  const [moved] = next.splice(fromIndex, 1)
+  if (!moved) return files
+  next.splice(toIndex, 0, moved)
+  return next
+}
+
+function hasFileTransfer(event: DragEvent<HTMLElement>): boolean {
+  return Array.from(event.dataTransfer.types).includes('Files')
+}
+
 export default function SiftliClient() {
   const [message, setMessage] = useState('')
   const [files, setFiles] = useState<File[]>([])
@@ -156,6 +179,8 @@ export default function SiftliClient() {
   )
   const [uploadFiles, setUploadFiles] = useState<UploadFileMeta[]>([])
   const [fileProgress, setFileProgress] = useState<Record<string, number>>({})
+  const [dragSourceIndex, setDragSourceIndex] = useState<number | null>(null)
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -244,6 +269,8 @@ export default function SiftliClient() {
 
   const clearFiles = useCallback(() => {
     setFiles([])
+    setDragSourceIndex(null)
+    setDragOverIndex(null)
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
@@ -555,11 +582,7 @@ export default function SiftliClient() {
     [uploadFiles],
   )
   const hiddenUploadFilesCount = uploadFiles.length - visibleUploadFiles.length
-  const visibleSelectedFiles = useMemo(
-    () => files.slice(0, MAX_VISIBLE_SELECTED_FILES),
-    [files],
-  )
-  const hiddenSelectedFilesCount = files.length - visibleSelectedFiles.length
+  const visibleSelectedFiles = files
   const totalSize = useMemo(
     () => files.reduce((sum, current) => sum + current.size, 0),
     [files],
@@ -599,6 +622,52 @@ export default function SiftliClient() {
     },
     [canSubmit, channelMode, clearResult, files, message, sendSubmission],
   )
+
+  const reorderFile = useCallback((fromIndex: number, toIndex: number) => {
+    setFiles((previous) => moveFileInArray(previous, fromIndex, toIndex))
+  }, [])
+
+  const onFileDragStart = useCallback(
+    (index: number, event: DragEvent<HTMLLIElement>) => {
+      setDragSourceIndex(index)
+      setDragOverIndex(index)
+      event.dataTransfer.effectAllowed = 'move'
+      event.dataTransfer.setData('text/plain', String(index))
+    },
+    [],
+  )
+
+  const onFileDragOver = useCallback(
+    (index: number, event: DragEvent<HTMLLIElement>) => {
+      event.preventDefault()
+      event.stopPropagation()
+      event.dataTransfer.dropEffect = 'move'
+      setDragOverIndex(index)
+    },
+    [],
+  )
+
+  const onFileDrop = useCallback(
+    (index: number, event: DragEvent<HTMLLIElement>) => {
+      event.preventDefault()
+      event.stopPropagation()
+
+      const fallbackIndex = Number.parseInt(event.dataTransfer.getData('text/plain'), 10)
+      const sourceIndex = dragSourceIndex ?? (Number.isNaN(fallbackIndex) ? null : fallbackIndex)
+      if (sourceIndex !== null) {
+        reorderFile(sourceIndex, index)
+      }
+
+      setDragSourceIndex(null)
+      setDragOverIndex(null)
+    },
+    [dragSourceIndex, reorderFile],
+  )
+
+  const onFileDragEnd = useCallback(() => {
+    setDragSourceIndex(null)
+    setDragOverIndex(null)
+  }, [])
 
   return (
     <section className='relative min-h-[68vh] pb-80'>
@@ -708,11 +777,16 @@ export default function SiftliClient() {
         <form
           onSubmit={handleSubmit}
           onDragOver={(event) => {
+            if (!hasFileTransfer(event)) return
             event.preventDefault()
             setIsDragging(true)
           }}
-          onDragLeave={() => setIsDragging(false)}
+          onDragLeave={(event) => {
+            if (!hasFileTransfer(event)) return
+            setIsDragging(false)
+          }}
           onDrop={(event) => {
+            if (!hasFileTransfer(event)) return
             event.preventDefault()
             setIsDragging(false)
             addFilesFromInput(event.dataTransfer.files)
@@ -767,9 +841,21 @@ export default function SiftliClient() {
               <ul className='mt-0 list-none pl-0 grid grid-cols-1 gap-2 sm:grid-cols-2'>
                 {visibleSelectedFiles.map((file, index) => (
                   <li
-                    key={`${fileSignature(file)}-${index}`}
-                    className='border border-rurikon-border rounded-xl px-2 py-1 flex min-w-0 items-center gap-2 text-xs text-rurikon-500 bg-rurikon-50/80'
+                    key={fileSignature(file)}
+                    draggable
+                    onDragStart={(event) => onFileDragStart(index, event)}
+                    onDragOver={(event) => onFileDragOver(index, event)}
+                    onDrop={(event) => onFileDrop(index, event)}
+                    onDragEnd={onFileDragEnd}
+                    className={cn(
+                      'border border-rurikon-border rounded-xl px-2 py-1 flex min-w-0 items-center gap-2 text-xs text-rurikon-500 bg-rurikon-50/80 cursor-move',
+                      dragSourceIndex === index && 'opacity-55',
+                      dragOverIndex === index &&
+                        dragSourceIndex !== index &&
+                        'border-rurikon-400 bg-rurikon-100/70',
+                    )}
                   >
+                    <Bars3Icon className='h-4 w-4 text-rurikon-300 shrink-0' />
                     <DocumentTextIcon className='h-4 w-4 text-rurikon-300 shrink-0' />
                     <span className='flex-1 min-w-0 truncate'>{file.name}</span>
                     <span className='shrink-0 text-rurikon-300'>{formatSize(file.size)}</span>
@@ -778,17 +864,14 @@ export default function SiftliClient() {
                       onClick={() => removeFile(index)}
                       className='shrink-0 p-0.5 text-rurikon-300 hover:text-rurikon-700'
                       aria-label={`Remove ${file.name}`}
+                      draggable={false}
                     >
                       <XMarkIcon className='h-4 w-4' />
                     </button>
                   </li>
                 ))}
               </ul>
-              {hiddenSelectedFilesCount > 0 ? (
-                <p className='mt-2 text-xs text-rurikon-300'>
-                  Showing first {visibleSelectedFiles.length} of {files.length} files
-                </p>
-              ) : null}
+              <p className='mt-2 text-xs text-rurikon-300'>Drag files to reorder queue.</p>
               <p className='mt-2 text-xs text-rurikon-300'>
                 {files.length} file{files.length > 1 ? 's' : ''} · {formatSize(totalSize)}
               </p>
