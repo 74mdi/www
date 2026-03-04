@@ -76,7 +76,7 @@ export default function ThemePresets() {
   )
 
   useEffect(() => {
-    persistThemePreset(activePreset)
+    applyThemePreset(activePreset)
   }, [activePreset])
 
   const onSelectPreset = (preset: ThemePreset) => {
@@ -86,8 +86,8 @@ export default function ThemePresets() {
   }
 
   return (
-    <div className='inline-flex items-center justify-end gap-2 px-2'>
-      <span className='text-[10px] tracking-[0.06em] uppercase text-rurikon-200'>
+    <div className='inline-flex items-center justify-end gap-2'>
+      <span className='text-[10px] tracking-[0.06em] uppercase text-rurikon-200 whitespace-nowrap'>
         Theme
       </span>
       <div className='inline-flex rounded-xl border border-rurikon-border overflow-hidden bg-white/70'>
@@ -99,7 +99,7 @@ export default function ThemePresets() {
               type='button'
               onClick={() => onSelectPreset(preset.id)}
               className={cn(
-                'px-2 py-1 text-[10px] leading-none transition-colors',
+                'px-2 py-1 text-[10px] leading-none transition-colors whitespace-nowrap',
                 isActive
                   ? 'bg-rurikon-700 text-white'
                   : 'text-rurikon-400 hover:text-rurikon-700 bg-white',
