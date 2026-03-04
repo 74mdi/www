@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "postbuild": "node scripts/postbuild-open-next.mjs",
     "start": "next start",
     "lint": "eslint app/siftli app/api/siftli --max-warnings=0",
     "lint:all": "eslint .",
