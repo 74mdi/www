@@ -50,6 +50,7 @@ export default function Navbar() {
         <Item href='/thoughts'>Thoughts</Item>
         {/* <Item href='/visuals'>Visuals</Item> */}
         <Item href='/projects'>Projects</Item>
+        <Item href='/performance'>Performance</Item>
         <Item href='/siftli'>SIFTLI</Item>
         {/* <Item href='/guestbook'>Guestbook</Item> */}
         <li className='-mx-2'>

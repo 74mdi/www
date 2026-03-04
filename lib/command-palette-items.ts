@@ -54,6 +54,14 @@ const BASE_ITEMS: CommandPaletteItem[] = [
     order: 40,
   },
   {
+    id: 'page-performance',
+    title: 'Performance',
+    href: '/performance',
+    section: 'Page',
+    keywords: ['lighthouse', 'uptime', 'latency', 'response'],
+    order: 45,
+  },
+  {
     id: 'page-visuals',
     title: 'Visuals',
     href: '/visuals',
@@ -142,4 +150,3 @@ export async function getCommandPaletteItems(): Promise<CommandPaletteItem[]> {
     return a.title.localeCompare(b.title)
   })
 }
-
