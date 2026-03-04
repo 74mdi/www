@@ -53,7 +53,7 @@ export default function Navbar() {
         <ThemePresets />
       </div>
 
-      <div className='mobile:hidden mt-2 flex items-center justify-end gap-2'>
+      <div className='mobile:hidden fixed left-1/2 -translate-x-1/2 bottom-4 z-40 flex items-center justify-center pb-[env(safe-area-inset-bottom)]'>
         <ThemePresets />
       </div>
     </nav>
