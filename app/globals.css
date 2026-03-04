@@ -63,12 +63,57 @@
 
 :root {
   --background: #fcfcfc;
+  --background-rgb: 252 252 252;
+  --selection-background: #95a5ac40;
+  --selection-text: #485a74;
 }
 
 :root {
   --sans-variation: 'opsz' 32;
   --font-features: 'cpsp' 1, 'cv01', 'cv03', 'cv04', 'calt', 'ss03',
     'liga', 'ordn';
+}
+
+:root[data-theme-preset='paper'] {
+  --background: #fcfcfc;
+  --background-rgb: 252 252 252;
+  --color-rurikon-border: #d8dbdfb3;
+  --selection-background: #95a5ac40;
+  --selection-text: #485a74;
+}
+
+:root[data-theme-preset='mist'] {
+  --background: #f6f8fb;
+  --background-rgb: 246 248 251;
+  --color-rurikon-50: #edf1f5;
+  --color-rurikon-100: #dbe2e9;
+  --color-rurikon-200: #b8c1cc;
+  --color-rurikon-300: #929eac;
+  --color-rurikon-400: #6e7b8a;
+  --color-rurikon-500: #4f5b68;
+  --color-rurikon-600: #3f4954;
+  --color-rurikon-700: #303942;
+  --color-rurikon-800: #232b33;
+  --color-rurikon-border: #cfd8e3b3;
+  --selection-background: #9cb0c84a;
+  --selection-text: #3d5370;
+}
+
+:root[data-theme-preset='graphite'] {
+  --background: #fbfaf8;
+  --background-rgb: 251 250 248;
+  --color-rurikon-50: #efeeec;
+  --color-rurikon-100: #dcd9d4;
+  --color-rurikon-200: #b9b4ac;
+  --color-rurikon-300: #969086;
+  --color-rurikon-400: #736c61;
+  --color-rurikon-500: #524c44;
+  --color-rurikon-600: #423d36;
+  --color-rurikon-700: #322e28;
+  --color-rurikon-800: #25211d;
+  --color-rurikon-border: #d4ccc2b3;
+  --selection-background: #9a8d7b4f;
+  --selection-text: #44392e;
 }
 
 body {
@@ -252,12 +297,22 @@ article {
 }
 
 .content-fade-out {
-  background: linear-gradient(180deg,  hsla(0, 0%, 100%, 1.00) 0%,  hsla(0, 0%, 100%, 0.63) 14%,  hsla(0, 0%, 100%, 0.36) 29%,  hsla(0, 0%, 100%, 0.19) 43%,  hsla(0, 0%, 100%, 0.08) 57%,  hsla(0, 0%, 100%, 0.02) 71%,  hsla(0, 0%, 100%, 0.00) 86%,  hsla(0, 0%, 100%, 0.00) 100%);
+  background: linear-gradient(
+    180deg,
+    rgb(var(--background-rgb) / 1) 0%,
+    rgb(var(--background-rgb) / 0.63) 14%,
+    rgb(var(--background-rgb) / 0.36) 29%,
+    rgb(var(--background-rgb) / 0.19) 43%,
+    rgb(var(--background-rgb) / 0.08) 57%,
+    rgb(var(--background-rgb) / 0.02) 71%,
+    rgb(var(--background-rgb) / 0) 86%,
+    rgb(var(--background-rgb) / 0) 100%
+  );
 }
 
 *::selection {
-  background: #95a5ac40;
-  color: #485a74;
+  background: var(--selection-background);
+  color: var(--selection-text);
 }
 
 .dot-leaders {

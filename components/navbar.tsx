@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 
 import { COMMAND_PALETTE_OPEN_EVENT } from '@/components/command-palette-events'
+import ThemePresets from '@/components/theme-presets'
 
 function Item(props: React.ComponentProps<typeof Link>) {
   const pathname = usePathname()
@@ -62,6 +63,9 @@ export default function Navbar() {
             <span>Search</span>
             <span className='text-[10px] text-rurikon-200'>Ctrl/Cmd+K</span>
           </button>
+        </li>
+        <li className='-mx-2'>
+          <ThemePresets />
         </li>
       </ul>
     </nav>
