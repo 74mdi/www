@@ -41,7 +41,18 @@ function Item(props: React.ComponentProps<typeof Link>) {
 export default function Navbar() {
   return (
     <nav className='mobile:mr-6 sm:mr-10 md:mr-14 w-full mobile:w-24 mobile:sticky top-6 sm:top-10 md:top-14 self-start'>
-      <ul className='lowercase text-right mb-6 mobile:mb-0 flex gap-2 justify-end mobile:block'>
+      <div className='mobile:hidden mb-6 flex items-start justify-between gap-3'>
+        <ThemeModeToggle />
+        <ul className='lowercase text-right flex gap-2 justify-end'>
+          <Item href='/'>About</Item>
+          <Item href='/thoughts'>Thoughts</Item>
+          <Item href='/projects'>Projects</Item>
+          <Item href='/siftli'>SIFTLI</Item>
+          {/* <Item href='/guestbook'>Guestbook</Item> */}
+        </ul>
+      </div>
+
+      <ul className='lowercase text-right hidden mobile:block'>
         <Item href='/'>About</Item>
         <Item href='/thoughts'>Thoughts</Item>
         <Item href='/projects'>Projects</Item>
@@ -49,11 +60,7 @@ export default function Navbar() {
         {/* <Item href='/guestbook'>Guestbook</Item> */}
       </ul>
 
-      <div className='mobile:fixed mobile:left-6 sm:left-10 md:left-14 mobile:bottom-6 sm:bottom-10 md:bottom-14 mobile:z-30 hidden mobile:flex flex-col items-end gap-2'>
-        <ThemeModeToggle />
-      </div>
-
-      <div className='mobile:hidden fixed left-1/2 -translate-x-1/2 bottom-4 z-40 flex items-center justify-center pb-[env(safe-area-inset-bottom)]'>
+      <div className='hidden mobile:flex mobile:fixed mobile:left-6 sm:left-10 md:left-14 mobile:bottom-6 sm:bottom-10 md:bottom-14 mobile:z-30 flex-col items-end gap-2'>
         <ThemeModeToggle />
       </div>
     </nav>
