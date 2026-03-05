@@ -44,7 +44,7 @@ export default function Navbar() {
       <div className='mobile:hidden mb-6 flex items-center justify-between gap-3'>
         <ThemeModeToggle />
         <ul className='lowercase text-right flex items-center gap-2 justify-end'>
-          <Item href='/'>About</Item>
+          <Item href='/'>Home</Item>
           <Item href='/thoughts'>Thoughts</Item>
           <Item href='/projects'>Projects</Item>
           <Item href='/siftli'>SIFTLI</Item>
@@ -53,7 +53,7 @@ export default function Navbar() {
       </div>
 
       <ul className='lowercase text-right hidden mobile:block'>
-        <Item href='/'>About</Item>
+        <Item href='/'>Home</Item>
         <Item href='/thoughts'>Thoughts</Item>
         <Item href='/projects'>Projects</Item>
         <Item href='/siftli'>SIFTLI</Item>

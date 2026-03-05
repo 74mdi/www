@@ -14,7 +14,7 @@ export default function Page() {
 
   return (
     <section className='rounded-xs bg-[var(--surface-raised)] px-5 py-6 sm:px-7 sm:py-7'>
-      <h1 className='m-0 font-semibold text-[1.62rem] leading-[1.13] sm:text-[1.95rem] sm:leading-[1.08] text-rurikon-700 text-balance'>
+      <h1 className='m-0 inline-block whitespace-nowrap break-normal font-semibold text-[1.62rem] leading-[1.13] sm:text-[1.95rem] sm:leading-[1.08] text-rurikon-700'>
         7amdi
       </h1>
 
