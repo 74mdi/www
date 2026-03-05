@@ -39,7 +39,7 @@ function getSiteUrl(): string {
   const preview = process.env.VERCEL_URL?.trim()
   if (preview) return `https://${preview}`
 
-  return 'http://localhost:3000'
+  return 'https://qaiiik.vercel.app'
 }
 
 const siteUrl = getSiteUrl().replace(/\/+$/, '')

@@ -16,7 +16,7 @@ function getSiteUrl(): string {
     return `https://${preview.replace(/\/+$/, '')}`
   }
 
-  return 'http://localhost:3000'
+  return 'https://qaiiik.vercel.app'
 }
 
 export default function robots(): MetadataRoute.Robots {
