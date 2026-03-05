@@ -86,5 +86,27 @@ export async function generateMetadata(props: {
       description && description.toLowerCase() !== 'qaiik'
         ? description
         : `Thought by qaiik: ${title}`,
+    alternates: {
+      canonical: `/thoughts/${params.slug}`,
+    },
+    openGraph: {
+      type: 'article',
+      url: `/thoughts/${params.slug}`,
+      title,
+      description:
+        description && description.toLowerCase() !== 'qaiik'
+          ? description
+          : `Thought by qaiik: ${title}`,
+      images: [`/thoughts/${params.slug}/opengraph-image`],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description:
+        description && description.toLowerCase() !== 'qaiik'
+          ? description
+          : `Thought by qaiik: ${title}`,
+      images: [`/thoughts/${params.slug}/opengraph-image`],
+    },
   }
 }

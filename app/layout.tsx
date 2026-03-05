@@ -29,13 +29,48 @@ const mono = localFont({
   variable: '--mono',
 })
 
+function getSiteUrl(): string {
+  const explicit = process.env.NEXT_PUBLIC_SITE_URL?.trim()
+  if (explicit) return explicit
+
+  const production = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim()
+  if (production) return `https://${production}`
+
+  const preview = process.env.VERCEL_URL?.trim()
+  if (preview) return `https://${preview}`
+
+  return 'http://localhost:3000'
+}
+
+const siteUrl = getSiteUrl().replace(/\/+$/, '')
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: {
     template: '%s - qaiik',
     default: 'qaiik',
   },
-  description: 'salam ana qaiik/7amdi/mohamed',
+  description: 'Personal website of qaiik: thoughts, projects, and SIFTLI.',
   applicationName: 'qaiik',
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    type: 'website',
+    url: '/',
+    siteName: 'qaiik',
+    title: 'qaiik',
+    description: 'Personal website of qaiik: thoughts, projects, and SIFTLI.',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'qaiik',
+    description: 'Personal website of qaiik: thoughts, projects, and SIFTLI.',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 }
 
 export const viewport: Viewport = {
