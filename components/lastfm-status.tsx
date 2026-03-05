@@ -35,7 +35,7 @@ type TrackSnapshot = {
 
 const LAST_FM_USERNAME = 'khrya'
 const LAST_FM_ENDPOINT = `https://lastfm-last-played.biancarosa.com.br/${LAST_FM_USERNAME}/latest-song`
-const VISIBLE_POLL_MS = 4000
+const VISIBLE_POLL_MS = 3000
 const HIDDEN_POLL_MS = 30000
 const REQUEST_TIMEOUT_MS = 4500
 const MAX_FAILURE_BACKOFF_MS = 120000
@@ -127,12 +127,15 @@ async function fetchTrack(signal: AbortSignal): Promise<{
 export function LastFmStatus() {
   const [track, setTrack] = useState<TrackSnapshot | null>(null)
   const [showDetails, setShowDetails] = useState(false)
+  const [showCoverPreview, setShowCoverPreview] = useState(false)
   const [coverLoadFailed, setCoverLoadFailed] = useState(false)
   const [statusText, setStatusText] = useState('Loading Last.fm status...')
   const signatureRef = useRef<string>('')
+  const coverPreviewRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     setCoverLoadFailed(false)
+    setShowCoverPreview(false)
   }, [track?.coverUrl])
 
   useEffect(() => {
@@ -215,6 +218,31 @@ export function LastFmStatus() {
     }
   }, [])
 
+  useEffect(() => {
+    if (!showCoverPreview) return
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!coverPreviewRef.current) return
+      if (!coverPreviewRef.current.contains(event.target as Node)) {
+        setShowCoverPreview(false)
+      }
+    }
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setShowCoverPreview(false)
+      }
+    }
+
+    document.addEventListener('pointerdown', handlePointerDown)
+    document.addEventListener('keydown', handleEscape)
+
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown)
+      document.removeEventListener('keydown', handleEscape)
+    }
+  }, [showCoverPreview])
+
   const showCover = Boolean(track?.coverUrl) && !coverLoadFailed
   const isNowPlaying = track?.isNowPlaying ?? false
   const statePrefix = isNowPlaying ? 'Listening to ' : 'Last listened to '
@@ -223,15 +251,44 @@ export function LastFmStatus() {
     <section className='mt-4'>
       <div className='flex items-center gap-2 text-rurikon-500'>
         {showCover ? (
-          <img
-            src={track!.coverUrl!}
-            alt='Current album cover'
-            className='h-6 w-6 shrink-0 rounded-[3px] border border-rurikon-border object-cover'
-            loading='eager'
-            decoding='async'
-            draggable={false}
-            onError={() => setCoverLoadFailed(true)}
-          />
+          <div ref={coverPreviewRef} className='relative shrink-0'>
+            <button
+              type='button'
+              onClick={() => setShowCoverPreview((prev) => !prev)}
+              className='block rounded-[3px] focus-visible:outline focus-visible:outline-rurikon-400 focus-visible:rounded-[3px] focus-visible:outline-offset-1 focus-visible:outline-dotted'
+              aria-label='Toggle album cover preview'
+              aria-expanded={showCoverPreview}
+              aria-controls='lastfm-cover-preview'
+            >
+              <img
+                src={track!.coverUrl!}
+                alt='Current album cover'
+                className='h-6 w-6 rounded-[3px] border border-rurikon-border object-cover transition-transform duration-200 ease-out hover:scale-105'
+                loading='eager'
+                decoding='async'
+                draggable={false}
+                onError={() => {
+                  setCoverLoadFailed(true)
+                  setShowCoverPreview(false)
+                }}
+              />
+            </button>
+
+            <div
+              id='lastfm-cover-preview'
+              className={`absolute left-0 top-[calc(100%+0.4rem)] z-20 origin-top-left transition-all duration-200 ease-out ${showCoverPreview ? 'pointer-events-auto opacity-100 scale-100 translate-y-0' : 'pointer-events-none opacity-0 scale-95 -translate-y-1'}`}
+              aria-hidden={!showCoverPreview}
+            >
+              <img
+                src={track!.coverUrl!}
+                alt='Album cover preview'
+                className='h-28 w-28 sm:h-32 sm:w-32 rounded-md border border-rurikon-border bg-[var(--surface-raised)] object-cover shadow-[var(--overlay-shadow)]'
+                loading='lazy'
+                decoding='async'
+                draggable={false}
+              />
+            </div>
+          </div>
         ) : null}
 
         {track ? (
