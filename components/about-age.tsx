@@ -2,18 +2,22 @@
 
 import { useEffect, useState } from 'react'
 
-const BIRTH_DATE_ISO = '2008-08-20T03:57:38.179Z'
+const BIRTH_DATE_ISO = '2008-08-20T00:00:00.000Z'
 const YEAR_MS = 365.2425 * 24 * 60 * 60 * 1000
 
 function getAge(nowMs: number): number {
   return (nowMs - new Date(BIRTH_DATE_ISO).getTime()) / YEAR_MS
 }
 
-export function AboutAge() {
-  const [nowMs, setNowMs] = useState(() => Date.now())
+type AboutAgeProps = {
+  initialNowMs: number
+}
+
+export function AboutAge({ initialNowMs }: AboutAgeProps) {
+  const [nowMs, setNowMs] = useState(initialNowMs)
 
   useEffect(() => {
-    const timer = window.setInterval(() => setNowMs(Date.now()), 20_000)
+    const timer = window.setInterval(() => setNowMs(Date.now()), 10_000)
     return () => window.clearInterval(timer)
   }, [])
 
@@ -22,11 +26,13 @@ export function AboutAge() {
   const exactAge = age.toFixed(12)
 
   return (
-    <section className='mt-9 text-[1.95rem] leading-[1.55] text-zinc-300'>
+    <section className='mt-12'>
       <div className='flex flex-wrap items-center gap-3'>
-        <h2 className='m-0 text-[1em] font-normal text-zinc-400'>About Me</h2>
+        <h2 className='m-0 font-semibold text-[1.3rem] leading-[1.2] sm:text-[1.52rem] text-rurikon-600'>
+          About Me
+        </h2>
         <span
-          className='group relative inline-flex h-10 items-center rounded-lg border border-zinc-300/20 bg-zinc-100 px-3 text-[0.62em] text-zinc-900'
+          className='group relative inline-flex items-center rounded-md border border-rurikon-border bg-[var(--surface-raised)] px-3 py-1.5 text-sm tabular-nums text-rurikon-600'
           title={exactAge}
         >
           <span className='transition-opacity duration-150 group-hover:opacity-0'>
@@ -38,11 +44,10 @@ export function AboutAge() {
         </span>
       </div>
 
-      <p className='mt-2 text-[1em] text-zinc-300'>
-        I&apos;m 7amdi, a <span className='text-zinc-100'>{shortAge}</span> year old
-        failure.
+      <p className='mt-5'>
+        I&apos;m 7amdi, a <strong>{shortAge}</strong> year old failure.
       </p>
-      <p className='mt-1 text-[1em] text-zinc-300'>Currently I live in dakhla.</p>
+      <p className='mt-3'>Currently I live in dakhla.</p>
     </section>
   )
 }
