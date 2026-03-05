@@ -42,8 +42,8 @@ export const viewport: Viewport = {
   maximumScale: 1,
   colorScheme: 'light dark',
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#fcfcfc' },
-    { media: '(prefers-color-scheme: dark)', color: '#111418' },
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#000000' },
   ],
 }
 
@@ -51,11 +51,6 @@ const themeInitScript = `
 (() => {
   try {
     const root = document.documentElement;
-    const storedPreset = window.localStorage.getItem('qaiik-theme-preset');
-    if (storedPreset === 'paper' || storedPreset === 'mist' || storedPreset === 'graphite') {
-      root.setAttribute('data-theme-preset', storedPreset);
-    }
-
     const storedMode = window.localStorage.getItem('qaiik-theme-mode');
     if (storedMode === 'light' || storedMode === 'dark') {
       root.setAttribute('data-theme-mode', storedMode);

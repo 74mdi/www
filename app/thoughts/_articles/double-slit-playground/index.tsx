@@ -222,9 +222,9 @@ export function DoubleSlitPlayground({
       lastDrawnCountRef.current = 0
       drawCanvas(true)
     }
-    window.addEventListener('qaiik:theme-preset-change', onThemeChange)
+    window.addEventListener('qaiik:theme-mode-change', onThemeChange)
     return () => {
-      window.removeEventListener('qaiik:theme-preset-change', onThemeChange)
+      window.removeEventListener('qaiik:theme-mode-change', onThemeChange)
     }
   }, [drawCanvas, simple])
 

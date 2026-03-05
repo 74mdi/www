@@ -4,7 +4,7 @@ import cn from 'clsx'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 
-import ThemePresets from '@/components/theme-presets'
+import ThemeModeToggle from '@/components/theme-mode-toggle'
 
 function Item(props: React.ComponentProps<typeof Link>) {
   const pathname = usePathname()
@@ -50,11 +50,11 @@ export default function Navbar() {
       </ul>
 
       <div className='mobile:fixed mobile:left-6 sm:left-10 md:left-14 mobile:bottom-6 sm:bottom-10 md:bottom-14 mobile:z-30 hidden mobile:flex flex-col items-end gap-2'>
-        <ThemePresets />
+        <ThemeModeToggle />
       </div>
 
       <div className='mobile:hidden fixed left-1/2 -translate-x-1/2 bottom-4 z-40 flex items-center justify-center pb-[env(safe-area-inset-bottom)]'>
-        <ThemePresets />
+        <ThemeModeToggle />
       </div>
     </nav>
   )
