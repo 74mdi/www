@@ -17,7 +17,7 @@ export function AboutAge({ initialNowMs }: AboutAgeProps) {
   const [nowMs, setNowMs] = useState(initialNowMs)
 
   useEffect(() => {
-    const timer = window.setInterval(() => setNowMs(Date.now()), 10_000)
+    const timer = window.setInterval(() => setNowMs(Date.now()), 100)
     return () => window.clearInterval(timer)
   }, [])
 
@@ -30,9 +30,6 @@ export function AboutAge({ initialNowMs }: AboutAgeProps) {
         <h2 className='m-0 font-semibold text-[1.3rem] leading-[1.2] sm:text-[1.52rem] text-rurikon-600'>
           About Me
         </h2>
-        <span className='inline-flex items-center py-1 text-sm tabular-nums text-rurikon-500'>
-          {exactAge}
-        </span>
       </div>
 
       <p className='mt-5'>
