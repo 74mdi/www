@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     template: '%s - qaiik',
     default: 'qaiik',
   },
-  description: 'qaiik',
+  description: 'salam ana qaiik/7amdi/mohamed',
   applicationName: 'qaiik',
 }
 
