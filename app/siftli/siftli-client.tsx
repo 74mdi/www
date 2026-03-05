@@ -670,7 +670,7 @@ export default function SiftliClient() {
   }, [])
 
   return (
-    <section className='relative min-h-[68vh] pb-[23rem]'>
+    <section className='relative min-h-[68vh] pb-52 sm:pb-56'>
       <h1 className='font-semibold mb-7 text-rurikon-600 text-balance'>SIFTLI</h1>
 
       <p className='text-rurikon-500'>
@@ -773,7 +773,109 @@ export default function SiftliClient() {
         ) : null}
       </div>
 
-      <div className='fixed bottom-0 left-0 right-0 z-30 border-t border-rurikon-border bg-[var(--surface-overlay)]/95 backdrop-blur-sm'>
+      <div className='mt-6 space-y-2'>
+        {status === 'sending' && uploadFiles.length > 0 ? (
+          <div className='rounded-2xl border border-rurikon-border bg-[var(--surface-raised)] px-3 py-2 shadow-[var(--overlay-shadow)] max-h-[28vh] overflow-x-hidden overflow-y-auto'>
+            <ul className='mt-0 list-none pl-0 flex flex-col gap-2'>
+              {visibleUploadFiles.map((file) => {
+                const progressValue = fileProgress[file.id] ?? 0
+                return (
+                  <li
+                    key={file.id}
+                    className='border border-rurikon-border rounded-xl px-2 py-1.5 bg-rurikon-50/80 min-w-0'
+                  >
+                    <div className='flex min-w-0 items-center gap-2 text-xs text-rurikon-500'>
+                      <DocumentTextIcon className='h-4 w-4 text-rurikon-300 shrink-0' />
+                      <span className='flex-1 min-w-0 truncate'>{file.name}</span>
+                      <span className='ml-auto shrink-0 text-rurikon-300'>
+                        {progressValue}%
+                      </span>
+                    </div>
+                    <div className='mt-1 h-1 w-full rounded-full bg-rurikon-100 overflow-hidden'>
+                      <div
+                        className='h-full bg-rurikon-400 transition-[width] duration-200'
+                        style={{ width: `${progressValue}%` }}
+                      />
+                    </div>
+                  </li>
+                )
+              })}
+            </ul>
+            {hiddenUploadFilesCount > 0 ? (
+              <p className='mt-2 text-xs text-rurikon-300'>
+                +{hiddenUploadFilesCount} more files uploading
+              </p>
+            ) : null}
+          </div>
+        ) : null}
+
+        {status !== 'sending' && files.length > 0 ? (
+          <div className='rounded-2xl border border-rurikon-border bg-[var(--surface-raised)] px-3 py-2 shadow-[var(--overlay-shadow)] max-h-[28vh] overflow-x-hidden overflow-y-auto'>
+            <ul className='mt-0 list-none pl-0 grid grid-cols-1 gap-2 sm:grid-cols-2'>
+              {visibleSelectedFiles.map((file, index) => (
+                <li
+                  key={fileSignature(file)}
+                  draggable
+                  onDragStart={(event) => onFileDragStart(index, event)}
+                  onDragOver={(event) => onFileDragOver(index, event)}
+                  onDrop={(event) => onFileDrop(index, event)}
+                  onDragEnd={onFileDragEnd}
+                  className={cn(
+                    'border border-rurikon-border rounded-xl px-2 py-1 flex min-w-0 items-center gap-2 text-xs text-rurikon-500 bg-rurikon-50/80 cursor-move',
+                    dragSourceIndex === index && 'opacity-55',
+                    dragOverIndex === index &&
+                      dragSourceIndex !== index &&
+                      'border-rurikon-400 bg-rurikon-100/70',
+                  )}
+                >
+                  <Bars3Icon className='h-4 w-4 text-rurikon-300 shrink-0' />
+                  <DocumentTextIcon className='h-4 w-4 text-rurikon-300 shrink-0' />
+                  <span className='flex-1 min-w-0 truncate'>{file.name}</span>
+                  <span className='shrink-0 text-rurikon-300'>{formatSize(file.size)}</span>
+                  <button
+                    type='button'
+                    onClick={() => removeFile(index)}
+                    className='shrink-0 p-0.5 text-rurikon-300 hover:text-rurikon-700'
+                    aria-label={`Remove ${file.name}`}
+                    draggable={false}
+                  >
+                    <XMarkIcon className='h-4 w-4' />
+                  </button>
+                </li>
+              ))}
+            </ul>
+            <p className='mt-2 text-xs text-rurikon-300'>Drag files to reorder queue.</p>
+            <p className='mt-2 text-xs text-rurikon-300'>
+              {files.length} file{files.length > 1 ? 's' : ''} · {formatSize(totalSize)}
+            </p>
+            <div className='mt-2'>
+              <button
+                type='button'
+                onClick={clearFiles}
+                className='text-xs text-rurikon-400 hover:text-rurikon-700 underline underline-offset-2'
+              >
+                remove all
+              </button>
+            </div>
+          </div>
+        ) : null}
+
+        {status === 'sending' && progress > 0 ? (
+          <div className='rounded-xl border border-rurikon-border bg-[var(--surface-raised)] px-3 py-2'>
+            <div className='h-1.5 w-full rounded-full bg-rurikon-100 overflow-hidden'>
+              <div
+                className='h-full bg-rurikon-400 transition-[width] duration-300'
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+            <p className='mt-1 text-xs text-rurikon-300'>
+              {phaseLabel(uploadPhase)} · {progress}%
+            </p>
+          </div>
+        ) : null}
+      </div>
+
+      <div className='fixed bottom-0 left-0 right-0 z-30 border-t border-rurikon-border bg-[var(--surface-overlay)] shadow-[0_-10px_30px_rgba(0,0,0,0.06)]'>
         <form
           onSubmit={handleSubmit}
           onDragOver={(event) => {
@@ -791,7 +893,7 @@ export default function SiftliClient() {
             setIsDragging(false)
             addFilesFromInput(event.dataTransfer.files)
           }}
-          className='mx-auto w-[min(760px,calc(100vw-1rem))] space-y-2 py-3 sm:w-[min(820px,calc(100vw-2rem))]'
+          className='mx-auto w-[min(760px,calc(100vw-1rem))] space-y-2 py-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] sm:w-[min(820px,calc(100vw-2rem))]'
         >
           <input
             ref={fileInputRef}
@@ -800,106 +902,6 @@ export default function SiftliClient() {
             className='hidden'
             onChange={(event) => addFilesFromInput(event.target.files)}
           />
-
-          {status === 'sending' && uploadFiles.length > 0 ? (
-            <div className='rounded-2xl border border-rurikon-border bg-[var(--surface-raised)] backdrop-blur px-3 py-2 shadow-[var(--overlay-shadow)] max-h-[22vh] overflow-x-hidden overflow-y-auto'>
-              <ul className='mt-0 list-none pl-0 flex flex-col gap-2'>
-                {visibleUploadFiles.map((file) => {
-                  const progressValue = fileProgress[file.id] ?? 0
-                  return (
-                    <li
-                      key={file.id}
-                      className='border border-rurikon-border rounded-xl px-2 py-1.5 bg-rurikon-50/80 min-w-0'
-                    >
-                      <div className='flex min-w-0 items-center gap-2 text-xs text-rurikon-500'>
-                        <DocumentTextIcon className='h-4 w-4 text-rurikon-300 shrink-0' />
-                        <span className='flex-1 min-w-0 truncate'>{file.name}</span>
-                        <span className='ml-auto shrink-0 text-rurikon-300'>
-                          {progressValue}%
-                        </span>
-                      </div>
-                      <div className='mt-1 h-1 w-full rounded-full bg-rurikon-100 overflow-hidden'>
-                        <div
-                          className='h-full bg-rurikon-400 transition-[width] duration-200'
-                          style={{ width: `${progressValue}%` }}
-                        />
-                      </div>
-                    </li>
-                  )
-                })}
-              </ul>
-              {hiddenUploadFilesCount > 0 ? (
-                <p className='mt-2 text-xs text-rurikon-300'>
-                  +{hiddenUploadFilesCount} more files uploading
-                </p>
-              ) : null}
-            </div>
-          ) : null}
-
-          {status !== 'sending' && files.length > 0 ? (
-            <div className='rounded-2xl border border-rurikon-border bg-[var(--surface-raised)] backdrop-blur px-3 py-2 shadow-[var(--overlay-shadow)] max-h-[20vh] overflow-x-hidden overflow-y-auto'>
-              <ul className='mt-0 list-none pl-0 grid grid-cols-1 gap-2 sm:grid-cols-2'>
-                {visibleSelectedFiles.map((file, index) => (
-                  <li
-                    key={fileSignature(file)}
-                    draggable
-                    onDragStart={(event) => onFileDragStart(index, event)}
-                    onDragOver={(event) => onFileDragOver(index, event)}
-                    onDrop={(event) => onFileDrop(index, event)}
-                    onDragEnd={onFileDragEnd}
-                    className={cn(
-                      'border border-rurikon-border rounded-xl px-2 py-1 flex min-w-0 items-center gap-2 text-xs text-rurikon-500 bg-rurikon-50/80 cursor-move',
-                      dragSourceIndex === index && 'opacity-55',
-                      dragOverIndex === index &&
-                        dragSourceIndex !== index &&
-                        'border-rurikon-400 bg-rurikon-100/70',
-                    )}
-                  >
-                    <Bars3Icon className='h-4 w-4 text-rurikon-300 shrink-0' />
-                    <DocumentTextIcon className='h-4 w-4 text-rurikon-300 shrink-0' />
-                    <span className='flex-1 min-w-0 truncate'>{file.name}</span>
-                    <span className='shrink-0 text-rurikon-300'>{formatSize(file.size)}</span>
-                    <button
-                      type='button'
-                      onClick={() => removeFile(index)}
-                      className='shrink-0 p-0.5 text-rurikon-300 hover:text-rurikon-700'
-                      aria-label={`Remove ${file.name}`}
-                      draggable={false}
-                    >
-                      <XMarkIcon className='h-4 w-4' />
-                    </button>
-                  </li>
-                ))}
-              </ul>
-              <p className='mt-2 text-xs text-rurikon-300'>Drag files to reorder queue.</p>
-              <p className='mt-2 text-xs text-rurikon-300'>
-                {files.length} file{files.length > 1 ? 's' : ''} · {formatSize(totalSize)}
-              </p>
-              <div className='mt-2'>
-                <button
-                  type='button'
-                  onClick={clearFiles}
-                  className='text-xs text-rurikon-400 hover:text-rurikon-700 underline underline-offset-2'
-                >
-                  remove all
-                </button>
-              </div>
-            </div>
-          ) : null}
-
-          {status === 'sending' && progress > 0 ? (
-            <div className='rounded-xl border border-rurikon-border bg-[var(--surface-raised)] backdrop-blur px-3 py-2'>
-              <div className='h-1.5 w-full rounded-full bg-rurikon-100 overflow-hidden'>
-                <div
-                  className='h-full bg-rurikon-400 transition-[width] duration-300'
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
-              <p className='mt-1 text-xs text-rurikon-300'>
-                {phaseLabel(uploadPhase)} · {progress}%
-              </p>
-            </div>
-          ) : null}
 
           <div
             className={cn(
