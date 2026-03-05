@@ -1,89 +1,261 @@
-type LastFmArtist = {
+'use client'
+
+import { useEffect, useRef, useState } from 'react'
+
+type LastFmText = {
   '#text'?: string
 }
 
-type LastFmAttrs = {
-  nowplaying?: string
+type LastFmImage = {
+  '#text'?: string
+  size?: string
 }
 
-type LastFmTrack = {
-  '@attr'?: LastFmAttrs
-  artist?: LastFmArtist
+type LastFmTrackPayload = {
+  '@attr'?: {
+    nowplaying?: string
+  }
+  album?: LastFmText
+  artist?: LastFmText
+  image?: LastFmImage[]
   name?: string
-  url?: string
 }
 
 type LastFmResponse = {
-  track?: LastFmTrack
+  track?: LastFmTrackPayload
+}
+
+type TrackSnapshot = {
+  isNowPlaying: boolean
+  title: string
+  album: string
+  artist: string
+  coverUrl: string | null
 }
 
 const LAST_FM_USERNAME = 'khrya'
-const LAST_FM_PROFILE_URL = `https://www.last.fm/user/${LAST_FM_USERNAME}`
-const LAST_FM_LATEST_SONG_URL = `https://lastfm-last-played.biancarosa.com.br/${LAST_FM_USERNAME}/latest-song`
-const AVATAR_URL = 'https://avatars.githubusercontent.com/74mdi'
+const LAST_FM_ENDPOINT = `https://lastfm-last-played.biancarosa.com.br/${LAST_FM_USERNAME}/latest-song`
+const VISIBLE_POLL_MS = 4000
+const HIDDEN_POLL_MS = 30000
+const REQUEST_TIMEOUT_MS = 4500
+const MAX_FAILURE_BACKOFF_MS = 120000
 
-async function getLatestTrack(): Promise<LastFmTrack | null> {
-  try {
-    const response = await fetch(LAST_FM_LATEST_SONG_URL, {
-      next: { revalidate: 60 },
-    })
+function cleanText(value: string | undefined): string {
+  return value?.trim() ?? ''
+}
 
-    if (!response.ok) return null
+function isHttpUrl(value: string | undefined): value is string {
+  if (!value) return false
+  return value.startsWith('https://') || value.startsWith('http://')
+}
 
-    const data = (await response.json()) as LastFmResponse
-    return data.track ?? null
-  } catch {
-    return null
+function pickCoverUrl(images: LastFmImage[] | undefined): string | null {
+  if (!images || images.length === 0) return null
+
+  const preferredSizes = ['extralarge', 'large', 'medium', 'small']
+  for (const size of preferredSizes) {
+    const image = images.find((item) => item.size === size)
+    if (isHttpUrl(image?.['#text'])) return image!['#text']
+  }
+
+  const fallback = images.find((item) => isHttpUrl(item['#text']))
+  return fallback?.['#text'] ?? null
+}
+
+function normalizeTrack(payload: LastFmResponse): TrackSnapshot | null {
+  const rawTrack = payload.track
+  if (!rawTrack) return null
+
+  const title = cleanText(rawTrack.name)
+  if (!title) return null
+
+  return {
+    isNowPlaying: rawTrack['@attr']?.nowplaying === 'true',
+    title,
+    album: cleanText(rawTrack.album?.['#text']),
+    artist: cleanText(rawTrack.artist?.['#text']),
+    coverUrl: pickCoverUrl(rawTrack.image),
   }
 }
 
-export async function LastFmStatus() {
-  const track = await getLatestTrack()
-  const isNowPlaying = track?.['@attr']?.nowplaying === 'true'
-  const trackName = track?.name?.trim()
-  const artistName = track?.artist?.['#text']?.trim()
-  const trackUrl = track?.url ?? LAST_FM_PROFILE_URL
-  const prefix = isNowPlaying ? 'Listening to ' : 'Last listened to '
-  const dotClass = isNowPlaying ? 'bg-emerald-400' : 'bg-rurikon-300'
+function createSignature(track: TrackSnapshot): string {
+  return `${track.isNowPlaying ? '1' : '0'}|${track.title}|${track.album}|${track.artist}|${track.coverUrl ?? ''}`
+}
+
+async function fetchTrack(signal: AbortSignal): Promise<{
+  track: TrackSnapshot | null
+  error: string | null
+}> {
+  try {
+    const requestUrl = `${LAST_FM_ENDPOINT}?_=${Date.now()}`
+    const response = await fetch(requestUrl, {
+      method: 'GET',
+      cache: 'no-store',
+      signal,
+      headers: {
+        Accept: 'application/json',
+      },
+    })
+
+    if (!response.ok) {
+      return {
+        track: null,
+        error: `Last.fm request failed (${response.status}).`,
+      }
+    }
+
+    const payload = (await response.json()) as LastFmResponse
+    const track = normalizeTrack(payload)
+
+    if (!track) {
+      return {
+        track: null,
+        error: 'No playable track found from Last.fm.',
+      }
+    }
+
+    return { track, error: null }
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      return { track: null, error: 'Last.fm request timed out.' }
+    }
+
+    return { track: null, error: 'Unable to reach Last.fm right now.' }
+  }
+}
+
+export function LastFmStatus() {
+  const [track, setTrack] = useState<TrackSnapshot | null>(null)
+  const [showDetails, setShowDetails] = useState(false)
+  const [coverLoadFailed, setCoverLoadFailed] = useState(false)
+  const [statusText, setStatusText] = useState('Loading Last.fm status...')
+  const signatureRef = useRef<string>('')
+
+  useEffect(() => {
+    setCoverLoadFailed(false)
+  }, [track?.coverUrl])
+
+  useEffect(() => {
+    let isDisposed = false
+    let failureCount = 0
+    let timer: number | null = null
+    let inFlightController: AbortController | null = null
+
+    const clearTimer = () => {
+      if (timer !== null) {
+        window.clearTimeout(timer)
+        timer = null
+      }
+    }
+
+    const getBaseDelay = () =>
+      document.visibilityState === 'visible' ? VISIBLE_POLL_MS : HIDDEN_POLL_MS
+
+    const scheduleNext = (delayMs: number) => {
+      clearTimer()
+      timer = window.setTimeout(runPoll, delayMs)
+    }
+
+    const runPoll = async () => {
+      inFlightController?.abort()
+      const controller = new AbortController()
+      inFlightController = controller
+
+      const timeoutTimer = window.setTimeout(() => {
+        controller.abort()
+      }, REQUEST_TIMEOUT_MS)
+
+      const { track: nextTrack, error } = await fetchTrack(controller.signal)
+      window.clearTimeout(timeoutTimer)
+
+      if (isDisposed) return
+
+      if (nextTrack) {
+        failureCount = 0
+        const nextSignature = createSignature(nextTrack)
+
+        if (nextSignature !== signatureRef.current) {
+          signatureRef.current = nextSignature
+          setTrack(nextTrack)
+          setShowDetails(false)
+        }
+
+        setStatusText('')
+      } else {
+        failureCount += 1
+        setStatusText(error ?? 'Last.fm activity unavailable.')
+      }
+
+      const baseDelay = getBaseDelay()
+      const nextDelay = nextTrack
+        ? baseDelay
+        : Math.min(
+            baseDelay * 2 ** Math.min(failureCount - 1, 4),
+            MAX_FAILURE_BACKOFF_MS,
+          )
+
+      scheduleNext(nextDelay)
+    }
+
+    const refreshSoon = () => {
+      if (document.visibilityState !== 'visible') return
+      scheduleNext(0)
+    }
+
+    runPoll()
+    document.addEventListener('visibilitychange', refreshSoon)
+    window.addEventListener('focus', refreshSoon)
+
+    return () => {
+      isDisposed = true
+      clearTimer()
+      inFlightController?.abort()
+      document.removeEventListener('visibilitychange', refreshSoon)
+      window.removeEventListener('focus', refreshSoon)
+    }
+  }, [])
+
+  const showCover = Boolean(track?.coverUrl) && !coverLoadFailed
+  const isNowPlaying = track?.isNowPlaying ?? false
+  const statePrefix = isNowPlaying ? 'Listening to ' : 'Last listened to '
 
   return (
-    <div className='mt-4 flex items-center gap-2 text-rurikon-500'>
-      <span
-        className={`h-2.5 w-2.5 shrink-0 rounded-full ${dotClass} ${isNowPlaying ? 'shadow-[0_0_10px_rgba(74,222,128,0.8)]' : ''}`}
-      />
-      <img
-        src={AVATAR_URL}
-        alt='7amdi avatar'
-        className='h-6 w-6 shrink-0 rounded-full border border-rurikon-border object-cover'
-        loading='lazy'
-        draggable={false}
-      />
-      {trackName ? (
-        <a
-          href={trackUrl}
-          target='_blank'
-          rel='noopener noreferrer'
-          className='break-words decoration-from-font underline underline-offset-2 decoration-rurikon-300 hover:decoration-rurikon-600 focus-visible:outline focus-visible:outline-rurikon-400 focus-visible:rounded-xs focus-visible:outline-offset-1 focus-visible:outline-dotted'
-        >
-          {prefix}
-          <strong className='font-semibold text-rurikon-700'>{trackName}</strong>
-          {artistName ? (
-            <>
-              {' '}
-              by <span className='text-rurikon-400'>{artistName}</span>
-            </>
-          ) : null}
-        </a>
-      ) : (
-        <a
-          href={LAST_FM_PROFILE_URL}
-          target='_blank'
-          rel='noopener noreferrer'
-          className='break-words decoration-from-font underline underline-offset-2 decoration-rurikon-300 hover:decoration-rurikon-600 focus-visible:outline focus-visible:outline-rurikon-400 focus-visible:rounded-xs focus-visible:outline-offset-1 focus-visible:outline-dotted'
-        >
-          Last.fm activity unavailable
-        </a>
-      )}
-    </div>
+    <section className='mt-4'>
+      <div className='flex items-center gap-2 text-rurikon-500'>
+        {showCover ? (
+          <img
+            src={track!.coverUrl!}
+            alt='Current album cover'
+            className='h-6 w-6 shrink-0 rounded-[3px] border border-rurikon-border object-cover'
+            loading='eager'
+            decoding='async'
+            draggable={false}
+            onError={() => setCoverLoadFailed(true)}
+          />
+        ) : null}
+
+        {track ? (
+          <button
+            type='button'
+            onClick={() => setShowDetails((prev) => !prev)}
+            className='text-left break-words decoration-from-font underline underline-offset-2 decoration-rurikon-300 hover:decoration-rurikon-600 focus-visible:outline focus-visible:outline-rurikon-400 focus-visible:rounded-xs focus-visible:outline-offset-1 focus-visible:outline-dotted'
+            aria-expanded={showDetails}
+            aria-controls='lastfm-track-details'
+          >
+            {statePrefix}
+            <strong className='font-semibold text-rurikon-700'>{track.title}</strong>
+          </button>
+        ) : (
+          <p className='m-0 text-rurikon-400'>{statusText}</p>
+        )}
+      </div>
+
+      {track && showDetails ? (
+        <p id='lastfm-track-details' className='mt-2 text-sm text-rurikon-400'>
+          album: <span className='text-rurikon-600'>{track.album || 'unknown'}</span>{' '}
+          artist: <span className='text-rurikon-600'>{track.artist || 'unknown'}</span>
+        </p>
+      ) : null}
+    </section>
   )
 }
