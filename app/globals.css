@@ -192,6 +192,22 @@ mark {
   padding: 0 0.15em;
 }
 
+article h1:has(+ h2),
+article h2:has(+ h3),
+article h3:has(+ h4),
+article h4:has(+ h5),
+article h5:has(+ h6) {
+  margin-bottom: 0.45rem !important;
+}
+
+article h1 + h2,
+article h2 + h3,
+article h3 + h4,
+article h4 + h5,
+article h5 + h6 {
+  margin-top: 0.45rem !important;
+}
+
 blockquote {
   box-shadow: 1px 0 0 var(--color-rurikon-500) inset;
 }
