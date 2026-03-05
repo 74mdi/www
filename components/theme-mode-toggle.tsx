@@ -1,6 +1,5 @@
 'use client'
 
-import cn from 'clsx'
 import { useEffect, useSyncExternalStore } from 'react'
 
 type ThemeMode = 'light' | 'dark'
@@ -8,10 +7,6 @@ type ThemeMode = 'light' | 'dark'
 const MODE_STORAGE_KEY = 'qaiik-theme-mode'
 const THEME_MODE_CHANGE_EVENT = 'qaiik:theme-mode-change'
 const DEFAULT_MODE: ThemeMode = 'light'
-const MODES: Array<{ id: ThemeMode; label: string }> = [
-  { id: 'light', label: 'Light' },
-  { id: 'dark', label: 'Dark' },
-]
 
 function isThemeMode(value: string | null): value is ThemeMode {
   return value === 'light' || value === 'dark'
@@ -84,38 +79,26 @@ export default function ThemeModeToggle() {
     applyThemeMode(activeMode)
   }, [activeMode])
 
-  const onSelectMode = (mode: ThemeMode) => {
-    if (mode === activeMode || typeof window === 'undefined') return
-    persistThemeMode(mode)
+  const onToggleMode = () => {
+    if (typeof window === 'undefined') return
+    const nextMode: ThemeMode = activeMode === 'dark' ? 'light' : 'dark'
+    persistThemeMode(nextMode)
     window.dispatchEvent(new Event(THEME_MODE_CHANGE_EVENT))
   }
 
   return (
     <div className='inline-flex items-center justify-end gap-2'>
       <span className='text-[10px] tracking-[0.06em] uppercase text-rurikon-200 whitespace-nowrap'>
-        Mode
+        Theme
       </span>
-      <div className='inline-flex rounded-xl border border-rurikon-border overflow-hidden bg-[var(--surface-overlay)]'>
-        {MODES.map((mode) => {
-          const isActive = activeMode === mode.id
-          return (
-            <button
-              key={mode.id}
-              type='button'
-              onClick={() => onSelectMode(mode.id)}
-              aria-pressed={isActive}
-              className={cn(
-                'px-2 py-1 text-[10px] leading-none transition-colors whitespace-nowrap',
-                isActive
-                  ? 'bg-[var(--accent-solid)] text-[var(--accent-solid-text)]'
-                  : 'bg-[var(--surface-raised)] text-rurikon-400 hover:text-rurikon-700',
-              )}
-            >
-              {mode.label}
-            </button>
-          )
-        })}
-      </div>
+      <button
+        type='button'
+        onClick={onToggleMode}
+        aria-label={`Switch to ${activeMode === 'dark' ? 'light' : 'dark'} mode`}
+        className='rounded-xl border border-rurikon-border bg-[var(--surface-overlay)] px-2.5 py-1 text-[10px] leading-none transition-colors whitespace-nowrap hover:text-rurikon-700'
+      >
+        {activeMode === 'dark' ? 'Dark' : 'Light'}
+      </button>
     </div>
   )
 }
