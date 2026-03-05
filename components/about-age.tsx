@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 
-const BIRTH_DATE_ISO = '2008-08-20T00:00:00.000Z'
+const BIRTH_DATE_ISO = '2008-08-08T00:00:00.000Z'
 const YEAR_MS = 365.2425 * 24 * 60 * 60 * 1000
 
 function getAge(nowMs: number): number {

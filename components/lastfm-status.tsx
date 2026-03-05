@@ -9,8 +9,14 @@ type LastFmAttrs = {
 type LastFmTrack = {
   '@attr'?: LastFmAttrs
   artist?: LastFmArtist
+  image?: LastFmImage[]
   name?: string
   url?: string
+}
+
+type LastFmImage = {
+  '#text'?: string
+  size?: string
 }
 
 type LastFmResponse = {
@@ -37,20 +43,51 @@ async function getLatestTrack(): Promise<LastFmTrack | null> {
   }
 }
 
+function getAlbumArtUrl(track: LastFmTrack | null): string | null {
+  if (!track?.image || track.image.length === 0) return null
+
+  const priority = ['extralarge', 'large', 'medium', 'small']
+  for (const size of priority) {
+    const match = track.image.find((item) => item.size === size)
+    if (match?.['#text']) return match['#text']
+  }
+
+  return track.image.find((item) => Boolean(item['#text']))?.['#text'] ?? null
+}
+
 export async function LastFmStatus() {
   const track = await getLatestTrack()
   const isNowPlaying = track?.['@attr']?.nowplaying === 'true'
   const trackName = track?.name?.trim()
   const artistName = track?.artist?.['#text']?.trim()
   const trackUrl = track?.url ?? LAST_FM_PROFILE_URL
+  const albumArtUrl = getAlbumArtUrl(track)
   const prefix = isNowPlaying ? 'Listening to ' : 'Last listened to '
   const dotClass = isNowPlaying ? 'bg-emerald-400' : 'bg-rurikon-300'
 
   return (
     <div className='mt-4 flex items-center gap-2 text-rurikon-500'>
-      <span
-        className={`h-2.5 w-2.5 shrink-0 rounded-full ${dotClass} ${isNowPlaying ? 'shadow-[0_0_10px_rgba(74,222,128,0.8)]' : ''}`}
-      />
+      {albumArtUrl ? (
+        <a
+          href={trackUrl}
+          target='_blank'
+          rel='noopener noreferrer'
+          className='block shrink-0'
+          aria-label='Open current track on Last.fm'
+        >
+          <img
+            src={albumArtUrl}
+            alt='Current track album art'
+            className={`h-5 w-5 rounded-[3px] border border-rurikon-border object-cover ${isNowPlaying ? 'ring-1 ring-emerald-400/70' : ''}`}
+            loading='lazy'
+            draggable={false}
+          />
+        </a>
+      ) : (
+        <span
+          className={`h-2.5 w-2.5 shrink-0 rounded-full ${dotClass} ${isNowPlaying ? 'shadow-[0_0_10px_rgba(74,222,128,0.8)]' : ''}`}
+        />
+      )}
       <img
         src={AVATAR_URL}
         alt='7amdi avatar'
