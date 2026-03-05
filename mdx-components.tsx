@@ -19,37 +19,61 @@ import { DoubleSlitPlayground } from '@/app/thoughts/_articles/double-slit-playg
 
 const cssVariablesTheme = createCssVariablesTheme({})
 
+const headingAnchorClass =
+  'absolute md:w-14 sm:w-10 mobile:w-6 w-6 -translate-x-[calc(100%-2px)] text-center opacity-0 blur-xs group-hover:opacity-100 group-hover:blur-none text-rurikon-200 hover:text-rurikon-500 transition-all delay-0 duration-500 group-target:blur-none group-target:opacity-100 group-hover:delay-300 select-none'
+
+function getHeadingText(node: any): string {
+  if (typeof node === 'string') return node
+  if (Array.isArray(node)) return node.map(getHeadingText).join('')
+  if (node?.props?.children) return getHeadingText(node.props.children)
+  return ''
+}
+
+function getHeadingId(children: any, fallback = 'section'): string {
+  const id = getHeadingText(children)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+
+  return id || fallback
+}
+
 export const components: Record<
   string,
   (props: any) => ReactNode | Promise<ReactNode>
 > = {
-  h1: (props) => (
-    <h1
-      className='font-semibold mb-7 text-rurikon-600 text-balance'
-      {...props}
-    />
-  ),
-  h2: ({ children, ...props }) => {
-    const getText = (node: any): string => {
-      if (typeof node === 'string') return node
-      if (Array.isArray(node)) return node.map(getText).join('')
-      if (node?.props?.children) return getText(node.props.children)
-      return ''
-    }
-    const id = getText(children)
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-|-$/g, '')
+  h1: ({ children, ...props }) => {
+    const id = getHeadingId(children, 'heading')
 
     return (
-      <h2
+      <h1
         id={id}
-        className='group relative font-semibold mt-14 mb-7 text-rurikon-600 text-balance scroll-mt-6 sm:scroll-mt-14'
+        className='group relative font-semibold mb-5 text-[1.62rem] leading-[1.13] sm:text-[1.95rem] sm:leading-[1.08] text-rurikon-700 text-balance scroll-mt-6 sm:scroll-mt-14'
         {...props}
       >
         <a
           href={`#${id}`}
-          className='absolute md:w-14 sm:w-10 mobile:w-6 w-6 -translate-x-[calc(100%-2px)] text-center opacity-0 blur-xs group-hover:opacity-100 group-hover:blur-none text-rurikon-200 hover:text-rurikon-500 transition-all delay-0 duration-500 group-target:blur-none group-target:opacity-100 group-hover:delay-300 select-none'
+          className={headingAnchorClass}
+          aria-label='Link to this section'
+        >
+          #
+        </a>
+        {children}
+      </h1>
+    )
+  },
+  h2: ({ children, ...props }) => {
+    const id = getHeadingId(children, 'section')
+
+    return (
+      <h2
+        id={id}
+        className='group relative font-semibold mt-12 mb-5 text-[1.3rem] leading-[1.2] sm:text-[1.52rem] text-rurikon-600 text-balance scroll-mt-6 sm:scroll-mt-14'
+        {...props}
+      >
+        <a
+          href={`#${id}`}
+          className={headingAnchorClass}
           aria-label='Link to this section'
         >
           #
@@ -60,7 +84,7 @@ export const components: Record<
   },
   h3: (props) => (
     <h3
-      className='font-semibold mt-14 mb-7 text-rurikon-600 text-balance'
+      className='font-semibold mt-9 mb-4 text-[1.12rem] sm:text-[1.22rem] text-rurikon-600 text-balance'
       {...props}
     />
   ),
