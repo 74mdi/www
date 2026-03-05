@@ -33,7 +33,7 @@ export function AboutAge({ initialNowMs }: AboutAgeProps) {
       </div>
 
       <p className='mt-5'>
-       ana 7amdi, endi <strong>{exactAge}</strong> 3am.
+       ana حمدي, endi <strong>{exactAge}</strong> عام.
       </p>
       <p className='mt-3'>wsafi.</p>
     </section>
