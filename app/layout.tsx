@@ -13,19 +13,19 @@ import './globals.css'
 
 const sans = localFont({
   src: './_fonts/InterVariable.woff2',
-  preload: true,
+  preload: false,
   variable: '--sans',
 })
 
 const serif = localFont({
   src: './_fonts/LoraItalicVariable.woff2',
-  preload: true,
+  preload: false,
   variable: '--serif',
 })
 
 const mono = localFont({
   src: './_fonts/IosevkaFixedCurly-ExtendedMedium.woff2',
-  preload: true,
+  preload: false,
   variable: '--mono',
 })
 
