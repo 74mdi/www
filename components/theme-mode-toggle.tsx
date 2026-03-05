@@ -87,10 +87,7 @@ export default function ThemeModeToggle() {
   }
 
   return (
-    <div className='inline-flex items-center justify-end gap-2'>
-      <span className='text-[10px] tracking-[0.06em] uppercase text-rurikon-200 whitespace-nowrap'>
-        Theme
-      </span>
+    <div className='inline-flex items-center justify-end'>
       <button
         type='button'
         onClick={onToggleMode}
