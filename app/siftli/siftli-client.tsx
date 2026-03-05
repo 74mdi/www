@@ -802,7 +802,7 @@ export default function SiftliClient() {
           />
 
           {status === 'sending' && uploadFiles.length > 0 ? (
-            <div className='rounded-2xl border border-rurikon-border bg-white/95 backdrop-blur px-3 py-2 shadow-[0_12px_28px_rgba(30,33,37,0.10)] max-h-[22vh] overflow-x-hidden overflow-y-auto'>
+            <div className='rounded-2xl border border-rurikon-border bg-[var(--surface-raised)] backdrop-blur px-3 py-2 shadow-[var(--overlay-shadow)] max-h-[22vh] overflow-x-hidden overflow-y-auto'>
               <ul className='mt-0 list-none pl-0 flex flex-col gap-2'>
                 {visibleUploadFiles.map((file) => {
                   const progressValue = fileProgress[file.id] ?? 0
@@ -837,7 +837,7 @@ export default function SiftliClient() {
           ) : null}
 
           {status !== 'sending' && files.length > 0 ? (
-            <div className='rounded-2xl border border-rurikon-border bg-white/95 backdrop-blur px-3 py-2 shadow-[0_12px_28px_rgba(30,33,37,0.10)] max-h-[20vh] overflow-x-hidden overflow-y-auto'>
+            <div className='rounded-2xl border border-rurikon-border bg-[var(--surface-raised)] backdrop-blur px-3 py-2 shadow-[var(--overlay-shadow)] max-h-[20vh] overflow-x-hidden overflow-y-auto'>
               <ul className='mt-0 list-none pl-0 grid grid-cols-1 gap-2 sm:grid-cols-2'>
                 {visibleSelectedFiles.map((file, index) => (
                   <li
@@ -888,7 +888,7 @@ export default function SiftliClient() {
           ) : null}
 
           {status === 'sending' && progress > 0 ? (
-            <div className='rounded-xl border border-rurikon-border bg-white/95 backdrop-blur px-3 py-2'>
+            <div className='rounded-xl border border-rurikon-border bg-[var(--surface-raised)] backdrop-blur px-3 py-2'>
               <div className='h-1.5 w-full rounded-full bg-rurikon-100 overflow-hidden'>
                 <div
                   className='h-full bg-rurikon-400 transition-[width] duration-300'
@@ -903,8 +903,8 @@ export default function SiftliClient() {
 
           <div
             className={cn(
-              'rounded-2xl border bg-white/96 backdrop-blur px-2 py-2 sm:px-3',
-              'shadow-[0_14px_35px_rgba(30,33,37,0.12)]',
+              'rounded-2xl border bg-[var(--surface-overlay)] backdrop-blur px-2 py-2 sm:px-3',
+              'shadow-[var(--overlay-shadow-strong)]',
               isDragging ? 'border-rurikon-400' : 'border-rurikon-border',
             )}
           >
@@ -920,8 +920,8 @@ export default function SiftliClient() {
                     className={cn(
                       'px-2.5 py-1 text-xs transition-colors',
                       channelMode === option.value
-                        ? 'bg-rurikon-700 text-white'
-                        : 'bg-white text-rurikon-400 hover:text-rurikon-700',
+                        ? 'bg-[var(--accent-solid)] text-[var(--accent-solid-text)]'
+                        : 'bg-[var(--surface-raised)] text-rurikon-400 hover:text-rurikon-700',
                       status === 'sending' && 'opacity-60 cursor-not-allowed',
                     )}
                   >
@@ -957,7 +957,7 @@ export default function SiftliClient() {
                   placeholder='Type your message...'
                   className={cn(
                     'w-full min-h-[50px] resize-none overflow-hidden border rounded-xl px-4 py-3 pr-16',
-                    'bg-white text-rurikon-500 placeholder:text-rurikon-300',
+                    'bg-[var(--surface-raised)] text-rurikon-500 placeholder:text-rurikon-300',
                     'focus-visible:outline focus-visible:outline-rurikon-400 focus-visible:outline-dotted',
                     isOverLimit ? 'border-amber-400' : 'border-rurikon-border',
                   )}
@@ -979,7 +979,7 @@ export default function SiftliClient() {
                 className={cn(
                   'h-[50px] px-4 sm:px-5 border rounded-xl transition-colors shrink-0 inline-flex items-center gap-2',
                   canSubmit
-                    ? 'border-rurikon-700 bg-rurikon-700 text-white hover:bg-rurikon-600'
+                    ? 'border-[var(--accent-solid)] bg-[var(--accent-solid)] text-[var(--accent-solid-text)] hover:bg-[var(--accent-solid-hover)]'
                     : 'border-rurikon-border bg-rurikon-100 text-rurikon-300 cursor-not-allowed',
                 )}
                 aria-label='Send'

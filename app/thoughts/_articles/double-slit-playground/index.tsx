@@ -64,11 +64,16 @@ export function DoubleSlitPlayground({
       bgCanvas.height = height * dpr
       const ctx = bgCanvas.getContext('2d')!
       ctx.scale(dpr, dpr)
+      const isDarkMode =
+        document.documentElement.getAttribute('data-theme-mode') === 'dark'
+      const gridColor = isDarkMode ? 'rgba(223, 232, 244, 0.07)' : 'rgba(0, 0, 0, 0.035)'
+      const axisColor = isDarkMode ? 'rgba(223, 232, 244, 0.2)' : 'rgba(0, 0, 0, 0.08)'
+      const labelColor = isDarkMode ? 'rgba(223, 232, 244, 0.56)' : 'rgba(0, 0, 0, 0.3)'
 
       const padding = 28
 
       // Very subtle dot grid pattern
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.035)'
+      ctx.fillStyle = gridColor
       const gridSpacing = 16
       for (let x = padding; x <= width - padding; x += gridSpacing) {
         for (let y = padding; y <= height - padding; y += gridSpacing) {
@@ -79,7 +84,7 @@ export function DoubleSlitPlayground({
       }
 
       // Center line with dashed style
-      ctx.strokeStyle = 'rgba(0, 0, 0, 0.08)'
+      ctx.strokeStyle = axisColor
       ctx.lineWidth = 1
       ctx.setLineDash([4, 4])
       ctx.beginPath()
@@ -89,7 +94,7 @@ export function DoubleSlitPlayground({
       ctx.setLineDash([])
 
       // Axis labels
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.3)'
+      ctx.fillStyle = labelColor
       ctx.font =
         '9px mono, ui-monospace, SFMono-Regular, Menlo, Monaco, monospace'
       ctx.textAlign = 'center'
@@ -117,6 +122,14 @@ export function DoubleSlitPlayground({
       const width = rect.width
       const height = rect.height
       const padding = 28
+      const isDarkMode =
+        document.documentElement.getAttribute('data-theme-mode') === 'dark'
+      const outerDotColor = isDarkMode
+        ? 'rgba(203, 217, 236, 0.16)'
+        : 'rgba(55, 65, 81, 0.06)'
+      const innerDotColor = isDarkMode
+        ? 'rgba(203, 217, 236, 0.6)'
+        : 'rgba(55, 65, 81, 0.55)'
 
       // Check if canvas needs resizing
       const needsResize =
@@ -159,13 +172,13 @@ export function DoubleSlitPlayground({
         // Outer glow
         ctx.beginPath()
         ctx.arc(canvasX, canvasY, 3.5, 0, Math.PI * 2)
-        ctx.fillStyle = 'rgba(55, 65, 81, 0.06)'
+        ctx.fillStyle = outerDotColor
         ctx.fill()
 
         // Inner dot
         ctx.beginPath()
         ctx.arc(canvasX, canvasY, 1.5, 0, Math.PI * 2)
-        ctx.fillStyle = 'rgba(55, 65, 81, 0.55)'
+        ctx.fillStyle = innerDotColor
         ctx.fill()
       }
 
@@ -201,6 +214,19 @@ export function DoubleSlitPlayground({
       }
     }
   }, [drawCanvas, filter])
+
+  useEffect(() => {
+    if (simple || typeof window === 'undefined') return
+    const onThemeChange = () => {
+      bgCanvasRef.current = null
+      lastDrawnCountRef.current = 0
+      drawCanvas(true)
+    }
+    window.addEventListener('qaiik:theme-preset-change', onThemeChange)
+    return () => {
+      window.removeEventListener('qaiik:theme-preset-change', onThemeChange)
+    }
+  }, [drawCanvas, simple])
 
   // Run a single experiment with real setTimeout delays
   const runOnce = useCallback(async () => {
@@ -429,7 +455,7 @@ export function DoubleSlitPlayground({
   if (simple) {
     return (
       <div className='my-7'>
-        <div className='overflow-hidden border border-rurikon-border rounded-xs bg-[#fefefe]'>
+        <div className='overflow-hidden border border-rurikon-border rounded-xs bg-[var(--surface-raised)]'>
           {/* Code editor area */}
           <div
             className='[&_pre]:!bg-transparent [&_pre]:!m-0 tracking-normal [&_pre]:min-h-[80px] [&_textarea]:!bg-transparent [&_.codice-editor]:!bg-transparent [&_.codice-title]:hidden [&_textarea]:[word-spacing:0] [&_[data-codice-header-controls]]:!hidden bg-transparent'
@@ -437,7 +463,7 @@ export function DoubleSlitPlayground({
               {
                 '--codice-font-family': `var(--mono)`,
                 '--codice-font-size': '13px',
-                '--codice-caret-color': '#374151',
+                '--codice-caret-color': 'var(--color-rurikon-500)',
               } as any
             }
           >
@@ -462,7 +488,7 @@ export function DoubleSlitPlayground({
               className={`transition-all duration-150 px-3.5 py-1 text-xs font-medium tracking-[0.01em] rounded border-none ${
                 isRunningOnce
                   ? 'bg-rurikon-100 text-rurikon-800 cursor-not-allowed'
-                  : 'bg-rurikon-800 text-white cursor-pointer'
+                  : 'bg-[var(--accent-solid)] text-[var(--accent-solid-text)] cursor-pointer'
               } ${!isLoaded ? 'opacity-50' : ''}`}
             >
               {isRunningOnce ? 'Running...' : 'Run'}
@@ -477,12 +503,12 @@ export function DoubleSlitPlayground({
 
           {/* Console output */}
           {consoleLogs.length > 0 && (
-            <div className='max-h-[9.7rem] overflow-y-auto border-t border-rurikon-border px-3.5 py-2.5 bg-black/[0.02] font-mono text-xs leading-[1.6] flex flex-col-reverse'>
+            <div className='max-h-[9.7rem] overflow-y-auto border-t border-rurikon-border px-3.5 py-2.5 bg-rurikon-50/45 font-mono text-xs leading-[1.6] flex flex-col-reverse'>
               {consoleLogs.toReversed().map((log, i) =>
                 log.startsWith('__WHICH__:') ? (
                   <div
                     key={i}
-                    className='text-blue-600 font-semibold flex items-center gap-1'
+                    className='text-sky-600 font-semibold flex items-center gap-1'
                   >
                     <span className=''>which = {log.slice(10)}</span>
                   </div>
@@ -502,10 +528,10 @@ export function DoubleSlitPlayground({
   // Full mode UI - refined laboratory aesthetic
   return (
     <div className='my-10 w-full min-w-[50vw]'>
-      <div className='overflow-hidden border border-rurikon-border rounded-xs bg-[#fefefe]'>
+      <div className='overflow-hidden border border-rurikon-border rounded-xs bg-[var(--surface-raised)]'>
         {/* Description */}
         {description && (
-          <div className='px-4 py-2.5 text-[13px] text-gray-500 border-b border-black/[0.04] bg-black/[0.01]'>
+          <div className='px-4 py-2.5 text-[13px] text-rurikon-400 border-b border-rurikon-border bg-rurikon-50/40'>
             {description}
           </div>
         )}
@@ -519,7 +545,7 @@ export function DoubleSlitPlayground({
               {
                 '--codice-font-family': `var(--mono)`,
                 '--codice-font-size': '13px',
-                '--codice-caret-color': '#374151',
+                '--codice-caret-color': 'var(--color-rurikon-500)',
               } as any
             }
           >
@@ -535,16 +561,16 @@ export function DoubleSlitPlayground({
           </div>
 
           {/* Canvas */}
-          <div className='w-full lg:w-[340px] flex flex-col bg-[#fdfcfa]'>
+          <div className='w-full lg:w-[340px] flex flex-col bg-rurikon-50/35'>
             <div className='relative flex flex-col'>
               <canvas ref={canvasRef} className='w-full h-full aspect-[4/3]' />
               {!isLoaded && (
-                <div className='absolute inset-0 flex items-center justify-center bg-white/90 text-gray-400 text-[13px]'>
+                <div className='absolute inset-0 flex items-center justify-center bg-[var(--surface-overlay)] text-rurikon-300 text-[13px]'>
                   Loading runtime...
                 </div>
               )}
               {/* Stats & Filters */}
-              <div className='px-3 pb-1 text-[11px] text-gray-400'>
+              <div className='px-3 pb-1 text-[11px] text-rurikon-300'>
                 <span className='font-medium tabular-nums'>
                   {filter === 'all'
                     ? dots.length.toLocaleString()
@@ -561,7 +587,7 @@ export function DoubleSlitPlayground({
                       onClick={() => setFilter('all')}
                       className={`px-2 py-1 text-[11px] font-medium border-none rounded cursor-pointer select-none tracking-tight ${
                         filter === 'all'
-                          ? 'bg-rurikon-700 text-white'
+                          ? 'bg-[var(--accent-solid)] text-[var(--accent-solid-text)]'
                           : 'bg-rurikon-50 text-rurikon-400'
                       }`}
                     >
@@ -573,7 +599,7 @@ export function DoubleSlitPlayground({
                         onClick={() => setFilter(value)}
                         className={`px-2 py-1 text-[11px] font-medium font-mono border-none rounded cursor-pointer select-none tracking-tight ${
                           filter === value
-                            ? 'bg-rurikon-700 text-white'
+                            ? 'bg-[var(--accent-solid)] text-[var(--accent-solid-text)]'
                             : 'bg-rurikon-50 text-rurikon-400'
                         }`}
                       >
@@ -596,8 +622,8 @@ export function DoubleSlitPlayground({
                   disabled={!isLoaded || isRunningOnce}
                   className={`transition-all duration-150 px-3.5 py-1 text-xs font-medium tracking-[0.01em] rounded border-none ${
                     isRunningOnce
-                      ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                      : 'bg-gray-800 text-white cursor-pointer'
+                      ? 'bg-rurikon-100 text-rurikon-500 cursor-not-allowed'
+                      : 'bg-[var(--accent-solid)] text-[var(--accent-solid-text)] cursor-pointer'
                   } ${!isLoaded ? 'opacity-50' : ''}`}
                 >
                   {isRunningOnce ? 'Running...' : 'Run'}
@@ -638,12 +664,12 @@ export function DoubleSlitPlayground({
 
         {/* Console output */}
         {consoleLogs.length > 0 && (
-          <div className='max-h-[9.7rem] overflow-y-auto border-t border-rurikon-border px-4 py-2.5 bg-white font-mono text-xs leading-[1.6] flex flex-col-reverse'>
+          <div className='max-h-[9.7rem] overflow-y-auto border-t border-rurikon-border px-4 py-2.5 bg-[var(--surface-raised)] font-mono text-xs leading-[1.6] flex flex-col-reverse'>
             {consoleLogs.toReversed().map((log, i) =>
               log.startsWith('__WHICH__:') ? (
                 <div
                   key={i}
-                  className='text-blue-600 font-semibold flex items-center gap-1'
+                  className='text-sky-600 font-semibold flex items-center gap-1'
                 >
                   <span className=''>which = {log.slice(10)}</span>
                 </div>

@@ -40,9 +40,34 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   maximumScale: 1,
-  colorScheme: 'only light',
-  themeColor: '#fcfcfc',
+  colorScheme: 'light dark',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#fcfcfc' },
+    { media: '(prefers-color-scheme: dark)', color: '#111418' },
+  ],
 }
+
+const themeInitScript = `
+(() => {
+  try {
+    const root = document.documentElement;
+    const storedPreset = window.localStorage.getItem('qaiik-theme-preset');
+    if (storedPreset === 'paper' || storedPreset === 'mist' || storedPreset === 'graphite') {
+      root.setAttribute('data-theme-preset', storedPreset);
+    }
+
+    const storedMode = window.localStorage.getItem('qaiik-theme-mode');
+    if (storedMode === 'light' || storedMode === 'dark') {
+      root.setAttribute('data-theme-mode', storedMode);
+      return;
+    }
+
+    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      root.setAttribute('data-theme-mode', 'dark');
+    }
+  } catch {}
+})();
+`
 
 export default function RootLayout({
   children,
@@ -50,7 +75,14 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang='en' className='overflow-x-hidden touch-manipulation'>
+    <html
+      lang='en'
+      className='overflow-x-hidden touch-manipulation'
+      suppressHydrationWarning
+    >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body
         className={cn(
           sans.variable,

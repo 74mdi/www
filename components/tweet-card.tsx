@@ -17,7 +17,7 @@ export function Card({
       target='_blank'
       rel='noreferrer'
       draggable={false}
-      className='group block rounded-lg overflow-clip select-none border border-rurikon-border my-7 transition-colors hover:bg-white'
+      className='group block rounded-lg overflow-clip select-none border border-rurikon-border my-7 transition-colors hover:bg-[var(--surface-raised)]'
     >
       <img
         src={image}
