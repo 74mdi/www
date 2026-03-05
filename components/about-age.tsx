@@ -33,9 +33,9 @@ export function AboutAge({ initialNowMs }: AboutAgeProps) {
       </div>
 
       <p className='mt-5'>
-        I&apos;m 7amdi, a <strong>{exactAge}</strong> year old failure.
+       ana 7amdi, endi <strong>{exactAge}</strong> 3am.
       </p>
-      <p className='mt-3'>Currently I live in dakhla.</p>
+      <p className='mt-3'>wsafi.</p>
     </section>
   )
 }
