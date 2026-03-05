@@ -181,7 +181,6 @@ export default function SiftliClient() {
   const [fileProgress, setFileProgress] = useState<Record<string, number>>({})
   const [dragSourceIndex, setDragSourceIndex] = useState<number | null>(null)
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
-  const [isComposerVisible, setIsComposerVisible] = useState(false)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -200,13 +199,6 @@ export default function SiftliClient() {
   useEffect(() => {
     resizeTextarea(textareaRef.current)
   }, [message, resizeTextarea])
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => {
-      setIsComposerVisible(true)
-    }, 110)
-    return () => window.clearTimeout(timer)
-  }, [])
 
   const appendFiles = useCallback(
     (incomingFiles: File[]) => {
@@ -678,7 +670,7 @@ export default function SiftliClient() {
   }, [])
 
   return (
-    <section className='relative min-h-[68vh] pb-80'>
+    <section className='relative min-h-[68vh] pb-[23rem]'>
       <h1 className='font-semibold mb-7 text-rurikon-600 text-balance'>SIFTLI</h1>
 
       <p className='text-rurikon-500'>
@@ -781,16 +773,7 @@ export default function SiftliClient() {
         ) : null}
       </div>
 
-      <div
-        className={cn(
-          'fixed bottom-4 left-1/2 -translate-x-1/2 z-30 w-[min(760px,calc(100vw-1rem))] sm:w-[min(820px,calc(100vw-2rem))]',
-          'transition-[opacity,transform,filter] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform',
-          isComposerVisible
-            ? 'opacity-100 translate-y-0 blur-0'
-            : 'opacity-0 translate-y-5 blur-[2px] pointer-events-none',
-          'motion-reduce:transition-none motion-reduce:translate-y-0 motion-reduce:blur-0 motion-reduce:opacity-100',
-        )}
-      >
+      <div className='fixed bottom-0 left-0 right-0 z-30 border-t border-rurikon-border bg-[var(--surface-overlay)]/95 backdrop-blur-sm'>
         <form
           onSubmit={handleSubmit}
           onDragOver={(event) => {
@@ -808,7 +791,7 @@ export default function SiftliClient() {
             setIsDragging(false)
             addFilesFromInput(event.dataTransfer.files)
           }}
-          className='space-y-2'
+          className='mx-auto w-[min(760px,calc(100vw-1rem))] space-y-2 py-3 sm:w-[min(820px,calc(100vw-2rem))]'
         >
           <input
             ref={fileInputRef}
@@ -994,9 +977,9 @@ export default function SiftliClient() {
                 type='submit'
                 disabled={!canSubmit}
                 className={cn(
-                  'h-[50px] px-4 sm:px-5 border rounded-xl transition-colors shrink-0 inline-flex items-center gap-2',
+                  'h-[50px] w-[50px] border rounded-full transition-colors shrink-0 inline-flex items-center justify-center',
                   canSubmit
-                    ? 'border-[var(--accent-solid)] bg-[var(--accent-solid)] text-[var(--accent-solid-text)] hover:bg-[var(--accent-solid-hover)]'
+                    ? 'border-black bg-black text-white hover:bg-neutral-800'
                     : 'border-rurikon-border bg-rurikon-100 text-rurikon-300 cursor-not-allowed',
                 )}
                 aria-label='Send'
@@ -1006,7 +989,6 @@ export default function SiftliClient() {
                 ) : (
                   <PaperAirplaneIcon className='h-5 w-5' />
                 )}
-                <span className='hidden sm:inline'>Send</span>
               </button>
             </div>
           </div>

@@ -14,4 +14,12 @@
   - `TELEGRAM_CHAT_ID`
   - `DISCORD_WEBHOOK_URL`
 
+## Last.fm Status
+
+- API route: `/api/lastfm/latest`
+- Required env vars:
+  - `LASTFM_API_KEY`
+- Optional env vars:
+  - `LASTFM_USERNAME` (defaults to `khrya`)
+
 Use `.env.example` as the template for local setup.

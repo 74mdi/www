@@ -3,15 +3,26 @@ import type { Metadata } from 'next'
 import { AboutAge } from '@/components/about-age'
 import { LastFmStatus } from '@/components/lastfm-status'
 
+const INITIAL_NOW_MS = Date.now()
+
 export const metadata: Metadata = {
   title: {
     absolute: '7amdi',
   },
+  description: 'salam ana 7amdi',
+  openGraph: {
+    title: '7amdi',
+    description: 'salam ana 7amdi',
+    images: ['/opengraph-image'],
+  },
+  twitter: {
+    title: '7amdi',
+    description: 'salam ana 7amdi',
+    images: ['/opengraph-image'],
+  },
 }
 
 export default function Page() {
-  const nowMs = Date.now()
-
   return (
     <section className='px-0 py-0'>
       <h1
@@ -57,7 +68,7 @@ export default function Page() {
         <span className='text-rurikon-400'>email</span>
       </div>
 
-      <AboutAge initialNowMs={nowMs} />
+      <AboutAge initialNowMs={INITIAL_NOW_MS} />
     </section>
   )
 }

@@ -24,6 +24,8 @@ type LastFmTrackPayload = {
 
 type LastFmResponse = {
   track?: LastFmTrackPayload
+  error?: string
+  stale?: boolean
 }
 
 type TrackSnapshot = {
@@ -34,8 +36,7 @@ type TrackSnapshot = {
   coverUrl: string | null
 }
 
-const LAST_FM_USERNAME = 'khrya'
-const LAST_FM_ENDPOINT = `https://lastfm-last-played.biancarosa.com.br/${LAST_FM_USERNAME}/latest-song`
+const LAST_FM_ENDPOINT = '/api/lastfm/latest'
 const VISIBLE_POLL_MS = 3000
 const HIDDEN_POLL_MS = 30000
 const REQUEST_TIMEOUT_MS = 4500
@@ -101,9 +102,17 @@ async function fetchTrack(signal: AbortSignal): Promise<{
     })
 
     if (!response.ok) {
+      let serverError = ''
+      try {
+        const payload = (await response.json()) as LastFmResponse
+        serverError = payload.error?.trim() ?? ''
+      } catch {
+        serverError = ''
+      }
       return {
         track: null,
-        error: `Last.fm request failed (${response.status}).`,
+        error:
+          serverError || `Last.fm request failed (${response.status}).`,
       }
     }
 
@@ -113,7 +122,7 @@ async function fetchTrack(signal: AbortSignal): Promise<{
     if (!track) {
       return {
         track: null,
-        error: 'No playable track found from Last.fm.',
+        error: payload.error || 'No playable track found from Last.fm.',
       }
     }
 
@@ -133,20 +142,11 @@ export function LastFmStatus() {
   const [showCoverPreview, setShowCoverPreview] = useState(false)
   const [coverLoadFailed, setCoverLoadFailed] = useState(false)
   const [statusText, setStatusText] = useState('Loading Last.fm status...')
-  const [isClient, setIsClient] = useState(false)
   const [previewPosition, setPreviewPosition] = useState({ left: 0, top: 0 })
   const signatureRef = useRef<string>('')
   const coverButtonRef = useRef<HTMLButtonElement | null>(null)
   const coverPreviewRef = useRef<HTMLDivElement | null>(null)
-
-  useEffect(() => {
-    setIsClient(true)
-  }, [])
-
-  useEffect(() => {
-    setCoverLoadFailed(false)
-    setShowCoverPreview(false)
-  }, [track?.coverUrl])
+  const isClient = typeof window !== 'undefined'
 
   useEffect(() => {
     let isDisposed = false
@@ -191,6 +191,8 @@ export function LastFmStatus() {
           signatureRef.current = nextSignature
           setTrack(nextTrack)
           setShowDetails(false)
+          setCoverLoadFailed(false)
+          setShowCoverPreview(false)
         }
 
         setStatusText('')

@@ -4,6 +4,17 @@ import { getThoughtArticles } from '@/app/thoughts/articles'
 
 export const metadata = {
   title: 'Thoughts',
+  description: 'salam ana 7amdi',
+  openGraph: {
+    title: 'Thoughts',
+    description: 'salam ana 7amdi',
+    images: ['/opengraph-image'],
+  },
+  twitter: {
+    title: 'Thoughts',
+    description: 'salam ana 7amdi',
+    images: ['/opengraph-image'],
+  },
 }
 
 export default async function Page() {

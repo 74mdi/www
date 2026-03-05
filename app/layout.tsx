@@ -43,6 +43,7 @@ function getSiteUrl(): string {
 }
 
 const siteUrl = getSiteUrl().replace(/\/+$/, '')
+const siteDescription = 'salam ana 7amdi'
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -50,7 +51,7 @@ export const metadata: Metadata = {
     template: '%s - qaiik',
     default: 'qaiik',
   },
-  description: 'Personal website of qaiik: thoughts, projects, and SIFTLI.',
+  description: siteDescription,
   applicationName: 'qaiik',
   alternates: {
     canonical: '/',
@@ -60,12 +61,14 @@ export const metadata: Metadata = {
     url: '/',
     siteName: 'qaiik',
     title: 'qaiik',
-    description: 'Personal website of qaiik: thoughts, projects, and SIFTLI.',
+    description: siteDescription,
+    images: ['/opengraph-image'],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'qaiik',
-    description: 'Personal website of qaiik: thoughts, projects, and SIFTLI.',
+    description: siteDescription,
+    images: ['/opengraph-image'],
   },
   robots: {
     index: true,

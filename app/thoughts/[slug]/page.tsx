@@ -79,13 +79,14 @@ export async function generateMetadata(props: {
 
   const title = resolveArticleTitle(articleModule.metadata?.title, params.slug)
   const description = articleModule.metadata?.description?.trim()
+  const normalizedDescription =
+    description && description.toLowerCase() !== 'qaiik'
+      ? description
+      : 'salam ana 7amdi'
 
   return {
     title,
-    description:
-      description && description.toLowerCase() !== 'qaiik'
-        ? description
-        : `Thought by qaiik: ${title}`,
+    description: normalizedDescription,
     alternates: {
       canonical: `/thoughts/${params.slug}`,
     },
@@ -93,19 +94,13 @@ export async function generateMetadata(props: {
       type: 'article',
       url: `/thoughts/${params.slug}`,
       title,
-      description:
-        description && description.toLowerCase() !== 'qaiik'
-          ? description
-          : `Thought by qaiik: ${title}`,
+      description: normalizedDescription,
       images: [`/thoughts/${params.slug}/opengraph-image`],
     },
     twitter: {
       card: 'summary_large_image',
       title,
-      description:
-        description && description.toLowerCase() !== 'qaiik'
-          ? description
-          : `Thought by qaiik: ${title}`,
+      description: normalizedDescription,
       images: [`/thoughts/${params.slug}/opengraph-image`],
     },
   }
