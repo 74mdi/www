@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && node scripts/postbuild-open-next.mjs",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint app/siftli app/api/siftli --max-warnings=0",
     "lint:all": "eslint .",
