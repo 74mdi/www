@@ -184,6 +184,7 @@ export default function SiftliClient() {
 
   const fileInputRef = useRef<HTMLInputElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const dragDepthRef = useRef(0)
 
   const resizeTextarea = useCallback((element: HTMLTextAreaElement | null) => {
     if (!element) return
@@ -670,7 +671,7 @@ export default function SiftliClient() {
   }, [])
 
   return (
-    <section className='relative min-h-[68vh] pb-52 sm:pb-56'>
+    <section className='relative min-h-[68vh] pb-40 sm:pb-44'>
       <h1 className='font-semibold mb-7 text-rurikon-600 text-balance'>SIFTLI</h1>
 
       <p className='text-rurikon-500'>
@@ -875,25 +876,40 @@ export default function SiftliClient() {
         ) : null}
       </div>
 
-      <div className='fixed bottom-0 left-0 right-0 z-30 border-t border-rurikon-border bg-[var(--surface-overlay)] shadow-[0_-10px_30px_rgba(0,0,0,0.06)]'>
+      <div className='sticky bottom-3 z-20 mt-4'>
         <form
           onSubmit={handleSubmit}
+          onDragEnter={(event) => {
+            if (!hasFileTransfer(event)) return
+            event.preventDefault()
+            dragDepthRef.current += 1
+            setIsDragging(true)
+          }}
           onDragOver={(event) => {
             if (!hasFileTransfer(event)) return
             event.preventDefault()
+            event.dataTransfer.dropEffect = 'copy'
             setIsDragging(true)
           }}
-          onDragLeave={(event) => {
-            if (!hasFileTransfer(event)) return
-            setIsDragging(false)
+          onDragLeave={() => {
+            dragDepthRef.current = Math.max(0, dragDepthRef.current - 1)
+            if (dragDepthRef.current === 0) {
+              setIsDragging(false)
+            }
           }}
           onDrop={(event) => {
             if (!hasFileTransfer(event)) return
             event.preventDefault()
+            dragDepthRef.current = 0
             setIsDragging(false)
             addFilesFromInput(event.dataTransfer.files)
           }}
-          className='mx-auto w-[min(760px,calc(100vw-1rem))] space-y-2 py-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] sm:w-[min(820px,calc(100vw-2rem))]'
+          className={cn(
+            'w-full max-w-[820px] space-y-2 rounded-2xl px-2 py-2 sm:px-3',
+            'pb-[max(env(safe-area-inset-bottom),0.75rem)]',
+            'border bg-[var(--surface-overlay)] shadow-[var(--overlay-shadow-strong)]',
+            isDragging ? 'border-rurikon-400' : 'border-rurikon-border',
+          )}
         >
           <input
             ref={fileInputRef}
@@ -903,13 +919,7 @@ export default function SiftliClient() {
             onChange={(event) => addFilesFromInput(event.target.files)}
           />
 
-          <div
-            className={cn(
-              'rounded-2xl border bg-[var(--surface-overlay)] backdrop-blur px-2 py-2 sm:px-3',
-              'shadow-[var(--overlay-shadow-strong)]',
-              isDragging ? 'border-rurikon-400' : 'border-rurikon-border',
-            )}
-          >
+          <div>
             <div className='mb-2 flex items-center justify-between gap-2'>
               <span className='text-xs text-rurikon-300'>Channel</span>
               <div className='inline-flex border border-rurikon-border rounded-xl overflow-hidden'>
