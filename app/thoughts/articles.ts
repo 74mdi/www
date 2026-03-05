@@ -31,6 +31,14 @@ function slugToTitle(slug: string): string {
     .join(' ')
 }
 
+function resolveArticleTitle(rawTitle: string | undefined, slug: string): string {
+  const title = rawTitle?.trim()
+  if (!title || title.toLowerCase() === 'qaiik') {
+    return slugToTitle(slug)
+  }
+  return title
+}
+
 export async function getThoughtArticles(): Promise<ThoughtArticle[]> {
   const articles = await fs.readdir(articlesDirectory)
 
@@ -52,7 +60,7 @@ export async function getThoughtArticles(): Promise<ThoughtArticle[]> {
 
     items.push({
       slug,
-      title: articleModule.metadata.title?.trim() || slugToTitle(slug),
+      title: resolveArticleTitle(articleModule.metadata.title, slug),
       description: articleModule.metadata.description || '',
       date: normalizedDate,
       sort: Number(normalizedDate.replaceAll('.', '')) || 0,

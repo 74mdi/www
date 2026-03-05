@@ -3,6 +3,22 @@ import path from 'path'
 import cn from 'clsx'
 import { notFound } from 'next/navigation'
 
+function slugToTitle(slug: string): string {
+  return slug
+    .split('-')
+    .filter(Boolean)
+    .map((word) => word.slice(0, 1).toUpperCase() + word.slice(1))
+    .join(' ')
+}
+
+function resolveArticleTitle(rawTitle: string | undefined, slug: string): string {
+  const title = rawTitle?.trim()
+  if (!title || title.toLowerCase() === 'qaiik') {
+    return slugToTitle(slug)
+  }
+  return title
+}
+
 export default async function Page(props: {
   params: Promise<{
     slug: string
@@ -61,8 +77,14 @@ export async function generateMetadata(props: {
     notFound()
   }
 
+  const title = resolveArticleTitle(articleModule.metadata?.title, params.slug)
+  const description = articleModule.metadata?.description?.trim()
+
   return {
-    title: 'qaiik',
-    description: 'qaiik',
+    title,
+    description:
+      description && description.toLowerCase() !== 'qaiik'
+        ? description
+        : `Thought by qaiik: ${title}`,
   }
 }

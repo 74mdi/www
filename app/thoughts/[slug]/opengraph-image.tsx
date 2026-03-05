@@ -26,6 +26,22 @@ const fonts = [
   },
 ]
 
+function slugToTitle(slug: string): string {
+  return slug
+    .split('-')
+    .filter(Boolean)
+    .map((word) => word.slice(0, 1).toUpperCase() + word.slice(1))
+    .join(' ')
+}
+
+function resolveArticleTitle(rawTitle: string | undefined, slug: string): string {
+  const title = rawTitle?.trim()
+  if (!title || title.toLowerCase() === 'qaiik') {
+    return slugToTitle(slug)
+  }
+  return title
+}
+
 export default async function OpenGraphImage(props: {
   params: Promise<{ slug: string }>
 }) {
@@ -35,6 +51,9 @@ export default async function OpenGraphImage(props: {
   if (metadata.draft) {
     notFound()
   }
+
+  const title = resolveArticleTitle(metadata.title, params.slug)
+  const description = metadata.description?.trim() || ''
 
   return new ImageResponse(
     <div
@@ -61,7 +80,7 @@ export default async function OpenGraphImage(props: {
           fontFamily: 'GeistPixel-Square',
         }}
       >
-        {metadata.title + ' →'}
+        {title + ' →'}
       </div>
       <div
         style={{
@@ -74,7 +93,7 @@ export default async function OpenGraphImage(props: {
           fontFamily: 'GeistPixel-Square',
         }}
       >
-        {metadata.description}
+        {description}
       </div>
     </div>,
     {

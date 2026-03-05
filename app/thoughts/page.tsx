@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { getThoughtArticles } from '@/app/thoughts/articles'
 
 export const metadata = {
-  title: 'qaiik',
+  title: 'Thoughts',
 }
 
 export default async function Page() {
