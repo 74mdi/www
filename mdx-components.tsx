@@ -76,6 +76,20 @@ export const components: Record<
       {...props}
     />
   ),
+  table: (props) => (
+    <div className='mt-7 overflow-x-auto'>
+      <table className='w-full min-w-[36rem] border-collapse text-sm' {...props} />
+    </div>
+  ),
+  thead: (props) => <thead className='border-b border-rurikon-border' {...props} />,
+  tbody: (props) => <tbody className='divide-y divide-rurikon-border/60' {...props} />,
+  th: (props) => (
+    <th
+      className='px-3 py-2 text-left font-semibold text-rurikon-600 whitespace-nowrap'
+      {...props}
+    />
+  ),
+  td: (props) => <td className='px-3 py-2 align-top text-rurikon-500' {...props} />,
   li: (props) => <li className='pl-1.5' {...props} />,
   a: ({ href, ...props }) => {
     const className =
@@ -176,14 +190,13 @@ export const components: Record<
   img: async ({ src, alt, title }) => {
     let img: React.ReactNode
 
-    if (src.startsWith('https://')) {
+    if (src.startsWith('https://') || src.startsWith('http://')) {
       img = (
-        <Image
-          className='mt-7'
+        <img
+          className='mt-7 w-full h-auto'
           src={src}
-          alt={alt}
-          quality={95}
-          placeholder='blur'
+          alt={alt ?? ''}
+          loading='lazy'
           draggable={false}
         />
       )

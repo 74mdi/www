@@ -181,6 +181,17 @@ del {
   text-decoration-thickness: 1px;
 }
 
+ins {
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.15em;
+}
+
+mark {
+  background: var(--color-rurikon-200);
+  color: var(--color-rurikon-800);
+  padding: 0 0.15em;
+}
+
 blockquote {
   box-shadow: 1px 0 0 var(--color-rurikon-500) inset;
 }
