@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 
 type LastFmText = {
   '#text'?: string
@@ -39,6 +40,8 @@ const VISIBLE_POLL_MS = 3000
 const HIDDEN_POLL_MS = 30000
 const REQUEST_TIMEOUT_MS = 4500
 const MAX_FAILURE_BACKOFF_MS = 120000
+const PREVIEW_GAP_PX = 8
+const PREVIEW_MARGIN_PX = 8
 
 function cleanText(value: string | undefined): string {
   return value?.trim() ?? ''
@@ -130,8 +133,15 @@ export function LastFmStatus() {
   const [showCoverPreview, setShowCoverPreview] = useState(false)
   const [coverLoadFailed, setCoverLoadFailed] = useState(false)
   const [statusText, setStatusText] = useState('Loading Last.fm status...')
+  const [isClient, setIsClient] = useState(false)
+  const [previewPosition, setPreviewPosition] = useState({ left: 0, top: 0 })
   const signatureRef = useRef<string>('')
+  const coverButtonRef = useRef<HTMLButtonElement | null>(null)
   const coverPreviewRef = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
 
   useEffect(() => {
     setCoverLoadFailed(false)
@@ -221,11 +231,38 @@ export function LastFmStatus() {
   useEffect(() => {
     if (!showCoverPreview) return
 
-    const handlePointerDown = (event: PointerEvent) => {
-      if (!coverPreviewRef.current) return
-      if (!coverPreviewRef.current.contains(event.target as Node)) {
-        setShowCoverPreview(false)
+    const updatePreviewPosition = () => {
+      const button = coverButtonRef.current
+      if (!button) return
+
+      const rect = button.getBoundingClientRect()
+      const previewSize = window.matchMedia('(min-width: 640px)').matches
+        ? 128
+        : 112
+
+      const clampedLeft = Math.min(
+        Math.max(rect.left, PREVIEW_MARGIN_PX),
+        window.innerWidth - previewSize - PREVIEW_MARGIN_PX,
+      )
+
+      let top = rect.bottom + PREVIEW_GAP_PX
+      if (top + previewSize > window.innerHeight - PREVIEW_MARGIN_PX) {
+        top = Math.max(
+          PREVIEW_MARGIN_PX,
+          rect.top - previewSize - PREVIEW_GAP_PX,
+        )
       }
+
+      setPreviewPosition({ left: clampedLeft, top })
+    }
+
+    updatePreviewPosition()
+
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target as Node
+      if (coverButtonRef.current?.contains(target)) return
+      if (coverPreviewRef.current?.contains(target)) return
+      setShowCoverPreview(false)
     }
 
     const handleEscape = (event: KeyboardEvent) => {
@@ -234,12 +271,20 @@ export function LastFmStatus() {
       }
     }
 
+    const handleViewportChange = () => {
+      updatePreviewPosition()
+    }
+
     document.addEventListener('pointerdown', handlePointerDown)
     document.addEventListener('keydown', handleEscape)
+    window.addEventListener('resize', handleViewportChange)
+    window.addEventListener('scroll', handleViewportChange, true)
 
     return () => {
       document.removeEventListener('pointerdown', handlePointerDown)
       document.removeEventListener('keydown', handleEscape)
+      window.removeEventListener('resize', handleViewportChange)
+      window.removeEventListener('scroll', handleViewportChange, true)
     }
   }, [showCoverPreview])
 
@@ -251,8 +296,9 @@ export function LastFmStatus() {
     <section className='mt-4'>
       <div className='flex items-center gap-2 text-rurikon-500'>
         {showCover ? (
-          <div ref={coverPreviewRef} className='relative shrink-0'>
+          <div className='relative shrink-0'>
             <button
+              ref={coverButtonRef}
               type='button'
               onClick={() => setShowCoverPreview((prev) => !prev)}
               className='block rounded-[3px] focus-visible:outline focus-visible:outline-rurikon-400 focus-visible:rounded-[3px] focus-visible:outline-offset-1 focus-visible:outline-dotted'
@@ -273,21 +319,6 @@ export function LastFmStatus() {
                 }}
               />
             </button>
-
-            <div
-              id='lastfm-cover-preview'
-              className={`absolute left-0 top-[calc(100%+0.4rem)] z-20 origin-top-left transition-all duration-200 ease-out ${showCoverPreview ? 'pointer-events-auto opacity-100 scale-100 translate-y-0' : 'pointer-events-none opacity-0 scale-95 -translate-y-1'}`}
-              aria-hidden={!showCoverPreview}
-            >
-              <img
-                src={track!.coverUrl!}
-                alt='Album cover preview'
-                className='h-28 w-28 sm:h-32 sm:w-32 rounded-md border border-rurikon-border bg-[var(--surface-raised)] object-cover shadow-[var(--overlay-shadow)]'
-                loading='lazy'
-                decoding='async'
-                draggable={false}
-              />
-            </div>
           </div>
         ) : null}
 
@@ -313,6 +344,39 @@ export function LastFmStatus() {
           artist: <span className='text-rurikon-600'>{track.artist || 'unknown'}</span>
         </p>
       ) : null}
+
+      {isClient && showCover
+        ? createPortal(
+            <div
+              className='fixed inset-0 z-30 pointer-events-none'
+              aria-hidden={!showCoverPreview}
+            >
+              <div
+                ref={coverPreviewRef}
+                id='lastfm-cover-preview'
+                className={`absolute origin-top-left transition-all duration-200 ease-out ${showCoverPreview ? 'pointer-events-auto opacity-100 scale-100 translate-y-0' : 'pointer-events-none opacity-0 scale-95 -translate-y-1'}`}
+                style={{
+                  left: `${previewPosition.left}px`,
+                  top: `${previewPosition.top}px`,
+                }}
+              >
+                <img
+                  src={track!.coverUrl!}
+                  alt='Album cover preview'
+                  className='h-28 w-28 sm:h-32 sm:w-32 rounded-md border border-rurikon-border bg-[var(--surface-raised)] object-cover shadow-[var(--overlay-shadow)]'
+                  loading='lazy'
+                  decoding='async'
+                  draggable={false}
+                  onError={() => {
+                    setCoverLoadFailed(true)
+                    setShowCoverPreview(false)
+                  }}
+                />
+              </div>
+            </div>,
+            document.body,
+          )
+        : null}
     </section>
   )
 }
