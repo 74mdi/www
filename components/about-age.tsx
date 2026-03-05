@@ -32,7 +32,7 @@ export function AboutAge({ initialNowMs }: AboutAgeProps) {
           About Me
         </h2>
         <span
-          className='group relative inline-flex items-center rounded-md border border-rurikon-border bg-[var(--surface-raised)] px-3 py-1.5 text-sm tabular-nums text-rurikon-600'
+          className='group relative inline-flex items-center py-1 text-sm tabular-nums text-rurikon-500'
           title={exactAge}
         >
           <span className='transition-opacity duration-150 group-hover:opacity-0'>

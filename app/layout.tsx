@@ -98,6 +98,53 @@ const themeInitScript = `
 })();
 `
 
+const chunkRecoveryScript = `
+(() => {
+  const reloadKey = 'qaiik-chunk-reload-once';
+
+  const shouldReload = (source) => {
+    if (!source) return false;
+    return (
+      source.includes('/_next/static/chunks/') ||
+      source.includes('ChunkLoadError') ||
+      source.includes('Loading chunk')
+    );
+  };
+
+  const safeReload = () => {
+    try {
+      if (sessionStorage.getItem(reloadKey) === '1') return;
+      sessionStorage.setItem(reloadKey, '1');
+      window.location.reload();
+    } catch {}
+  };
+
+  window.addEventListener(
+    'error',
+    (event) => {
+      try {
+        const target = event.target;
+        const scriptSource =
+          target && target.tagName === 'SCRIPT' ? target.src || '' : '';
+        const message = event.message || '';
+
+        if (shouldReload(scriptSource) || shouldReload(message)) {
+          safeReload();
+        }
+      } catch {}
+    },
+    true
+  );
+
+  window.addEventListener('unhandledrejection', (event) => {
+    const message = String(event.reason?.message || event.reason || '');
+    if (shouldReload(message)) {
+      safeReload();
+    }
+  });
+})();
+`
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -111,6 +158,7 @@ export default function RootLayout({
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+        <script dangerouslySetInnerHTML={{ __html: chunkRecoveryScript }} />
       </head>
       <body
         className={cn(
