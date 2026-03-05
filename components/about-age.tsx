@@ -22,7 +22,6 @@ export function AboutAge({ initialNowMs }: AboutAgeProps) {
   }, [])
 
   const age = getAge(nowMs)
-  const shortAge = age.toFixed(4)
   const exactAge = age.toFixed(12)
 
   return (
@@ -31,21 +30,13 @@ export function AboutAge({ initialNowMs }: AboutAgeProps) {
         <h2 className='m-0 font-semibold text-[1.3rem] leading-[1.2] sm:text-[1.52rem] text-rurikon-600'>
           About Me
         </h2>
-        <span
-          className='group relative inline-flex items-center py-1 text-sm tabular-nums text-rurikon-500'
-          title={exactAge}
-        >
-          <span className='transition-opacity duration-150 group-hover:opacity-0'>
-            {shortAge}
-          </span>
-          <span className='pointer-events-none absolute inset-0 flex items-center justify-center px-3 opacity-0 transition-opacity duration-150 group-hover:opacity-100'>
-            {exactAge}
-          </span>
+        <span className='inline-flex items-center py-1 text-sm tabular-nums text-rurikon-500'>
+          {exactAge}
         </span>
       </div>
 
       <p className='mt-5'>
-        I&apos;m 7amdi, a <strong>{shortAge}</strong> year old failure.
+        I&apos;m 7amdi, a <strong>{exactAge}</strong> year old failure.
       </p>
       <p className='mt-3'>Currently I live in dakhla.</p>
     </section>
