@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useSyncExternalStore } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 
 type ThemeMode = 'light' | 'dark'
 
@@ -74,6 +74,11 @@ export default function ThemeModeToggle() {
     getThemeModeSnapshot,
     getThemeModeServerSnapshot,
   )
+  const [hasMounted, setHasMounted] = useState(false)
+
+  useEffect(() => {
+    setHasMounted(true)
+  }, [])
 
   useEffect(() => {
     applyThemeMode(activeMode)
@@ -86,15 +91,25 @@ export default function ThemeModeToggle() {
     window.dispatchEvent(new Event(THEME_MODE_CHANGE_EVENT))
   }
 
+  const buttonLabel = hasMounted
+    ? activeMode === 'dark'
+      ? 'Dark'
+      : 'Light'
+    : 'Theme'
+
+  const ariaLabel = hasMounted
+    ? `Switch to ${activeMode === 'dark' ? 'light' : 'dark'} mode`
+    : 'Toggle theme mode'
+
   return (
     <div className='inline-flex items-center justify-end'>
       <button
         type='button'
         onClick={onToggleMode}
-        aria-label={`Switch to ${activeMode === 'dark' ? 'light' : 'dark'} mode`}
+        aria-label={ariaLabel}
         className='rounded-xl border border-rurikon-border bg-[var(--surface-overlay)] px-2.5 py-1 text-[10px] leading-none transition-colors whitespace-nowrap hover:text-rurikon-700'
       >
-        {activeMode === 'dark' ? 'Dark' : 'Light'}
+        {buttonLabel}
       </button>
     </div>
   )
