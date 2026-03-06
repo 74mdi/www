@@ -16,7 +16,7 @@ function getSiteUrl(): string {
     return `https://${preview.replace(/\/+$/, '')}`
   }
 
-  return 'https://qaiiik.vercel.app'
+  return 'https://qaiik.vercel.app'
 }
 
 export default function robots(): MetadataRoute.Robots {

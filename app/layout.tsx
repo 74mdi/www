@@ -38,12 +38,12 @@ function getSiteUrl(): string {
   const preview = process.env.VERCEL_URL?.trim()
   if (preview) return `https://${preview}`
 
-  return 'https://qaiiik.vercel.app'
+  return 'https://qaiik.vercel.app'
 }
 
 const siteUrl = getSiteUrl().replace(/\/+$/, '')
 const siteDescription =
-  'salam ana 7amdi. personal website with thoughts, experiments, and SIFTLI.'
+  'salam ana 7amdi. whadi personal website dyalii akankherbeq wsafiiii.'
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

@@ -18,7 +18,7 @@ function getSiteUrl(): string {
     return `https://${preview.replace(/\/+$/, '')}`
   }
 
-  return 'https://qaiiik.vercel.app'
+  return 'https://qaiik.vercel.app'
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
