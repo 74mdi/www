@@ -1,4 +1,4 @@
-import { ImageResponse } from 'next/og'
+import { ImageResponse } from '@vercel/og'
 import path from 'path'
 import { readFileSync } from 'fs'
 
