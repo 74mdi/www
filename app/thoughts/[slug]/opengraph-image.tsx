@@ -18,6 +18,8 @@ const fonts = [
   },
 ]
 
+const SITE_NAME = 'qaiik'
+
 function slugToTitle(slug: string): string {
   return slug
     .split('-')
@@ -59,55 +61,57 @@ export default async function OpenGraphImage(props: {
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
-        position: 'relative',
-        padding: '64px',
-        background: 'linear-gradient(135deg, #ffffff 0%, #eef1f5 100%)',
+        padding: '66px 74px',
+        background: '#ffffff',
         fontFamily: 'Inter',
       }}
     >
-      <div
+      <h1
         style={{
-          position: 'absolute',
-          top: '38px',
-          right: '48px',
-          width: '100px',
-          height: '100px',
-          borderRadius: '9999px',
-          background: '#111111',
-        }}
-      />
-      <div
-        style={{
-          fontSize: 26,
+          margin: 0,
+          maxWidth: '86%',
+          fontSize: 86,
           fontWeight: 500,
-          color: '#475569',
-          lineHeight: 1.2,
-        }}
-      >
-        thought by 7amdi
-      </div>
-      <div
-        style={{
-          fontSize: 76,
-          fontWeight: 600,
-          color: '#020617',
           lineHeight: 1.06,
-          maxWidth: 1000,
-          letterSpacing: -1.4,
+          color: '#111111',
+          letterSpacing: -1.1,
+          fontFamily: 'serif',
         }}
       >
         {title}
-      </div>
-      <div
+      </h1>
+
+      <p
         style={{
           fontSize: 34,
-          color: '#334155',
-          maxWidth: 960,
-          lineHeight: 1.26,
-          letterSpacing: -0.2,
+          color: '#2f2f2f',
+          maxWidth: '86%',
+          lineHeight: 1.24,
+          letterSpacing: -0.1,
+          margin: 0,
         }}
       >
         {description}
+      </p>
+
+      <div
+        style={{
+          width: '100%',
+          display: 'flex',
+          justifyContent: 'flex-end',
+          marginTop: 20,
+        }}
+      >
+        <span
+          style={{
+            fontSize: 28,
+            lineHeight: 1,
+            color: '#5a5a5a',
+            letterSpacing: 0.2,
+          }}
+        >
+          {SITE_NAME}
+        </span>
       </div>
     </div>,
     {

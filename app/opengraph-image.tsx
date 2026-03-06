@@ -9,6 +9,8 @@ const interMedium = readFileSync(
   path.join(process.cwd(), 'app', '_fonts', 'Inter-Medium.ttf'),
 )
 
+const SITE_NAME = 'qaiik'
+
 export default function OpenGraphImage() {
   return new ImageResponse(
     <div
@@ -16,73 +18,57 @@ export default function OpenGraphImage() {
         width: '100%',
         height: '100%',
         display: 'flex',
-        position: 'relative',
         flexDirection: 'column',
         justifyContent: 'space-between',
-        padding: '64px',
-        background: 'linear-gradient(135deg, #ffffff 0%, #eef1f5 100%)',
-        color: '#0f172a',
+        padding: '66px 74px',
+        background: '#ffffff',
+        color: '#111111',
         fontFamily: 'Inter',
       }}
     >
-      <div
+      <h1
         style={{
-          position: 'absolute',
-          top: '38px',
-          right: '48px',
-          width: '112px',
-          height: '112px',
-          borderRadius: '9999px',
-          background: '#111111',
-        }}
-      />
-      <div style={{ display: 'flex', flexDirection: 'column' }}>
-        <span
-          style={{
-            fontSize: 30,
-            letterSpacing: 0.4,
-            color: '#475569',
-          }}
-        >
-          personal website
-        </span>
-        <h1
-          style={{
-            marginTop: '20px',
-            marginBottom: 0,
-            fontSize: 98,
-            lineHeight: 1,
-            letterSpacing: -2.2,
-            color: '#020617',
-          }}
-        >
-          7amdi
-        </h1>
-      </div>
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '10px',
+          margin: 0,
           maxWidth: '82%',
+          fontSize: 96,
+          lineHeight: 1.05,
+          letterSpacing: -1.2,
+          fontFamily: 'serif',
+        }}
+      >
+        7amdi
+      </h1>
+
+      <p
+        style={{
+          maxWidth: '82%',
+          margin: 0,
+          fontSize: 40,
+          lineHeight: 1.22,
+          color: '#2f2f2f',
+          fontFamily: 'Inter',
+        }}
+      >
+        salam ana 7amdi
+      </p>
+
+      <div
+        style={{
+          width: '100%',
+          display: 'flex',
+          justifyContent: 'flex-end',
+          marginTop: 20,
         }}
       >
         <span
           style={{
-            fontSize: 44,
-            lineHeight: 1.22,
-            color: '#0f172a',
+            fontSize: 28,
+            lineHeight: 1,
+            color: '#5a5a5a',
+            letterSpacing: 0.2,
           }}
         >
-          salam ana 7amdi
-        </span>
-        <span
-          style={{
-            fontSize: 27,
-            color: '#475569',
-          }}
-        >
-          thoughts, projects, and siftli
+          {SITE_NAME}
         </span>
       </div>
     </div>,
