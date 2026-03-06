@@ -382,7 +382,7 @@ article {
 }
 
 @supports (view-transition-name: none) {
-  @media not (prefers-reduced-motion: reduce) {
+  @media not (prefers-reduced-motion: reduce) and (min-width: 640px) {
     ::view-transition-old(crossfade) {
       animation: hide 0.4s cubic-bezier(0.6, 0, 0.8, 1) forwards;
     }

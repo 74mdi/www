@@ -342,12 +342,14 @@ export function LastFmStatus() {
           <button
             type='button'
             onClick={() => setShowDetails((prev) => !prev)}
-            className='text-left break-words decoration-from-font underline underline-offset-2 decoration-rurikon-300 hover:decoration-rurikon-600 focus-visible:outline focus-visible:outline-rurikon-400 focus-visible:rounded-xs focus-visible:outline-offset-1 focus-visible:outline-dotted'
+            className='min-w-0 flex-1 text-left decoration-from-font underline underline-offset-2 decoration-rurikon-300 hover:decoration-rurikon-600 focus-visible:outline focus-visible:outline-rurikon-400 focus-visible:rounded-xs focus-visible:outline-offset-1 focus-visible:outline-dotted'
             aria-expanded={showDetails}
             aria-controls='lastfm-track-details'
           >
-            {statePrefix}
-            <strong className='font-semibold text-rurikon-700'>{track.title}</strong>
+            <span className='mr-1'>{statePrefix}</span>
+            <strong className='font-semibold text-rurikon-700 [overflow-wrap:anywhere]'>
+              {track.title}
+            </strong>
           </button>
         ) : (
           <p className='m-0 text-rurikon-400'>{statusText}</p>
@@ -355,10 +357,14 @@ export function LastFmStatus() {
       </div>
 
       {track && showDetails ? (
-        <p id='lastfm-track-details' className='mt-2 text-sm text-rurikon-400'>
-          album: <span className='text-rurikon-600'>{track.album || 'unknown'}</span>{' '}
-          artist: <span className='text-rurikon-600'>{track.artist || 'unknown'}</span>
-        </p>
+        <div id='lastfm-track-details' className='mt-2 text-sm text-rurikon-400'>
+          <p className='m-0 [overflow-wrap:anywhere]'>
+            album: <span className='text-rurikon-600'>{track.album || 'unknown'}</span>
+          </p>
+          <p className='m-0 [overflow-wrap:anywhere]'>
+            artist: <span className='text-rurikon-600'>{track.artist || 'unknown'}</span>
+          </p>
+        </div>
       ) : null}
 
       {isClient && showCover
