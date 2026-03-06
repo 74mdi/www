@@ -671,7 +671,7 @@ export default function SiftliClient() {
   }, [])
 
   return (
-    <section className='relative min-h-[68vh] pb-48 sm:pb-52'>
+    <section className='relative min-h-[68vh] pb-16 sm:pb-20'>
       <h1 className='font-semibold mb-7 text-rurikon-600 text-balance'>SIFTLI</h1>
 
       <p className='text-rurikon-500'>
@@ -875,7 +875,7 @@ export default function SiftliClient() {
         ) : null}
       </div>
 
-      <div className='fixed left-1/2 bottom-3 z-20 w-[min(820px,calc(100vw-1rem))] -translate-x-1/2'>
+      <div className='sticky bottom-2 z-20 mt-6 w-full'>
         <form
           onSubmit={handleSubmit}
           onDragEnter={(event) => {
@@ -904,7 +904,7 @@ export default function SiftliClient() {
             addFilesFromInput(event.dataTransfer.files)
           }}
           className={cn(
-            'w-full space-y-2 px-1 py-1 sm:px-2',
+            'mx-auto w-full max-w-[820px] space-y-2 px-1 py-1 sm:px-2',
             'pb-[max(env(safe-area-inset-bottom),0.75rem)]',
             'bg-[var(--background)]',
             isDragging && 'rounded-xl outline outline-1 outline-rurikon-400',
@@ -942,11 +942,11 @@ export default function SiftliClient() {
               </div>
             </div>
 
-            <div className='flex items-end gap-2'>
+            <div className='grid grid-cols-[auto_minmax(0,1fr)_auto] items-end gap-2'>
               <button
                 type='button'
                 onClick={() => fileInputRef.current?.click()}
-                className='h-[50px] px-4 border border-rurikon-border rounded-xl text-rurikon-400 hover:text-rurikon-700 hover:border-rurikon-400 transition-colors inline-flex items-center gap-2 shrink-0 bg-[var(--background)]'
+                className='h-[50px] w-[50px] sm:w-auto sm:px-4 border border-rurikon-border rounded-xl text-rurikon-400 hover:text-rurikon-700 hover:border-rurikon-400 transition-colors inline-flex items-center justify-center sm:justify-start gap-2 shrink-0 bg-[var(--background)]'
                 aria-label='Attach files'
                 disabled={status === 'sending'}
               >
@@ -988,7 +988,7 @@ export default function SiftliClient() {
                 type='submit'
                 disabled={!canSubmit}
                 className={cn(
-                  'h-[50px] w-[50px] border rounded-full transition-colors shrink-0 inline-flex items-center justify-center',
+                  'h-[50px] w-[50px] border rounded-full transition-colors shrink-0 self-end inline-flex items-center justify-center',
                   canSubmit
                     ? 'border-black bg-black text-white hover:bg-neutral-800'
                     : 'border-rurikon-border bg-rurikon-100 text-rurikon-300 cursor-not-allowed',
