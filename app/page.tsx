@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 import { AboutAge } from '@/components/about-age'
-import { LastFmStatus } from '@/components/lastfm-status'
+import { HomeLastFm } from '@/components/home-lastfm'
 
 const INITIAL_NOW_MS = Date.now()
 
@@ -37,7 +37,7 @@ export default function Page() {
         7amdi
       </h1>
 
-      <LastFmStatus />
+      <HomeLastFm />
 
       <div className='mt-7 flex flex-wrap items-center gap-x-5 gap-y-2'>
         <a

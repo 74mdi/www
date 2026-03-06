@@ -6,7 +6,6 @@ import { ViewTransition } from 'react'
 
 import cn from 'clsx'
 import localFont from 'next/font/local'
-import 'katex/dist/katex.min.css'
 
 import Navbar from '@/components/navbar'
 import './globals.css'

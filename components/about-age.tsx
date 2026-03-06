@@ -17,12 +17,24 @@ export function AboutAge({ initialNowMs }: AboutAgeProps) {
   const [nowMs, setNowMs] = useState(initialNowMs)
 
   useEffect(() => {
-    const timer = window.setInterval(() => setNowMs(Date.now()), 100)
-    return () => window.clearInterval(timer)
+    let intervalId: number | null = null
+
+    const startTimer = window.setTimeout(() => {
+      intervalId = window.setInterval(() => {
+        setNowMs(Date.now())
+      }, 1_000)
+    }, 4_000)
+
+    return () => {
+      window.clearTimeout(startTimer)
+      if (intervalId !== null) {
+        window.clearInterval(intervalId)
+      }
+    }
   }, [])
 
   const age = getAge(nowMs)
-  const exactAge = age.toFixed(12)
+  const exactAge = age.toFixed(9)
 
   return (
     <section className='mt-12'>
@@ -33,7 +45,11 @@ export function AboutAge({ initialNowMs }: AboutAgeProps) {
       </div>
 
       <p className='mt-5'>
-       ana حمدي, endi <strong>{exactAge}</strong> عام.
+       ana حمدي, endi{' '}
+       <strong className='inline-block min-w-[12ch] tabular-nums text-right'>
+         {exactAge}
+       </strong>{' '}
+       عام.
       </p>
       <p className='mt-3'>wsafi.</p>
     </section>
