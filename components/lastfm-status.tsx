@@ -43,6 +43,7 @@ const REQUEST_TIMEOUT_MS = 4500
 const MAX_FAILURE_BACKOFF_MS = 120000
 const PREVIEW_GAP_PX = 8
 const PREVIEW_MARGIN_PX = 8
+const LASTFM_EMPTY_COVER_HASH = '2a96cbd8b46e442fc41c2b86b821562f'
 
 function cleanText(value: string | undefined): string {
   return value?.trim() ?? ''
@@ -53,16 +54,29 @@ function isHttpUrl(value: string | undefined): value is string {
   return value.startsWith('https://') || value.startsWith('http://')
 }
 
+function isPlaceholderCoverUrl(value: string): boolean {
+  try {
+    const url = new URL(value)
+    return url.pathname.includes(LASTFM_EMPTY_COVER_HASH)
+  } catch {
+    return value.includes(LASTFM_EMPTY_COVER_HASH)
+  }
+}
+
 function pickCoverUrl(images: LastFmImage[] | undefined): string | null {
   if (!images || images.length === 0) return null
 
   const preferredSizes = ['extralarge', 'large', 'medium', 'small']
   for (const size of preferredSizes) {
     const image = images.find((item) => item.size === size)
-    if (isHttpUrl(image?.['#text'])) return image!['#text']
+    const url = image?.['#text']
+    if (isHttpUrl(url) && !isPlaceholderCoverUrl(url)) return url
   }
 
-  const fallback = images.find((item) => isHttpUrl(item['#text']))
+  const fallback = images.find((item) => {
+    const url = item['#text']
+    return isHttpUrl(url) && !isPlaceholderCoverUrl(url)
+  })
   return fallback?.['#text'] ?? null
 }
 
