@@ -42,7 +42,8 @@ function getSiteUrl(): string {
 }
 
 const siteUrl = getSiteUrl().replace(/\/+$/, '')
-const siteDescription = 'salam ana 7amdi'
+const siteDescription =
+  'salam ana 7amdi. personal website with thoughts, experiments, and SIFTLI.'
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

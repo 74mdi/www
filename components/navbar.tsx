@@ -40,13 +40,15 @@ function Item(props: React.ComponentProps<typeof Link>) {
 
 export default function Navbar() {
   return (
-    <nav className='mobile:mr-6 sm:mr-10 md:mr-14 w-full mobile:w-24 mobile:sticky top-6 sm:top-10 md:top-14 self-start'>
+    <nav
+      data-nosnippet
+      className='mobile:mr-6 sm:mr-10 md:mr-14 w-full mobile:w-24 mobile:sticky top-6 sm:top-10 md:top-14 self-start'
+    >
       <div className='mobile:hidden mb-6 flex items-center justify-between gap-3'>
         <ThemeModeToggle />
         <ul className='lowercase text-right flex items-center gap-2 justify-end'>
           <Item href='/'>Home</Item>
           <Item href='/thoughts'>Thoughts</Item>
-          <Item href='/projects'>Projects</Item>
           <Item href='/siftli'>SIFTLI</Item>
           {/* <Item href='/guestbook'>Guestbook</Item> */}
         </ul>
@@ -55,7 +57,6 @@ export default function Navbar() {
       <ul className='lowercase text-right hidden mobile:block'>
         <Item href='/'>Home</Item>
         <Item href='/thoughts'>Thoughts</Item>
-        <Item href='/projects'>Projects</Item>
         <Item href='/siftli'>SIFTLI</Item>
         {/* <Item href='/guestbook'>Guestbook</Item> */}
       </ul>

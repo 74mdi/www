@@ -9,15 +9,21 @@ export const metadata: Metadata = {
   title: {
     absolute: '7amdi',
   },
-  description: 'salam ana 7amdi',
+  description:
+    'salam ana 7amdi. personal website with thoughts, experiments, and SIFTLI.',
+  alternates: {
+    canonical: '/',
+  },
   openGraph: {
     title: '7amdi',
-    description: 'salam ana 7amdi',
+    description:
+      'salam ana 7amdi. personal website with thoughts, experiments, and SIFTLI.',
     images: ['/opengraph-image'],
   },
   twitter: {
     title: '7amdi',
-    description: 'salam ana 7amdi',
+    description:
+      'salam ana 7amdi. personal website with thoughts, experiments, and SIFTLI.',
     images: ['/opengraph-image'],
   },
 }
