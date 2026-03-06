@@ -9,6 +9,20 @@
     "lint": "eslint app/siftli app/api/siftli --max-warnings=0",
     "lint:all": "eslint ."
   },
+  "browserslist": {
+    "production": [
+      "Chrome >= 111",
+      "Edge >= 111",
+      "Firefox >= 111",
+      "Safari >= 16.4",
+      "iOS >= 16.4"
+    ],
+    "development": [
+      "last 1 Chrome version",
+      "last 1 Firefox version",
+      "last 1 Safari version"
+    ]
+  },
   "dependencies": {
     "@heroicons/react": "^2.1.5",
     "@mdx-js/loader": "^3.0.1",

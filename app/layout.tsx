@@ -5,29 +5,10 @@ import { Analytics } from '@vercel/analytics/next'
 import { ViewTransition } from 'react'
 
 import cn from 'clsx'
-import localFont from 'next/font/local'
 import 'katex/dist/katex.min.css'
 
 import Navbar from '@/components/navbar'
 import './globals.css'
-
-const sans = localFont({
-  src: './_fonts/InterVariable.woff2',
-  preload: false,
-  variable: '--sans',
-})
-
-const serif = localFont({
-  src: './_fonts/LoraItalicVariable.woff2',
-  preload: false,
-  variable: '--serif',
-})
-
-const mono = localFont({
-  src: './_fonts/IosevkaFixedCurly-ExtendedMedium.woff2',
-  preload: false,
-  variable: '--mono',
-})
 
 function getSiteUrl(): string {
   const explicit = process.env.NEXT_PUBLIC_SITE_URL?.trim()
@@ -165,9 +146,6 @@ export default function RootLayout({
       </head>
       <body
         className={cn(
-          sans.variable,
-          serif.variable,
-          mono.variable,
           'w-full p-6 sm:p-10 md:p-14',
           'text-sm leading-6 sm:text-[15px] sm:leading-7 md:text-base md:leading-7',
           'text-rurikon-500',
