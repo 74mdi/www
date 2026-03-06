@@ -671,7 +671,7 @@ export default function SiftliClient() {
   }, [])
 
   return (
-    <section className='relative min-h-[68vh] pb-40 sm:pb-44'>
+    <section className='relative min-h-[68vh] pb-48 sm:pb-52'>
       <h1 className='font-semibold mb-7 text-rurikon-600 text-balance'>SIFTLI</h1>
 
       <p className='text-rurikon-500'>
@@ -876,7 +876,7 @@ export default function SiftliClient() {
         ) : null}
       </div>
 
-      <div className='sticky bottom-3 z-20 mt-4'>
+      <div className='fixed left-1/2 bottom-3 z-20 w-[min(820px,calc(100vw-1rem))] -translate-x-1/2 page-blur-in'>
         <form
           onSubmit={handleSubmit}
           onDragEnter={(event) => {
@@ -905,10 +905,10 @@ export default function SiftliClient() {
             addFilesFromInput(event.dataTransfer.files)
           }}
           className={cn(
-            'w-full max-w-[820px] space-y-2 rounded-2xl px-2 py-2 sm:px-3',
+            'w-full space-y-2 px-1 py-1 sm:px-2',
             'pb-[max(env(safe-area-inset-bottom),0.75rem)]',
-            'border bg-[var(--surface-overlay)] shadow-[var(--overlay-shadow-strong)]',
-            isDragging ? 'border-rurikon-400' : 'border-rurikon-border',
+            'bg-[var(--background)]',
+            isDragging && 'rounded-xl outline outline-1 outline-rurikon-400',
           )}
         >
           <input
@@ -933,7 +933,7 @@ export default function SiftliClient() {
                       'px-2.5 py-1 text-xs transition-colors',
                       channelMode === option.value
                         ? 'bg-[var(--accent-solid)] text-[var(--accent-solid-text)]'
-                        : 'bg-[var(--surface-raised)] text-rurikon-400 hover:text-rurikon-700',
+                        : 'bg-[var(--background)] text-rurikon-400 hover:text-rurikon-700',
                       status === 'sending' && 'opacity-60 cursor-not-allowed',
                     )}
                   >
@@ -947,7 +947,7 @@ export default function SiftliClient() {
               <button
                 type='button'
                 onClick={() => fileInputRef.current?.click()}
-                className='h-[50px] px-4 border border-rurikon-border rounded-xl text-rurikon-400 hover:text-rurikon-700 hover:border-rurikon-400 transition-colors inline-flex items-center gap-2 shrink-0 bg-rurikon-50/70'
+                className='h-[50px] px-4 border border-rurikon-border rounded-xl text-rurikon-400 hover:text-rurikon-700 hover:border-rurikon-400 transition-colors inline-flex items-center gap-2 shrink-0 bg-[var(--background)]'
                 aria-label='Attach files'
                 disabled={status === 'sending'}
               >
@@ -969,7 +969,7 @@ export default function SiftliClient() {
                   placeholder='Type your message...'
                   className={cn(
                     'w-full min-h-[50px] resize-none overflow-hidden border rounded-xl px-4 py-3 pr-16',
-                    'bg-[var(--surface-raised)] text-rurikon-500 placeholder:text-rurikon-300',
+                    'bg-[var(--background)] text-rurikon-500 placeholder:text-rurikon-300',
                     'focus-visible:outline focus-visible:outline-rurikon-400 focus-visible:outline-dotted',
                     isOverLimit ? 'border-amber-400' : 'border-rurikon-border',
                   )}
