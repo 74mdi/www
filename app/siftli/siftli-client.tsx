@@ -1061,8 +1061,7 @@ export default function SiftliClient() {
           </div>
 
           <p className='text-center text-xs text-rurikon-300 px-2'>
-            Attach multiple files up to 50MB each. Paste files into the input.
-            Use Ctrl/Cmd+Enter to send.
+            koko sorry ela lglitch li tytra lhad lbar ta ndir wnqado ;/
           </p>
           {inputNotice ? (
             <p className='text-center text-xs text-amber-600'>{inputNotice}</p>
