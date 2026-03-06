@@ -876,7 +876,7 @@ export default function SiftliClient() {
         ) : null}
       </div>
 
-      <div className='fixed left-1/2 bottom-3 z-20 w-[min(820px,calc(100vw-1rem))] -translate-x-1/2 page-blur-in'>
+      <div className='fixed left-1/2 bottom-3 z-20 w-[min(820px,calc(100vw-1rem))] -translate-x-1/2'>
         <form
           onSubmit={handleSubmit}
           onDragEnter={(event) => {

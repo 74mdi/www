@@ -364,21 +364,6 @@ article {
   );
 }
 
-.page-blur-in {
-  opacity: 0;
-  filter: blur(4px);
-  animation: appear 0.55s ease 0.04s forwards;
-  will-change: opacity, filter;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .page-blur-in {
-    opacity: 1;
-    filter: none;
-    animation: none;
-  }
-}
-
 *::selection {
   background: var(--selection-background);
   color: var(--selection-text);
