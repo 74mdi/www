@@ -157,10 +157,28 @@ export function LastFmStatus() {
   const [coverLoadFailed, setCoverLoadFailed] = useState(false)
   const [statusText, setStatusText] = useState('Loading Last.fm status...')
   const [previewPosition, setPreviewPosition] = useState({ left: 0, top: 0 })
+  const [titleTransitionCount, setTitleTransitionCount] = useState(0)
   const signatureRef = useRef<string>('')
+  const titleSignatureRef = useRef<string>('')
   const coverButtonRef = useRef<HTMLButtonElement | null>(null)
   const coverPreviewRef = useRef<HTMLDivElement | null>(null)
   const isClient = typeof window !== 'undefined'
+
+  useEffect(() => {
+    if (!track) {
+      titleSignatureRef.current = ''
+      return
+    }
+
+    const nextTitleSignature = `${track.title}|${track.artist}`
+    if (
+      titleSignatureRef.current &&
+      titleSignatureRef.current !== nextTitleSignature
+    ) {
+      setTitleTransitionCount((count) => count + 1)
+    }
+    titleSignatureRef.current = nextTitleSignature
+  }, [track?.title, track?.artist])
 
   useEffect(() => {
     let isDisposed = false
@@ -307,6 +325,9 @@ export function LastFmStatus() {
   const showCover = Boolean(track?.coverUrl) && !coverLoadFailed
   const isNowPlaying = track?.isNowPlaying ?? false
   const statePrefix = isNowPlaying ? 'Listening to ' : 'Last listened to '
+  const titleKey = track
+    ? `${track.title}|${track.artist}|${titleTransitionCount}`
+    : 'no-track'
 
   return (
     <section className='mt-4'>
@@ -347,7 +368,10 @@ export function LastFmStatus() {
             aria-controls='lastfm-track-details'
           >
             <span className='mr-1'>{statePrefix}</span>
-            <strong className='font-semibold text-rurikon-700 [overflow-wrap:anywhere]'>
+            <strong
+              key={titleKey}
+              className={`font-semibold text-rurikon-700 [overflow-wrap:anywhere] ${titleTransitionCount > 0 ? 'music-title-morph' : ''}`}
+            >
               {track.title}
             </strong>
           </button>
