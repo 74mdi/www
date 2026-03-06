@@ -34,7 +34,7 @@ export function AboutAge({ initialNowMs }: AboutAgeProps) {
   }, [])
 
   const age = getAge(nowMs)
-  const exactAge = age.toFixed(9)
+  const exactAge = age.toFixed(12)
 
   return (
     <section className='mt-12'>
@@ -45,11 +45,7 @@ export function AboutAge({ initialNowMs }: AboutAgeProps) {
       </div>
 
       <p className='mt-5'>
-       ana حمدي, endi{' '}
-       <strong className='inline-block min-w-[12ch] tabular-nums text-right'>
-         {exactAge}
-       </strong>{' '}
-       عام.
+       ana حمدي, endi <strong>{exactAge}</strong> عام.
       </p>
       <p className='mt-3'>wsafi.</p>
     </section>
