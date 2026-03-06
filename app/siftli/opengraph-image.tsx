@@ -10,6 +10,6 @@ export const contentType = OG_CONTENT_TYPE
 export default function OpenGraphImage() {
   return createSimpleOgImage({
     title: 'SIFTLI',
-    description: 'salam ana 7amdi',
+    description: 'siftli msg wela aya haja ghir mn site :)',
   })
 }

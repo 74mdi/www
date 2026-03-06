@@ -675,12 +675,11 @@ export default function SiftliClient() {
       <h1 className='font-semibold mb-7 text-rurikon-600 text-balance'>SIFTLI</h1>
 
       <p className='text-rurikon-500'>
-        Send one message to Telegram and Discord with optional file uploads.
+        siftli msgs f discord wela telegram ghir mn hna w dw manqdx n3erfek chkon ;)
       </p>
 
       <p className='mt-2 text-rurikon-300 text-sm'>
-        Paste files directly in the input, use shortcuts, and retry only failed
-        channels.
+       stp matspamich rah endi ra simsong
       </p>
 
       <div className='mt-7 space-y-3'>
