@@ -1021,7 +1021,7 @@ export default function SiftliClient() {
                   }}
                   onPaste={onTextareaPaste}
                   onKeyDown={onTextareaKeyDown}
-                  placeholder='Type your message...'
+                  placeholder='kteb msg hna'
                   className={cn(
                     'w-full min-h-[50px] resize-none overflow-hidden border rounded-xl px-4 py-3 pr-16',
                     'bg-[var(--background)] text-rurikon-500 placeholder:text-rurikon-300',
