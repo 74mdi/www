@@ -8,12 +8,12 @@ export const metadata = {
   openGraph: {
     title: 'Thoughts',
     description: 'salam ana 7amdi',
-    images: ['/opengraph-image'],
+    images: ['/thoughts/opengraph-image'],
   },
   twitter: {
     title: 'Thoughts',
     description: 'salam ana 7amdi',
-    images: ['/opengraph-image'],
+    images: ['/thoughts/opengraph-image'],
   },
 }
 

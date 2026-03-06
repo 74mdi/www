@@ -8,12 +8,12 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'SIFTLI',
     description: 'salam ana 7amdi',
-    images: ['/opengraph-image'],
+    images: ['/siftli/opengraph-image'],
   },
   twitter: {
     title: 'SIFTLI',
     description: 'salam ana 7amdi',
-    images: ['/opengraph-image'],
+    images: ['/siftli/opengraph-image'],
   },
 }
 

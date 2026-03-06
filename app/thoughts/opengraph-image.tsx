@@ -9,7 +9,7 @@ export const contentType = OG_CONTENT_TYPE
 
 export default function OpenGraphImage() {
   return createSimpleOgImage({
-    title: '7amdi',
+    title: 'Thoughts',
     description: 'salam ana 7amdi',
   })
 }
