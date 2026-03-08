@@ -1,6 +1,8 @@
 'use client'
 
-import { useEffect, useState, useSyncExternalStore } from 'react'
+import { useEffect, useSyncExternalStore } from 'react'
+
+import { useHydrated } from '@/components/use-hydrated'
 
 type ThemeMode = 'light' | 'dark'
 
@@ -74,11 +76,7 @@ export default function ThemeModeToggle() {
     getThemeModeSnapshot,
     getThemeModeServerSnapshot,
   )
-  const [hasMounted, setHasMounted] = useState(false)
-
-  useEffect(() => {
-    setHasMounted(true)
-  }, [])
+  const hasHydrated = useHydrated()
 
   useEffect(() => {
     applyThemeMode(activeMode)
@@ -91,13 +89,13 @@ export default function ThemeModeToggle() {
     window.dispatchEvent(new Event(THEME_MODE_CHANGE_EVENT))
   }
 
-  const buttonLabel = hasMounted
+  const buttonLabel = hasHydrated
     ? activeMode === 'dark'
       ? 'Dark'
       : 'Light'
     : 'Theme'
 
-  const ariaLabel = hasMounted
+  const ariaLabel = hasHydrated
     ? `Switch to ${activeMode === 'dark' ? 'light' : 'dark'} mode`
     : 'Toggle theme mode'
 

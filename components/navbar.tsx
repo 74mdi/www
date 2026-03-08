@@ -3,25 +3,21 @@
 import cn from 'clsx'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
 
 import ThemeModeToggle from '@/components/theme-mode-toggle'
+import { useHydrated } from '@/components/use-hydrated'
 
 function Item(props: React.ComponentProps<typeof Link>) {
   const pathname = usePathname()
-  const [hasMounted, setHasMounted] = useState(false)
+  const hasHydrated = useHydrated()
   const href = props.href
 
   if (typeof href !== 'string') {
     throw new Error('`href` must be a string')
   }
 
-  useEffect(() => {
-    setHasMounted(true)
-  }, [])
-
   const isActive =
-    hasMounted && (pathname === href || pathname.startsWith(href + '/'))
+    hasHydrated && (pathname === href || pathname.startsWith(href + '/'))
 
   return (
     <li
