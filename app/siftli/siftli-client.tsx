@@ -181,12 +181,7 @@ export default function SiftliClient() {
   const [fileProgress, setFileProgress] = useState<Record<string, number>>({})
   const [dragSourceIndex, setDragSourceIndex] = useState<number | null>(null)
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
-  const [composerFrame, setComposerFrame] = useState<{
-    left: number
-    width: number
-  } | null>(null)
 
-  const sectionRef = useRef<HTMLElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const dragDepthRef = useRef(0)
@@ -205,44 +200,6 @@ export default function SiftliClient() {
   useEffect(() => {
     resizeTextarea(textareaRef.current)
   }, [message, resizeTextarea])
-
-  useEffect(() => {
-    const section = sectionRef.current
-    if (!section) return
-
-    const updateComposerFrame = () => {
-      const rect = section.getBoundingClientRect()
-      const next = {
-        left: Math.max(0, Math.round(rect.left)),
-        width: Math.max(0, Math.round(rect.width)),
-      }
-      setComposerFrame((previous) => {
-        if (
-          previous &&
-          previous.left === next.left &&
-          previous.width === next.width
-        ) {
-          return previous
-        }
-        return next
-      })
-    }
-
-    updateComposerFrame()
-    const resizeObserver = new ResizeObserver(updateComposerFrame)
-    resizeObserver.observe(section)
-
-    window.addEventListener('resize', updateComposerFrame)
-    window.addEventListener('orientationchange', updateComposerFrame)
-    window.addEventListener('scroll', updateComposerFrame, true)
-
-    return () => {
-      resizeObserver.disconnect()
-      window.removeEventListener('resize', updateComposerFrame)
-      window.removeEventListener('orientationchange', updateComposerFrame)
-      window.removeEventListener('scroll', updateComposerFrame, true)
-    }
-  }, [])
 
   const appendFiles = useCallback(
     (incomingFiles: File[]) => {
@@ -714,7 +671,7 @@ export default function SiftliClient() {
   }, [])
 
   return (
-    <section ref={sectionRef} className='relative min-h-[68vh] pb-52 sm:pb-56'>
+    <section className='relative min-h-[68vh] pb-52 sm:pb-56'>
       <h1 className='font-semibold mb-7 text-rurikon-600 text-balance'>SIFTLI</h1>
 
       <p className='text-rurikon-500'>
@@ -918,20 +875,7 @@ export default function SiftliClient() {
         ) : null}
       </div>
 
-      <div
-        className='fixed bottom-2 z-20 pointer-events-none'
-        style={
-          composerFrame
-            ? {
-                left: `${composerFrame.left}px`,
-                width: `${composerFrame.width}px`,
-              }
-            : {
-                left: '0px',
-                right: '0px',
-              }
-        }
-      >
+      <div className='fixed inset-x-0 bottom-0 z-20 pointer-events-none'>
         <form
           onSubmit={handleSubmit}
           onDragEnter={(event) => {
