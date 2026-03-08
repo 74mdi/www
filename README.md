@@ -23,3 +23,8 @@
   - `LASTFM_USERNAME` (defaults to `khrya`)
 
 Use `.env.example` as the template for local setup.
+
+## Vercel Analytics (Optional)
+
+- Set `NEXT_PUBLIC_ENABLE_VERCEL_ANALYTICS=1` to render the analytics script.
+- Keep it `0` (or unset) to disable analytics script injection.

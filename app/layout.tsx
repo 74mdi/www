@@ -21,10 +21,13 @@ const serif = localFont({
 })
 
 const mono = localFont({
-  src: './_fonts/IosevkaFixedCurly-ExtendedMedium.woff2',
+  src: './_fonts/IosevkaFixedCurly-Medium.woff2',
   preload: false,
   variable: '--mono',
 })
+
+const enableVercelAnalytics =
+  process.env.NEXT_PUBLIC_ENABLE_VERCEL_ANALYTICS === '1'
 
 function getSiteUrl(): string {
   const explicit = process.env.NEXT_PUBLIC_SITE_URL?.trim()
@@ -182,7 +185,7 @@ export default function RootLayout({
             </PageTransitionShell>
           </main>
         </div>
-        <Analytics />
+        {enableVercelAnalytics ? <Analytics /> : null}
       </body>
     </html>
   )
