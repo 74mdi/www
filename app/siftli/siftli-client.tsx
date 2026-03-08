@@ -742,7 +742,7 @@ export default function SiftliClient() {
             </div>
           </div>
 
-          <div className='grid grid-cols-[auto_minmax(0,1fr)_auto] items-end gap-2'>
+          <div className='grid grid-cols-[50px_minmax(0,1fr)_50px] sm:grid-cols-[auto_minmax(0,1fr)_50px] items-center gap-2'>
             <button
               type='button'
               onClick={() => fileInputRef.current?.click()}
@@ -784,15 +784,15 @@ export default function SiftliClient() {
               </span>
             </div>
 
-            <button
-              type='submit'
-              disabled={!canSubmit}
-              className={cn(
-                'h-[50px] w-[50px] border rounded-full transition-colors shrink-0 self-end inline-flex items-center justify-center',
-                canSubmit
-                  ? 'border-black bg-black text-white hover:bg-neutral-800'
-                  : 'border-rurikon-border bg-rurikon-100 text-rurikon-300 cursor-not-allowed',
-              )}
+              <button
+                type='submit'
+                disabled={!canSubmit}
+                className={cn(
+                  'h-[50px] w-[50px] border rounded-full transition-colors shrink-0 inline-flex items-center justify-center',
+                  canSubmit
+                    ? 'border-black bg-black text-white hover:bg-neutral-800'
+                    : 'border-rurikon-border bg-rurikon-100 text-rurikon-300 cursor-not-allowed',
+                )}
               aria-label='Send'
             >
               {status === 'sending' ? (
