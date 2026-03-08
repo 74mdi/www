@@ -11,6 +11,7 @@ import {
   type FormEvent,
   type KeyboardEvent,
 } from 'react'
+import { createPortal } from 'react-dom'
 import cn from 'clsx'
 import {
   ArrowPathIcon,
@@ -22,6 +23,8 @@ import {
   PaperClipIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline'
+
+import { useHydrated } from '@/components/use-hydrated'
 
 type Status = 'idle' | 'sending' | 'success' | 'error' | 'partial'
 type UploadPhase = 'preparing' | 'uploading' | 'processing' | 'complete'
@@ -164,6 +167,7 @@ function hasFileTransfer(event: DragEvent<HTMLElement>): boolean {
 }
 
 export default function SiftliClient() {
+  const hasHydrated = useHydrated()
   const [message, setMessage] = useState('')
   const [files, setFiles] = useState<File[]>([])
   const [status, setStatus] = useState<Status>('idle')
@@ -670,6 +674,146 @@ export default function SiftliClient() {
     setDragOverIndex(null)
   }, [])
 
+  const composer = (
+    <div className='fixed inset-x-0 bottom-0 z-40 pointer-events-none'>
+      <form
+        onSubmit={handleSubmit}
+        onDragEnter={(event) => {
+          if (!hasFileTransfer(event)) return
+          event.preventDefault()
+          dragDepthRef.current += 1
+          setIsDragging(true)
+        }}
+        onDragOver={(event) => {
+          if (!hasFileTransfer(event)) return
+          event.preventDefault()
+          event.dataTransfer.dropEffect = 'copy'
+          setIsDragging(true)
+        }}
+        onDragLeave={() => {
+          dragDepthRef.current = Math.max(0, dragDepthRef.current - 1)
+          if (dragDepthRef.current === 0) {
+            setIsDragging(false)
+          }
+        }}
+        onDrop={(event) => {
+          if (!hasFileTransfer(event)) return
+          event.preventDefault()
+          dragDepthRef.current = 0
+          setIsDragging(false)
+          addFilesFromInput(event.dataTransfer.files)
+        }}
+        className={cn(
+          'pointer-events-auto mx-auto w-full max-w-[820px] space-y-2 px-1 py-1 sm:px-2',
+          'pb-[max(env(safe-area-inset-bottom),0.75rem)]',
+          'bg-[var(--background)]',
+          isDragging && 'rounded-xl outline outline-1 outline-rurikon-400',
+        )}
+      >
+        <input
+          ref={fileInputRef}
+          type='file'
+          multiple
+          className='hidden'
+          onChange={(event) => addFilesFromInput(event.target.files)}
+        />
+
+        <div>
+          <div className='mb-2 flex items-center justify-between gap-2'>
+            <span className='text-xs text-rurikon-300'>Channel</span>
+            <div className='inline-flex border border-rurikon-border rounded-xl overflow-hidden'>
+              {CHANNEL_OPTIONS.map((option) => (
+                <button
+                  key={option.value}
+                  type='button'
+                  disabled={status === 'sending'}
+                  onClick={() => setChannelMode(option.value)}
+                  className={cn(
+                    'px-2.5 py-1 text-xs transition-colors',
+                    channelMode === option.value
+                      ? 'bg-[var(--accent-solid)] text-[var(--accent-solid-text)]'
+                      : 'bg-[var(--background)] text-rurikon-400 hover:text-rurikon-700',
+                    status === 'sending' && 'opacity-60 cursor-not-allowed',
+                  )}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className='grid grid-cols-[auto_minmax(0,1fr)_auto] items-end gap-2'>
+            <button
+              type='button'
+              onClick={() => fileInputRef.current?.click()}
+              className='h-[50px] w-[50px] sm:w-auto sm:px-4 border border-rurikon-border rounded-xl text-rurikon-400 hover:text-rurikon-700 hover:border-rurikon-400 transition-colors inline-flex items-center justify-center sm:justify-start gap-2 shrink-0 bg-[var(--background)]'
+              aria-label='Attach files'
+              disabled={status === 'sending'}
+            >
+              <PaperClipIcon className='h-4 w-4' />
+              <span className='hidden sm:inline'>Attach</span>
+            </button>
+
+            <div className='relative min-w-0 flex-1'>
+              <textarea
+                ref={textareaRef}
+                rows={1}
+                value={message}
+                onChange={(event) => {
+                  setMessage(event.target.value)
+                  resizeTextarea(event.target)
+                }}
+                onPaste={onTextareaPaste}
+                onKeyDown={onTextareaKeyDown}
+                placeholder='kteb msg hna'
+                className={cn(
+                  'w-full min-h-[50px] resize-none overflow-hidden border rounded-xl px-4 py-3 pr-16',
+                  'bg-[var(--background)] text-rurikon-500 placeholder:text-rurikon-300',
+                  'focus-visible:outline focus-visible:outline-rurikon-400 focus-visible:outline-dotted',
+                  isOverLimit ? 'border-amber-400' : 'border-rurikon-border',
+                )}
+                disabled={status === 'sending'}
+              />
+              <span
+                className={cn(
+                  'absolute bottom-1.5 right-2 text-[11px]',
+                  isOverLimit ? 'text-amber-600' : 'text-rurikon-300',
+                )}
+              >
+                {message.length.toLocaleString()}
+              </span>
+            </div>
+
+            <button
+              type='submit'
+              disabled={!canSubmit}
+              className={cn(
+                'h-[50px] w-[50px] border rounded-full transition-colors shrink-0 self-end inline-flex items-center justify-center',
+                canSubmit
+                  ? 'border-black bg-black text-white hover:bg-neutral-800'
+                  : 'border-rurikon-border bg-rurikon-100 text-rurikon-300 cursor-not-allowed',
+              )}
+              aria-label='Send'
+            >
+              {status === 'sending' ? (
+                <ArrowPathIcon className='h-5 w-5 animate-spin' />
+              ) : (
+                <PaperAirplaneIcon className='h-5 w-5' />
+              )}
+            </button>
+          </div>
+        </div>
+
+        <p className='text-center text-xs text-rurikon-300 px-2'>
+          koko sorry ela lglitch li tytra lhad lbar ta ndir wnqado ;/
+        </p>
+        {inputNotice ? (
+          <p className='text-center text-xs text-amber-600'>{inputNotice}</p>
+        ) : null}
+      </form>
+    </div>
+  )
+
   return (
     <section className='relative min-h-[68vh] pb-52 sm:pb-56'>
       <h1 className='font-semibold mb-7 text-rurikon-600 text-balance'>SIFTLI</h1>
@@ -875,143 +1019,7 @@ export default function SiftliClient() {
         ) : null}
       </div>
 
-      <div className='fixed inset-x-0 bottom-0 z-20 pointer-events-none'>
-        <form
-          onSubmit={handleSubmit}
-          onDragEnter={(event) => {
-            if (!hasFileTransfer(event)) return
-            event.preventDefault()
-            dragDepthRef.current += 1
-            setIsDragging(true)
-          }}
-          onDragOver={(event) => {
-            if (!hasFileTransfer(event)) return
-            event.preventDefault()
-            event.dataTransfer.dropEffect = 'copy'
-            setIsDragging(true)
-          }}
-          onDragLeave={() => {
-            dragDepthRef.current = Math.max(0, dragDepthRef.current - 1)
-            if (dragDepthRef.current === 0) {
-              setIsDragging(false)
-            }
-          }}
-          onDrop={(event) => {
-            if (!hasFileTransfer(event)) return
-            event.preventDefault()
-            dragDepthRef.current = 0
-            setIsDragging(false)
-            addFilesFromInput(event.dataTransfer.files)
-          }}
-          className={cn(
-            'pointer-events-auto mx-auto w-full max-w-[820px] space-y-2 px-1 py-1 sm:px-2',
-            'pb-[max(env(safe-area-inset-bottom),0.75rem)]',
-            'bg-[var(--background)]',
-            isDragging && 'rounded-xl outline outline-1 outline-rurikon-400',
-          )}
-        >
-          <input
-            ref={fileInputRef}
-            type='file'
-            multiple
-            className='hidden'
-            onChange={(event) => addFilesFromInput(event.target.files)}
-          />
-
-          <div>
-            <div className='mb-2 flex items-center justify-between gap-2'>
-              <span className='text-xs text-rurikon-300'>Channel</span>
-              <div className='inline-flex border border-rurikon-border rounded-xl overflow-hidden'>
-                {CHANNEL_OPTIONS.map((option) => (
-                  <button
-                    key={option.value}
-                    type='button'
-                    disabled={status === 'sending'}
-                    onClick={() => setChannelMode(option.value)}
-                    className={cn(
-                      'px-2.5 py-1 text-xs transition-colors',
-                      channelMode === option.value
-                        ? 'bg-[var(--accent-solid)] text-[var(--accent-solid-text)]'
-                        : 'bg-[var(--background)] text-rurikon-400 hover:text-rurikon-700',
-                      status === 'sending' && 'opacity-60 cursor-not-allowed',
-                    )}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className='grid grid-cols-[auto_minmax(0,1fr)_auto] items-end gap-2'>
-              <button
-                type='button'
-                onClick={() => fileInputRef.current?.click()}
-                className='h-[50px] w-[50px] sm:w-auto sm:px-4 border border-rurikon-border rounded-xl text-rurikon-400 hover:text-rurikon-700 hover:border-rurikon-400 transition-colors inline-flex items-center justify-center sm:justify-start gap-2 shrink-0 bg-[var(--background)]'
-                aria-label='Attach files'
-                disabled={status === 'sending'}
-              >
-                <PaperClipIcon className='h-4 w-4' />
-                <span className='hidden sm:inline'>Attach</span>
-              </button>
-
-              <div className='relative min-w-0 flex-1'>
-                <textarea
-                  ref={textareaRef}
-                  rows={1}
-                  value={message}
-                  onChange={(event) => {
-                    setMessage(event.target.value)
-                    resizeTextarea(event.target)
-                  }}
-                  onPaste={onTextareaPaste}
-                  onKeyDown={onTextareaKeyDown}
-                  placeholder='kteb msg hna'
-                  className={cn(
-                    'w-full min-h-[50px] resize-none overflow-hidden border rounded-xl px-4 py-3 pr-16',
-                    'bg-[var(--background)] text-rurikon-500 placeholder:text-rurikon-300',
-                    'focus-visible:outline focus-visible:outline-rurikon-400 focus-visible:outline-dotted',
-                    isOverLimit ? 'border-amber-400' : 'border-rurikon-border',
-                  )}
-                  disabled={status === 'sending'}
-                />
-                <span
-                  className={cn(
-                    'absolute bottom-1.5 right-2 text-[11px]',
-                    isOverLimit ? 'text-amber-600' : 'text-rurikon-300',
-                  )}
-                >
-                  {message.length.toLocaleString()}
-                </span>
-              </div>
-
-              <button
-                type='submit'
-                disabled={!canSubmit}
-                className={cn(
-                  'h-[50px] w-[50px] border rounded-full transition-colors shrink-0 self-end inline-flex items-center justify-center',
-                  canSubmit
-                    ? 'border-black bg-black text-white hover:bg-neutral-800'
-                    : 'border-rurikon-border bg-rurikon-100 text-rurikon-300 cursor-not-allowed',
-                )}
-                aria-label='Send'
-              >
-                {status === 'sending' ? (
-                  <ArrowPathIcon className='h-5 w-5 animate-spin' />
-                ) : (
-                  <PaperAirplaneIcon className='h-5 w-5' />
-                )}
-              </button>
-            </div>
-          </div>
-
-          <p className='text-center text-xs text-rurikon-300 px-2'>
-            koko sorry ela lglitch li tytra lhad lbar ta ndir wnqado ;/
-          </p>
-          {inputNotice ? (
-            <p className='text-center text-xs text-amber-600'>{inputNotice}</p>
-          ) : null}
-        </form>
-      </div>
+      {hasHydrated ? createPortal(composer, document.body) : composer}
     </section>
   )
 }
