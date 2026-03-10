@@ -39,9 +39,10 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
 
   return (
     <>
-      <ul className='grid gap-5 sm:grid-cols-2 lg:grid-cols-3'>
+      {/* Pinterest-style masonry using CSS columns */}
+      <div className='columns-1 gap-4 sm:columns-2 lg:columns-3'>
         {visibleImages.map((image, index) => (
-          <li key={image.src}>
+          <div key={image.src} className='mb-4 break-inside-avoid'>
             <button
               type='button'
               onClick={() => setActiveIndex(index)}
@@ -49,7 +50,7 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
               aria-haspopup='dialog'
               aria-expanded={activeIndex === index}
             >
-              <div className='relative overflow-hidden rounded-2xl transition-[transform,box-shadow] duration-500 group-hover:-translate-y-1 group-hover:rotate-[-0.4deg] group-hover:shadow-[0_22px_44px_rgba(0,0,0,0.2)]'>
+              <div className='relative overflow-hidden rounded-2xl transition-[transform,box-shadow] duration-500 group-hover:-translate-y-1 group-hover:shadow-[0_22px_44px_rgba(0,0,0,0.22)]'>
                 <Image
                   src={image.src}
                   alt={image.title}
@@ -62,11 +63,18 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
                   blurDataURL={image.blurDataURL}
                   className='h-auto w-full rounded-2xl transition-transform duration-700 ease-[cubic-bezier(0.16,0.84,0.22,1)] group-hover:scale-[1.03]'
                 />
+                {/* subtle dark gradient at bottom for title legibility */}
+                <div className='pointer-events-none absolute inset-x-0 bottom-0 h-16 rounded-b-2xl bg-gradient-to-t from-black/40 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100' />
+                {image.title ? (
+                  <span className='pointer-events-none absolute inset-x-0 bottom-0 px-3 pb-2.5 text-[11px] font-medium text-white/90 opacity-0 transition-opacity duration-300 group-hover:opacity-100 drop-shadow-sm'>
+                    {image.title}
+                  </span>
+                ) : null}
               </div>
             </button>
-          </li>
+          </div>
         ))}
-      </ul>
+      </div>
 
       {visibleCount < images.length ? (
         <div className='flex justify-center pt-4'>
