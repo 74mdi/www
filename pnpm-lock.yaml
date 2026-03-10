@@ -41,18 +41,21 @@ dependencies:
   clsx:
     specifier: ^2.1.0
     version: 2.1.1
-  exif-reader:
-    specifier: ^2.0.1
-    version: 2.0.3
   codice:
     specifier: ^1.5.5
     version: 1.5.5(react@0.0.0-experimental-408b38ef-20251023)
+  exif-reader:
+    specifier: ^2.0.1
+    version: 2.0.3
   katex:
     specifier: ^0.16.11
     version: 0.16.25
   next:
     specifier: 16.1.1-canary.6
     version: 16.1.1-canary.6(@babel/core@7.29.0)(react-dom@0.0.0-experimental-408b38ef-20251023)(react@0.0.0-experimental-408b38ef-20251023)
+  plaiceholder:
+    specifier: ^3.0.0
+    version: 3.0.0(sharp@0.33.5)
   prop-types:
     specifier: ^15.8.1
     version: 15.8.1
@@ -4394,6 +4397,14 @@ packages:
     resolution: {integrity: sha512-5gTmgEY/sqK6gFXLIsQNH19lWb4ebPDLA4SdLP7dsWkIXHWlG66oPuVvXSGFPppYZz8ZDZq0dYYrbHfBCVUb1Q==}
     engines: {node: '>=12'}
     dev: true
+
+  /plaiceholder@3.0.0(sharp@0.33.5):
+    resolution: {integrity: sha512-jwHxxHPnr1BwRzPCeZgEK2BMsEy2327sWynw3qb6XC/oGgGDUTPtR8pFxFQmNArhMBwhkUbUr5OPhhIJpCa8eQ==}
+    peerDependencies:
+      sharp: '>= 0.30.6'
+    dependencies:
+      sharp: 0.33.5
+    dev: false
 
   /possible-typed-array-names@1.1.0:
     resolution: {integrity: sha512-/+5VFTchJDoVj3bhoqi6UeymcD00DAwb1nJwamzPvHEszJ4FpF6SNNbUbOS8yI56qHzdV8eK0qEfOSiodkTdxg==}

@@ -3,6 +3,7 @@ import path from 'node:path'
 
 import sharp, { type Metadata } from 'sharp'
 import exifReader from 'exif-reader'
+import { getPlaiceholder } from 'plaiceholder'
 import { cache } from 'react'
 
 type ExifRational =
@@ -23,6 +24,7 @@ export type GalleryImage = {
   filename: string
   width: number
   height: number
+  blurDataURL: string | undefined
   date: Date | undefined
   camera: string | undefined
   lens: string | undefined
@@ -159,8 +161,11 @@ export const getGalleryImages = cache(async (): Promise<GalleryImage[]> => {
     files.map(async (filename) => {
       const filePath = path.join(GALLERY_DIR, filename)
       let metadata: Metadata
+      let blurDataURL: string | undefined
+      let buffer: Buffer
       try {
-        metadata = await sharp(filePath).metadata()
+        buffer = await fs.readFile(filePath)
+        metadata = await sharp(buffer).metadata()
       } catch {
         return null
       }
@@ -176,6 +181,13 @@ export const getGalleryImages = cache(async (): Promise<GalleryImage[]> => {
         } catch {
           exifData = undefined
         }
+      }
+
+      try {
+        const { base64 } = await getPlaiceholder(buffer, { size: 12 })
+        blurDataURL = base64
+      } catch {
+        blurDataURL = undefined
       }
 
       const imageTags = exifData?.image ?? {}
@@ -195,6 +207,7 @@ export const getGalleryImages = cache(async (): Promise<GalleryImage[]> => {
         filename,
         width,
         height,
+        blurDataURL,
         date,
         camera,
         lens,
