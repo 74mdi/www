@@ -179,7 +179,7 @@ export default function RootLayout({
         <div className='flex flex-col mobile:flex-row'>
           <Navbar />
           <main className='relative flex-1 max-w-2xl [contain:inline-size]'>
-            <div className='absolute w-full h-px opacity-50 bg-rurikon-border right-0 mobile:right-auto mobile:left-0 mobile:w-px mobile:h-full mobile:opacity-100 mix-blend-multiply dark:mix-blend-screen mobile:bg-[var(--color-rurikon-border-strong)]' />
+            <div className='absolute w-full h-px opacity-60 bg-[var(--color-rurikon-border-strong)] right-0 mobile:right-auto mobile:left-0 mobile:w-px mobile:h-full mobile:opacity-100' />
             <PageTransitionShell className='pl-0 pt-6 mobile:pt-0 mobile:pl-6 sm:pl-10 md:pl-14'>
               {children}
             </PageTransitionShell>
