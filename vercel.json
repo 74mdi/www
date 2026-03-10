@@ -1,0 +1,3 @@
+{
+  "buildCommand": "pnpm run gallery:manifest && pnpm run build"
+}
