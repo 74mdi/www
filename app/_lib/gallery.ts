@@ -155,7 +155,7 @@ export const getGalleryImages = cache(async (): Promise<GalleryImage[]> => {
     .filter((entry) => entry.isFile() && isImageFile(entry.name))
     .map((entry) => entry.name)
 
-  const images = await Promise.all(
+  const images: Array<GalleryImage | null> = await Promise.all(
     files.map(async (filename) => {
       const filePath = path.join(GALLERY_DIR, filename)
       let metadata: Metadata
