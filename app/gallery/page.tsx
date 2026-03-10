@@ -47,7 +47,6 @@ export default async function GalleryPage() {
     blurDataURL: image.blurDataURL,
     title: humanizeFilename(image.filename),
     dateText: formatDate(image.date),
-    camera: image.camera,
   }))
 
   return (
@@ -66,7 +65,7 @@ export default async function GalleryPage() {
         </div>
         <p className='text-sm text-rurikon-500'>
           drop images into <code>public/gallery</code> and click a frame to see
-          the capture date and device.
+          the capture date.
         </p>
       </header>
 

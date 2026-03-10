@@ -19,7 +19,6 @@ export type GalleryImage = {
   height: number
   blurDataURL: string | undefined
   date: Date | undefined
-  camera: string | undefined
 }
 
 const GALLERY_DIR = path.join(process.cwd(), 'public', 'gallery')
@@ -45,13 +44,6 @@ function parseExifDate(value: unknown): Date | undefined {
   const parsed = new Date(normalized)
   if (Number.isNaN(parsed.getTime())) return undefined
   return parsed
-}
-
-function formatCamera(make: unknown, model: unknown): string | undefined {
-  const pieces = [make, model]
-    .map((item) => (typeof item === 'string' ? item.trim() : ''))
-    .filter(Boolean)
-  return pieces.length ? pieces.join(' ') : undefined
 }
 
 export const getGalleryImages = cache(async (): Promise<GalleryImage[]> => {
@@ -106,8 +98,6 @@ export const getGalleryImages = cache(async (): Promise<GalleryImage[]> => {
         parseExifDate(exifTags.CreateDate) ??
         parseExifDate(imageTags.DateTime)
 
-      const camera = formatCamera(imageTags.Make, imageTags.Model)
-
       return {
         src: `/gallery/${filename}`,
         filename,
@@ -115,7 +105,6 @@ export const getGalleryImages = cache(async (): Promise<GalleryImage[]> => {
         height,
         blurDataURL,
         date,
-        camera,
       } satisfies GalleryImage
     }),
   )

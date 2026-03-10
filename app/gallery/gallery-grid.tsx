@@ -11,7 +11,6 @@ type GalleryGridImage = {
   blurDataURL?: string
   title: string
   dateText?: string
-  camera?: string
 }
 
 type GalleryGridProps = {
@@ -45,7 +44,7 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
               aria-haspopup='dialog'
               aria-expanded={activeIndex === index}
             >
-              <div className='relative overflow-hidden rounded-xl border border-rurikon-border bg-[var(--frame-background)] p-2 sm:p-3 transition-[transform,box-shadow] duration-500 group-hover:-translate-y-1 group-hover:shadow-[0_16px_30px_rgba(0,0,0,0.14)]'>
+              <div className='relative overflow-hidden rounded-2xl bg-[var(--surface-soft)] transition-[transform,box-shadow] duration-500 group-hover:-translate-y-1 group-hover:shadow-[0_16px_30px_rgba(0,0,0,0.14)]'>
                 <Image
                   src={image.src}
                   alt={image.title}
@@ -86,34 +85,39 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
         />
         <div
           className={cn(
-            'relative z-10 w-[min(90vw,22rem)] rounded-2xl border border-rurikon-border bg-[var(--surface-overlay)] px-5 py-4 text-sm text-rurikon-600 shadow-[0_14px_35px_rgba(0,0,0,0.2)] transition-[opacity,transform,filter] duration-300',
+            'relative z-10 w-[min(92vw,46rem)] rounded-3xl border border-rurikon-border bg-[var(--surface-overlay)] p-4 shadow-[0_14px_35px_rgba(0,0,0,0.2)] transition-[opacity,transform,filter] duration-300 sm:p-5',
             activeImage
               ? 'opacity-100 translate-y-0 blur-0'
               : 'opacity-0 translate-y-2 blur-sm',
           )}
         >
-          {activeImage?.dateText || activeImage?.camera ? (
-            <dl className='space-y-3'>
-              {activeImage?.dateText ? (
-                <div className='flex items-baseline justify-between gap-4'>
-                  <dt className='text-xs text-rurikon-400'>date</dt>
-                  <dd className='text-right text-sm text-rurikon-600'>
-                    {activeImage.dateText}
-                  </dd>
-                </div>
+          {activeImage ? (
+            <div className='space-y-4'>
+              <div className='overflow-hidden rounded-2xl bg-[var(--surface-soft)]'>
+                <Image
+                  src={activeImage.src}
+                  alt={activeImage.title}
+                  width={activeImage.width}
+                  height={activeImage.height}
+                  sizes='(min-width: 640px) 70vw, 92vw'
+                  quality={90}
+                  placeholder={activeImage.blurDataURL ? 'blur' : 'empty'}
+                  blurDataURL={activeImage.blurDataURL}
+                  className='h-auto w-full'
+                />
+              </div>
+              {activeImage.dateText ? (
+                <dl className='space-y-1 text-sm text-rurikon-600'>
+                  <div className='flex items-baseline justify-between gap-4'>
+                    <dt className='text-xs text-rurikon-400'>date</dt>
+                    <dd className='text-right text-sm text-rurikon-600'>
+                      {activeImage.dateText}
+                    </dd>
+                  </div>
+                </dl>
               ) : null}
-              {activeImage?.camera ? (
-                <div className='flex items-baseline justify-between gap-4'>
-                  <dt className='text-xs text-rurikon-400'>device</dt>
-                  <dd className='text-right text-sm text-rurikon-600'>
-                    {activeImage.camera}
-                  </dd>
-                </div>
-              ) : null}
-            </dl>
-          ) : (
-            <div className='text-sm text-rurikon-500'>no metadata found</div>
-          )}
+            </div>
+          ) : null}
         </div>
       </div>
     </>
