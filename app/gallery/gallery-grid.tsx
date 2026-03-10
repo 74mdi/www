@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
-import cn from 'clsx'
 
 type GalleryGridImage = {
   src: string
@@ -56,17 +55,13 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
                   alt={image.title}
                   width={image.width}
                   height={image.height}
-                  sizes='(min-width: 640px) 50vw, 100vw'
-                  quality={70}
-                  priority={index < 2}
+                  sizes='(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw'
+                  quality={60}
+                  priority={index < 3}
                   placeholder={image.blurDataURL ? 'blur' : 'empty'}
                   blurDataURL={image.blurDataURL}
                   className='h-auto w-full rounded-2xl transition-transform duration-700 ease-[cubic-bezier(0.16,0.84,0.22,1)] group-hover:scale-[1.03]'
                 />
-                <div className='pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100'>
-                  <div className='absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,_rgba(255,255,255,0.55),_transparent_55%)] mix-blend-soft-light' />
-                  <div className='absolute inset-0 bg-[linear-gradient(120deg,_rgba(255,255,255,0.2),_transparent_40%,_transparent_60%,_rgba(255,255,255,0.18))] mix-blend-soft-light' />
-                </div>
               </div>
             </button>
           </li>
@@ -95,10 +90,9 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
           role='dialog'
           aria-modal='true'
         >
-          <button
-            type='button'
-            aria-label='Close details'
-            className='absolute inset-0 bg-[rgb(var(--background-rgb)/0.55)] sm:backdrop-blur-md'
+          <div
+            className='absolute inset-0 bg-[rgb(var(--background-rgb)/0.55)] [will-change:backdrop-filter] sm:[backdrop-filter:blur(12px)]'
+            aria-hidden='true'
             onClick={() => setActiveIndex(null)}
           />
           <div className='relative z-10 flex w-full flex-col items-center'>
