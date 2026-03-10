@@ -63,13 +63,10 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
                   blurDataURL={image.blurDataURL}
                   className='h-auto w-full rounded-2xl transition-transform duration-700 ease-[cubic-bezier(0.16,0.84,0.22,1)] group-hover:scale-[1.03]'
                 />
-                {/* subtle dark gradient at bottom for title legibility */}
-                <div className='pointer-events-none absolute inset-x-0 bottom-0 h-16 rounded-b-2xl bg-gradient-to-t from-black/40 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100' />
-                {image.title ? (
-                  <span className='pointer-events-none absolute inset-x-0 bottom-0 px-3 pb-2.5 text-[11px] font-medium text-white/90 opacity-0 transition-opacity duration-300 group-hover:opacity-100 drop-shadow-sm'>
-                    {image.title}
-                  </span>
-                ) : null}
+                <div className='pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100'>
+                  <div className='absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,_rgba(255,255,255,0.55),_transparent_55%)] mix-blend-soft-light' />
+                  <div className='absolute inset-0 bg-[linear-gradient(120deg,_rgba(255,255,255,0.2),_transparent_40%,_transparent_60%,_rgba(255,255,255,0.18))] mix-blend-soft-light' />
+                </div>
               </div>
             </button>
           </div>

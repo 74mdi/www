@@ -81,6 +81,7 @@
   --accent-solid: #000000;
   --accent-solid-hover: #171717;
   --accent-solid-text: #fff;
+  --color-rurikon-border-strong: #0000004d;
   --theme-shiki-token-comment: hsl(0deg 0% 45%);
   --theme-shiki-token-punctuation: hsl(0deg 0% 38%);
   --theme-shiki-token-keyword: hsl(0deg 0% 20%);
@@ -117,6 +118,7 @@
   --color-rurikon-800: #f8f8f8;
   --color-rurikon-900: #ffffff;
   --color-rurikon-border: #ffffff38;
+  --color-rurikon-border-strong: #ffffff66;
   --selection-background: #ffffff2b;
   --selection-text: #ffffff;
   --surface-raised: #0a0a0af0;
