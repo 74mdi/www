@@ -64,8 +64,7 @@ export default async function GalleryPage() {
           <div className='text-xs text-rurikon-400'>{countLabel}</div>
         </div>
         <p className='text-sm text-rurikon-500'>
-          drop images into <code>public/gallery</code> and click a frame to see
-          the capture date.
+          salam hna kanhet aya haja wsf ;0
         </p>
       </header>
 
