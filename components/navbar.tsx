@@ -51,6 +51,7 @@ export default function Navbar() {
         <ThemeModeToggle />
         <ul className='lowercase text-right flex items-center gap-2 justify-end'>
           <Item href='/'>Home</Item>
+          <Item href='/gallery'>Gallery</Item>
           <Item href='/thoughts'>Thoughts</Item>
           <Item href='/siftli'>SIFTLI</Item>
           {/* <Item href='/guestbook'>Guestbook</Item> */}
@@ -59,6 +60,7 @@ export default function Navbar() {
 
       <ul className='lowercase text-right hidden mobile:block'>
         <Item href='/'>Home</Item>
+        <Item href='/gallery'>Gallery</Item>
         <Item href='/thoughts'>Thoughts</Item>
         <Item href='/siftli'>SIFTLI</Item>
         {/* <Item href='/guestbook'>Guestbook</Item> */}

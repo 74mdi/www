@@ -36,6 +36,7 @@
     "@vercel/analytics": "^1.5.0",
     "@vercel/og": "^0.8.6",
     "clsx": "^2.1.0",
+    "exif-reader": "^2.0.1",
     "codice": "^1.5.5",
     "katex": "^0.16.11",
     "next": "16.1.1-canary.6",
