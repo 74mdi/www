@@ -17,9 +17,15 @@ type GalleryGridProps = {
   images: GalleryGridImage[]
 }
 
+const PAGE_SIZE = 12
+
 export default function GalleryGrid({ images }: GalleryGridProps) {
+  const [visibleCount, setVisibleCount] = useState(
+    Math.min(PAGE_SIZE, images.length),
+  )
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
-  const activeImage = activeIndex !== null ? images[activeIndex] : null
+  const visibleImages = images.slice(0, visibleCount)
+  const activeImage = activeIndex !== null ? visibleImages[activeIndex] : null
 
   useEffect(() => {
     if (!activeImage) return
@@ -35,7 +41,7 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
   return (
     <>
       <ul className='grid gap-5 sm:grid-cols-2 lg:grid-cols-3'>
-        {images.map((image, index) => (
+        {visibleImages.map((image, index) => (
           <li key={image.src}>
             <button
               type='button'
@@ -51,7 +57,7 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
                   width={image.width}
                   height={image.height}
                   sizes='(min-width: 640px) 50vw, 100vw'
-                  quality={82}
+                  quality={70}
                   priority={index < 2}
                   placeholder={image.blurDataURL ? 'blur' : 'empty'}
                   blurDataURL={image.blurDataURL}
@@ -67,6 +73,22 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
         ))}
       </ul>
 
+      {visibleCount < images.length ? (
+        <div className='flex justify-center pt-4'>
+          <button
+            type='button'
+            onClick={() =>
+              setVisibleCount((count) =>
+                Math.min(count + PAGE_SIZE, images.length),
+              )
+            }
+            className='rounded-full border border-rurikon-border bg-[var(--surface-overlay)] px-4 py-2 text-xs text-rurikon-600 transition-colors hover:text-rurikon-700'
+          >
+            load more
+          </button>
+        </div>
+      ) : null}
+
       {activeImage ? (
         <div
           className='fixed inset-0 z-40 flex items-center justify-center px-4 py-6 sm:px-8 sm:py-10'
@@ -76,7 +98,7 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
           <button
             type='button'
             aria-label='Close details'
-            className='absolute inset-0 bg-[rgb(var(--background-rgb)/0.35)] backdrop-blur-md'
+            className='absolute inset-0 bg-[rgb(var(--background-rgb)/0.55)] sm:backdrop-blur-md'
             onClick={() => setActiveIndex(null)}
           />
           <div className='relative z-10 flex w-full flex-col items-center'>
@@ -90,6 +112,7 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
               placeholder={activeImage.blurDataURL ? 'blur' : 'empty'}
               blurDataURL={activeImage.blurDataURL}
               className='max-h-[82vh] w-auto max-w-full rounded-3xl object-contain shadow-[0_18px_40px_rgba(0,0,0,0.28)]'
+              onClick={() => setActiveIndex(null)}
             />
             {activeImage.dateText ? (
               <div className='mt-4 text-xs text-rurikon-400'>
@@ -97,6 +120,14 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
               </div>
             ) : null}
           </div>
+          <button
+            type='button'
+            aria-label='Close image'
+            onClick={() => setActiveIndex(null)}
+            className='absolute right-5 top-5 z-20 rounded-full border border-rurikon-border bg-[var(--surface-overlay)] px-3 py-1 text-xs text-rurikon-600 transition-colors hover:text-rurikon-800'
+          >
+            close
+          </button>
         </div>
       ) : null}
     </>

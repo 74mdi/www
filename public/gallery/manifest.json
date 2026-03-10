@@ -1,0 +1,49 @@
+{
+  "generatedAt": "2026-03-10T20:16:03.381Z",
+  "blurLimit": 24,
+  "blurSize": 6,
+  "images": [
+    {
+      "src": "/gallery/08032026539.jpg",
+      "filename": "08032026539.jpg",
+      "width": 2592,
+      "height": 1944,
+      "blurDataURL": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAYAAAAFCAIAAADpOgqxAAAACXBIWXMAAC4jAAAuIwF4pT92AAAAaklEQVR4nAFfAKD/AAAIPgAYTwAiXAAuawA9dwBAdwAic6Uzhb1Ck85ZpeN0uPCAwPYAX4SLcZefhq25r9Hd4f7/5/noAG1lRIp9V66bcMmzgtjEi9TAfgBGPR5dUDJeTzB+bUiTgVaynW1k4CvTpj0vkAAAAABJRU5ErkJggg=="
+    },
+    {
+      "src": "/gallery/08032026544.jpg",
+      "filename": "08032026544.jpg",
+      "width": 2592,
+      "height": 1944,
+      "blurDataURL": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAYAAAAFCAIAAADpOgqxAAAACXBIWXMAAC4jAAAuIwF4pT92AAAAaklEQVR4nAFfAKD/APb9/7zP64qhxFt3nS9RcwAwTAD29uzO0c6YnaJhanM8SU4aJyoAkoRliHVXcVo+YksuWkUkRTYTAIJrRH5jPHZWMGpNJldBGUUzCgAxHgA1IgAtFwAqFAAlDQAgAAD1UiCmdci69AAAAABJRU5ErkJggg=="
+    },
+    {
+      "src": "/gallery/08032026565.jpg",
+      "filename": "08032026565.jpg",
+      "width": 2592,
+      "height": 1944,
+      "blurDataURL": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAYAAAAFCAIAAADpOgqxAAAACXBIWXMAAC4jAAAuIwF4pT92AAAAaklEQVR4nAFfAKD/AB44UTxPZFlmc3+AhqujlqebjwBKX2xseX+fnJbh2cb//fb79d4AWFtLh39ls51v1cWf7ubSzsGlAB0PADoqCFM9GGtVJYdyOW5VJQAUAAAgEgAzIgBCMQtHNAtGLAJVEiYaMdlSSAAAAABJRU5ErkJggg=="
+    },
+    {
+      "src": "/gallery/08032026567.jpg",
+      "filename": "08032026567.jpg",
+      "width": 2592,
+      "height": 1944,
+      "blurDataURL": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAYAAAAFCAIAAADpOgqxAAAACXBIWXMAAC4jAAAuIwF4pT92AAAAaklEQVR4nAFfAKD/ABsPAhQLAQYBAAYAABIFABsIAgBIJQIgDgFKQkBWUVY0HhopFA4A0b2bxbuq//7u8vLvvcbDnaqoANPErcK7p7KqlKiikaCimY6UjwBONx5KQTVUTUdYVU5QSkFbUkotRCLRMZjcjgAAAABJRU5ErkJggg=="
+    },
+    {
+      "src": "/gallery/08032026575.jpg",
+      "filename": "08032026575.jpg",
+      "width": 2592,
+      "height": 1944,
+      "blurDataURL": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAYAAAAFCAIAAADpOgqxAAAACXBIWXMAAC4jAAAuIwF4pT92AAAAaklEQVR4nAFfAKD/ABw/ZylQfTlfi0VplEtxl0xwlABIcJNnhKiKlbiepMCnr8SossMAkpmR0b2u+97D//bf//3s//nbACwmGEo7LFxLOm5dS3hpVmthTwACBAEFCAULCgkPDAgREQgQEAZi2SbgjxxY3QAAAABJRU5ErkJggg=="
+    },
+    {
+      "src": "/gallery/08032026576.jpg",
+      "filename": "08032026576.jpg",
+      "width": 2592,
+      "height": 1944,
+      "blurDataURL": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAYAAAAFCAIAAADpOgqxAAAACXBIWXMAAC4jAAAuIwF4pT92AAAAaklEQVR4nAFfAKD/AGyFpWp8m2pxj2BlgE9WbUNHWADT6f7C0eq0ttGop7yUlqZ7fowA9v//5+jt19DYxLzFvbm9rqqnADQuLEM6N1dHQmZSSmlWSVdENgAeCwAsHBE7JBg2IxcqGQ8cAABbzyoHS2m3/QAAAABJRU5ErkJggg=="
+    }
+  ]
+}
