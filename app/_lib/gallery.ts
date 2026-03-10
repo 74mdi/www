@@ -23,17 +23,17 @@ export type GalleryImage = {
   filename: string
   width: number
   height: number
-  date?: Date
-  camera?: string
-  lens?: string
-  focalLength?: string
-  aperture?: string
-  shutter?: string
-  iso?: string
-  exposureBias?: string
-  location?: string
-  dimensions?: string
-  fileSize?: string
+  date: Date | undefined
+  camera: string | undefined
+  lens: string | undefined
+  focalLength: string | undefined
+  aperture: string | undefined
+  shutter: string | undefined
+  iso: string | undefined
+  exposureBias: string | undefined
+  location: string | undefined
+  dimensions: string | undefined
+  fileSize: string | undefined
 }
 
 const GALLERY_DIR = path.join(process.cwd(), 'public', 'gallery')
