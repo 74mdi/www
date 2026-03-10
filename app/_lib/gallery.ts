@@ -63,10 +63,8 @@ export const getGalleryImages = cache(async (): Promise<GalleryImage[]> => {
       const filePath = path.join(GALLERY_DIR, filename)
       let metadata: Metadata
       let blurDataURL: string | undefined
-      let buffer: Buffer
       try {
-        buffer = await fs.readFile(filePath)
-        metadata = await sharp(buffer).metadata()
+        metadata = await sharp(filePath).metadata()
       } catch {
         return null
       }
@@ -84,7 +82,7 @@ export const getGalleryImages = cache(async (): Promise<GalleryImage[]> => {
       }
 
       try {
-        const { base64 } = await getPlaiceholder(buffer, { size: 12 })
+        const { base64 } = await getPlaiceholder(filePath, { size: 6 })
         blurDataURL = base64
       } catch {
         blurDataURL = undefined

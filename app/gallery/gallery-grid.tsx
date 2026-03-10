@@ -65,7 +65,7 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
 
       {activeImage ? (
         <div
-          className='fixed inset-0 z-40 flex items-center justify-center'
+          className='fixed inset-0 z-40 flex items-center justify-center px-4 py-6 sm:px-8 sm:py-10'
           role='dialog'
           aria-modal='true'
         >
@@ -75,20 +75,20 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
             className='absolute inset-0 bg-[rgb(var(--background-rgb)/0.35)] backdrop-blur-md'
             onClick={() => setActiveIndex(null)}
           />
-          <div className='relative z-10 w-[min(92vw,46rem)]'>
+          <div className='relative z-10 flex w-full flex-col items-center'>
             <Image
               src={activeImage.src}
               alt={activeImage.title}
               width={activeImage.width}
               height={activeImage.height}
-              sizes='(min-width: 640px) 70vw, 92vw'
+              sizes='(min-width: 640px) 90vw, 96vw'
               quality={90}
               placeholder={activeImage.blurDataURL ? 'blur' : 'empty'}
               blurDataURL={activeImage.blurDataURL}
-              className='h-auto w-full rounded-3xl shadow-[0_18px_40px_rgba(0,0,0,0.28)]'
+              className='max-h-[82vh] w-auto max-w-full rounded-3xl object-contain shadow-[0_18px_40px_rgba(0,0,0,0.28)]'
             />
             {activeImage.dateText ? (
-              <div className='mt-4 flex items-center justify-end text-xs text-rurikon-400'>
+              <div className='mt-4 text-xs text-rurikon-400'>
                 {activeImage.dateText}
               </div>
             ) : null}
