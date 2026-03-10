@@ -44,7 +44,7 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
               aria-haspopup='dialog'
               aria-expanded={activeIndex === index}
             >
-              <div className='relative overflow-hidden rounded-2xl transition-[transform,box-shadow] duration-500 group-hover:-translate-y-1 group-hover:shadow-[0_16px_30px_rgba(0,0,0,0.14)]'>
+              <div className='relative overflow-hidden rounded-2xl transition-[transform,box-shadow] duration-500 group-hover:-translate-y-1 group-hover:rotate-[-0.4deg] group-hover:shadow-[0_22px_44px_rgba(0,0,0,0.2)]'>
                 <Image
                   src={image.src}
                   alt={image.title}
@@ -55,8 +55,12 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
                   priority={index < 2}
                   placeholder={image.blurDataURL ? 'blur' : 'empty'}
                   blurDataURL={image.blurDataURL}
-                  className='h-auto w-full rounded-2xl transition-transform duration-700 ease-[cubic-bezier(0.16,0.84,0.22,1)] group-hover:scale-[1.015]'
+                  className='h-auto w-full rounded-2xl transition-transform duration-700 ease-[cubic-bezier(0.16,0.84,0.22,1)] group-hover:scale-[1.03]'
                 />
+                <div className='pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100'>
+                  <div className='absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,_rgba(255,255,255,0.55),_transparent_55%)] mix-blend-soft-light' />
+                  <div className='absolute inset-0 bg-[linear-gradient(120deg,_rgba(255,255,255,0.2),_transparent_40%,_transparent_60%,_rgba(255,255,255,0.18))] mix-blend-soft-light' />
+                </div>
               </div>
             </button>
           </li>
