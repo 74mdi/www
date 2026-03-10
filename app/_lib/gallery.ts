@@ -6,13 +6,6 @@ import exifReader from 'exif-reader'
 import { getPlaiceholder } from 'plaiceholder'
 import { cache } from 'react'
 
-type ExifRational =
-  | number
-  | {
-      numerator: number
-      denominator: number
-    }
-
 type ExifData = {
   image?: Record<string, unknown>
   exif?: Record<string, unknown>
@@ -27,15 +20,6 @@ export type GalleryImage = {
   blurDataURL: string | undefined
   date: Date | undefined
   camera: string | undefined
-  lens: string | undefined
-  focalLength: string | undefined
-  aperture: string | undefined
-  shutter: string | undefined
-  iso: string | undefined
-  exposureBias: string | undefined
-  location: string | undefined
-  dimensions: string | undefined
-  fileSize: string | undefined
 }
 
 const GALLERY_DIR = path.join(process.cwd(), 'public', 'gallery')
@@ -54,58 +38,6 @@ function isImageFile(filename: string) {
   return IMAGE_EXTENSIONS.has(path.extname(filename).toLowerCase())
 }
 
-function toNumber(value: ExifRational | undefined): number | null {
-  if (value === undefined || value === null) return null
-  if (typeof value === 'number') return Number.isFinite(value) ? value : null
-  if (typeof value === 'object') {
-    if (value.denominator === 0) return null
-    return value.numerator / value.denominator
-  }
-  return null
-}
-
-function formatExposureTime(value: ExifRational | undefined): string | undefined {
-  const exposure = toNumber(value)
-  if (!exposure) return undefined
-  if (exposure >= 1) return `${exposure.toFixed(1)}s`
-  const denominator = Math.round(1 / exposure)
-  return `1/${denominator}s`
-}
-
-function formatAperture(value: ExifRational | undefined): string | undefined {
-  const aperture = toNumber(value)
-  if (!aperture) return undefined
-  return `f/${aperture.toFixed(1)}`
-}
-
-function formatFocalLength(value: ExifRational | undefined): string | undefined {
-  const focal = toNumber(value)
-  if (!focal) return undefined
-  return `${Math.round(focal)}mm`
-}
-
-function formatExposureBias(value: ExifRational | undefined): string | undefined {
-  const bias = toNumber(value)
-  if (bias === null) return undefined
-  return `${bias > 0 ? '+' : ''}${bias.toFixed(1)} EV`
-}
-
-function formatIso(value: unknown): string | undefined {
-  if (typeof value === 'number') return `ISO ${Math.round(value)}`
-  if (Array.isArray(value) && typeof value[0] === 'number') {
-    return `ISO ${Math.round(value[0])}`
-  }
-  return undefined
-}
-
-function formatBytes(bytes: number): string {
-  if (!Number.isFinite(bytes) || bytes <= 0) return '0 B'
-  const units = ['B', 'KB', 'MB', 'GB']
-  const index = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1)
-  const value = bytes / 1024 ** index
-  return `${value.toFixed(value >= 10 || index === 0 ? 0 : 1)} ${units[index]}`
-}
-
 function parseExifDate(value: unknown): Date | undefined {
   if (value instanceof Date) return value
   if (typeof value !== 'string') return undefined
@@ -113,29 +45,6 @@ function parseExifDate(value: unknown): Date | undefined {
   const parsed = new Date(normalized)
   if (Number.isNaN(parsed.getTime())) return undefined
   return parsed
-}
-
-function toDegrees(value: unknown): number | null {
-  if (typeof value === 'number') return value
-  if (!Array.isArray(value) || value.length < 3) return null
-  const [deg, min, sec] = value as ExifRational[]
-  const degValue = toNumber(deg)
-  const minValue = toNumber(min)
-  const secValue = toNumber(sec)
-  if (degValue === null || minValue === null || secValue === null) return null
-  return degValue + minValue / 60 + secValue / 3600
-}
-
-function formatLocation(gps: Record<string, unknown> | undefined): string | undefined {
-  if (!gps) return undefined
-  const lat = toDegrees(gps.GPSLatitude)
-  const lon = toDegrees(gps.GPSLongitude)
-  if (lat === null || lon === null) return undefined
-  const latRef = gps.GPSLatitudeRef === 'S' ? -1 : 1
-  const lonRef = gps.GPSLongitudeRef === 'W' ? -1 : 1
-  const latValue = lat * latRef
-  const lonValue = lon * lonRef
-  return `${latValue.toFixed(5)}, ${lonValue.toFixed(5)}`
 }
 
 function formatCamera(make: unknown, model: unknown): string | undefined {
@@ -170,7 +79,6 @@ export const getGalleryImages = cache(async (): Promise<GalleryImage[]> => {
         return null
       }
 
-      const stats = await fs.stat(filePath)
       const width = metadata.width ?? 1
       const height = metadata.height ?? 1
 
@@ -192,7 +100,6 @@ export const getGalleryImages = cache(async (): Promise<GalleryImage[]> => {
 
       const imageTags = exifData?.image ?? {}
       const exifTags = exifData?.exif ?? {}
-      const gpsTags = exifData?.gps ?? {}
 
       const date =
         parseExifDate(exifTags.DateTimeOriginal) ??
@@ -200,7 +107,6 @@ export const getGalleryImages = cache(async (): Promise<GalleryImage[]> => {
         parseExifDate(imageTags.DateTime)
 
       const camera = formatCamera(imageTags.Make, imageTags.Model)
-      const lens = typeof exifTags.LensModel === 'string' ? exifTags.LensModel : undefined
 
       return {
         src: `/gallery/${filename}`,
@@ -210,17 +116,6 @@ export const getGalleryImages = cache(async (): Promise<GalleryImage[]> => {
         blurDataURL,
         date,
         camera,
-        lens,
-        focalLength: formatFocalLength(exifTags.FocalLength as ExifRational | undefined),
-        aperture: formatAperture(exifTags.FNumber as ExifRational | undefined),
-        shutter: formatExposureTime(exifTags.ExposureTime as ExifRational | undefined),
-        iso: formatIso(exifTags.ISOSpeedRatings),
-        exposureBias: formatExposureBias(
-          exifTags.ExposureBiasValue as ExifRational | undefined,
-        ),
-        location: formatLocation(gpsTags),
-        dimensions: `${width}x${height}`,
-        fileSize: formatBytes(stats.size),
       } satisfies GalleryImage
     }),
   )

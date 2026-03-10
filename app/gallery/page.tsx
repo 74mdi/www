@@ -39,6 +39,7 @@ function formatDate(value?: Date) {
 
 export default async function GalleryPage() {
   const images = await getGalleryImages()
+  const countLabel = images.length === 1 ? '1 photo' : `${images.length} photos`
   const gridImages = images.map((image) => ({
     src: image.src,
     width: image.width,
@@ -50,14 +51,22 @@ export default async function GalleryPage() {
   }))
 
   return (
-    <section className='space-y-6'>
-      <header className='space-y-2'>
-        <h1 className='m-0 inline-block whitespace-nowrap break-normal font-semibold tracking-normal text-[1.62rem] leading-[1.13] sm:text-[1.95rem] sm:leading-[1.08] text-rurikon-700'>
-          gallery
-        </h1>
+    <section className='space-y-8'>
+      <header className='space-y-3'>
+        <div className='flex flex-wrap items-end justify-between gap-3'>
+          <div className='space-y-2'>
+            <div className='text-[11px] uppercase tracking-[0.32em] text-rurikon-400'>
+              gallery
+            </div>
+            <h1 className='m-0 inline-block break-normal font-semibold tracking-normal text-[1.62rem] leading-[1.13] sm:text-[1.95rem] sm:leading-[1.08] text-rurikon-700'>
+              moments
+            </h1>
+          </div>
+          <div className='text-xs text-rurikon-400'>{countLabel}</div>
+        </div>
         <p className='text-sm text-rurikon-500'>
-          drop images into <code>public/gallery</code>. click any image to see
-          the capture details.
+          drop images into <code>public/gallery</code> and click a frame to see
+          the capture date and device.
         </p>
       </header>
 
