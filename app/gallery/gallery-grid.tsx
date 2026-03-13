@@ -39,10 +39,10 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
 
   return (
     <>
-      {/* Pinterest-style masonry using CSS columns */}
-      <div className='columns-1 gap-4 sm:columns-2 lg:columns-3'>
+      {/* Pinterest-style masonry grid */}
+      <div className='columns-2 gap-2 lg:columns-3'>
         {visibleImages.map((image, index) => (
-          <div key={image.src} className='mb-4 break-inside-avoid'>
+          <div key={image.src} className='mb-2 break-inside-avoid'>
             <button
               type='button'
               onClick={() => setActiveIndex(index)}
@@ -50,20 +50,18 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
               aria-haspopup='dialog'
               aria-expanded={activeIndex === index}
             >
-              <div className='relative overflow-hidden rounded-2xl'>
-                <Image
-                  src={image.src}
-                  alt={image.title}
-                  width={image.width}
-                  height={image.height}
-                  sizes='(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw'
-                  quality={60}
-                  priority={index < 3}
-                  placeholder={image.blurDataURL ? 'blur' : 'empty'}
-                  blurDataURL={image.blurDataURL}
-                  className='h-auto w-full rounded-2xl'
-                />
-              </div>
+              <Image
+                src={image.src}
+                alt={image.title}
+                width={image.width}
+                height={image.height}
+                sizes='(min-width: 1024px) 33vw, 50vw'
+                quality={60}
+                priority={index < 4}
+                placeholder={image.blurDataURL ? 'blur' : 'empty'}
+                blurDataURL={image.blurDataURL}
+                className='h-auto w-full rounded-lg'
+              />
             </button>
           </div>
         ))}
