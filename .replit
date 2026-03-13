@@ -36,4 +36,3 @@ externalPort = 80
 [userenv]
 
 [userenv.shared]
-NEXT_PUBLIC_SITE_URL = "https://f2b90526-8aca-48d8-9443-88214ede7d8d-00-3c4t6s8u3nxfu.riker.replit.dev"
