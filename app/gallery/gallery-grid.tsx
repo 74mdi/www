@@ -45,12 +45,19 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
   }, [visibleImages, numCols])
 
   useEffect(() => {
-    if (!activeImage) return
+    if (!activeImage) {
+      document.body.style.overflow = ''
+      return
+    }
+    document.body.style.overflow = 'hidden'
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') setActiveIndex(null)
     }
     window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
+    return () => {
+      window.removeEventListener('keydown', onKeyDown)
+      document.body.style.overflow = ''
+    }
   }, [activeImage])
 
   return (
@@ -106,16 +113,17 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
 
       {activeImage ? (
         <div
-          className='fixed inset-0 z-40 flex items-center justify-center px-4 py-6 sm:px-8 sm:py-10'
+          className='fixed inset-0 z-40 flex items-center justify-center'
+          style={{ height: '100dvh' }}
           role='dialog'
           aria-modal='true'
         >
           <div
-            className='absolute inset-0 bg-[rgb(var(--background-rgb)/0.55)] [will-change:backdrop-filter] sm:[backdrop-filter:blur(12px)]'
+            className='absolute inset-0 bg-[rgb(var(--background-rgb)/0.7)] backdrop-blur-sm'
             aria-hidden='true'
             onClick={() => setActiveIndex(null)}
           />
-          <div className='relative z-10 flex w-full flex-col items-center'>
+          <div className='relative z-10 flex w-full flex-col items-center px-4'>
             <Image
               src={activeImage.src}
               alt={activeImage.title}
@@ -125,11 +133,12 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
               quality={90}
               placeholder={activeImage.blurDataURL ? 'blur' : 'empty'}
               blurDataURL={activeImage.blurDataURL}
-              className='max-h-[82vh] w-auto max-w-full rounded-3xl object-contain shadow-[0_18px_40px_rgba(0,0,0,0.28)]'
+              style={{ maxHeight: '80dvh' }}
+              className='w-auto max-w-full rounded-2xl object-contain shadow-[0_18px_40px_rgba(0,0,0,0.28)]'
               onClick={() => setActiveIndex(null)}
             />
             {activeImage.dateText ? (
-              <div className='mt-4 text-xs text-rurikon-400'>
+              <div className='mt-3 text-xs text-rurikon-400'>
                 {activeImage.dateText}
               </div>
             ) : null}
@@ -138,7 +147,7 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
             type='button'
             aria-label='Close image'
             onClick={() => setActiveIndex(null)}
-            className='absolute right-5 top-5 z-20 rounded-full border border-rurikon-border bg-[var(--surface-overlay)] px-3 py-1 text-xs text-rurikon-600 transition-colors hover:text-rurikon-800'
+            className='absolute right-4 top-4 z-20 rounded-full border border-rurikon-border bg-[var(--surface-overlay)] px-3 py-1 text-xs text-rurikon-600 transition-colors hover:text-rurikon-800'
           >
             close
           </button>
