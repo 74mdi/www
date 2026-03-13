@@ -15,15 +15,12 @@ export default function PageTransitionShell({
 }: PageTransitionShellProps) {
   const pathname = usePathname()
   const hasHydrated = useHydrated()
-  const disableTransition = pathname.startsWith('/gallery')
 
   return (
     <article
       key={pathname}
       className={className}
-      data-route-transition={
-        hasHydrated && !disableTransition ? 'enter' : undefined
-      }
+      data-route-transition={hasHydrated ? 'enter' : undefined}
     >
       {children}
     </article>
