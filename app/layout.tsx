@@ -33,13 +33,7 @@ function getSiteUrl(): string {
   const explicit = process.env.NEXT_PUBLIC_SITE_URL?.trim()
   if (explicit) return explicit
 
-  const production = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim()
-  if (production) return `https://${production}`
-
-  const preview = process.env.VERCEL_URL?.trim()
-  if (preview) return `https://${preview}`
-
-  return 'https://qaiik.vercel.app'
+  return 'https://qaiik.replit.app'
 }
 
 const siteUrl = getSiteUrl().replace(/\/+$/, '')
@@ -50,9 +44,12 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
     template: '%s - qaiik',
-    default: 'qaiik',
+    default: 'qaiik — 7amdi personal website',
   },
   description: siteDescription,
+  keywords: ['qaiik', '7amdi', 'hamdi', 'personal website', 'blog', 'portfolio'],
+  authors: [{ name: '7amdi', url: siteUrl }],
+  creator: '7amdi',
   applicationName: 'qaiik',
   alternates: {
     canonical: '/',

@@ -8,17 +8,7 @@ function getSiteUrl(): string {
     return explicit.replace(/\/+$/, '')
   }
 
-  const production = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim()
-  if (production) {
-    return `https://${production.replace(/\/+$/, '')}`
-  }
-
-  const preview = process.env.VERCEL_URL?.trim()
-  if (preview) {
-    return `https://${preview.replace(/\/+$/, '')}`
-  }
-
-  return 'https://qaiik.vercel.app'
+  return 'https://qaiik.replit.app'
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
