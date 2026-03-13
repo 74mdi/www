@@ -2,7 +2,6 @@ import withMDX from '@next/mdx'
 import { NextConfig } from 'next'
 
 export default withMDX()({
-  output: 'standalone',
   pageExtensions: ['js', 'jsx', 'mdx', 'ts', 'tsx'],
   turbopack: {},
   redirects: async () => [
