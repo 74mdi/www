@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useState } from 'react'
 import Image from 'next/image'
 
 type GalleryGridImage = {
@@ -18,6 +18,17 @@ type GalleryGridProps = {
 
 const PAGE_SIZE = 12
 
+const useNumCols = () => {
+  const [numCols, setNumCols] = useState(2)
+  useLayoutEffect(() => {
+    const update = () => setNumCols(window.innerWidth >= 1024 ? 3 : 2)
+    update()
+    window.addEventListener('resize', update)
+    return () => window.removeEventListener('resize', update)
+  }, [])
+  return numCols
+}
+
 export default function GalleryGrid({ images }: GalleryGridProps) {
   const [visibleCount, setVisibleCount] = useState(
     Math.min(PAGE_SIZE, images.length),
@@ -25,13 +36,18 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
   const visibleImages = images.slice(0, visibleCount)
   const activeImage = activeIndex !== null ? visibleImages[activeIndex] : null
+  const numCols = useNumCols()
+
+  const cols = useMemo(() => {
+    const result: GalleryGridImage[][] = Array.from({ length: numCols }, () => [])
+    visibleImages.forEach((img, i) => result[i % numCols].push(img))
+    return result
+  }, [visibleImages, numCols])
 
   useEffect(() => {
     if (!activeImage) return
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setActiveIndex(null)
-      }
+      if (event.key === 'Escape') setActiveIndex(null)
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
@@ -39,30 +55,35 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
 
   return (
     <>
-      {/* Pinterest-style masonry grid */}
-      <div className='columns-2 gap-2 lg:columns-3'>
-        {visibleImages.map((image, index) => (
-          <div key={image.src} className='mb-2 break-inside-avoid'>
-            <button
-              type='button'
-              onClick={() => setActiveIndex(index)}
-              className='block w-full text-left focus-visible:outline focus-visible:outline-rurikon-400 focus-visible:outline-dotted focus-visible:outline-offset-4'
-              aria-haspopup='dialog'
-              aria-expanded={activeIndex === index}
-            >
-              <Image
-                src={image.src}
-                alt={image.title}
-                width={image.width}
-                height={image.height}
-                sizes='(min-width: 1024px) 33vw, 50vw'
-                quality={60}
-                priority={index < 4}
-                placeholder={image.blurDataURL ? 'blur' : 'empty'}
-                blurDataURL={image.blurDataURL}
-                className='h-auto w-full rounded-lg'
-              />
-            </button>
+      <div className='flex gap-2'>
+        {cols.map((col, ci) => (
+          <div key={ci} className='flex flex-1 flex-col gap-2'>
+            {col.map((image, index) => {
+              const globalIndex = ci + index * numCols
+              return (
+                <button
+                  key={image.src}
+                  type='button'
+                  onClick={() => setActiveIndex(globalIndex)}
+                  className='block w-full text-left focus-visible:outline focus-visible:outline-rurikon-400 focus-visible:outline-dotted focus-visible:outline-offset-4'
+                  aria-haspopup='dialog'
+                  aria-expanded={activeIndex === globalIndex}
+                >
+                  <Image
+                    src={image.src}
+                    alt={image.title}
+                    width={image.width}
+                    height={image.height}
+                    sizes='(min-width: 1024px) 33vw, 50vw'
+                    quality={60}
+                    priority={globalIndex < 4}
+                    placeholder={image.blurDataURL ? 'blur' : 'empty'}
+                    blurDataURL={image.blurDataURL}
+                    className='h-auto w-full rounded-lg'
+                  />
+                </button>
+              )
+            })}
           </div>
         ))}
       </div>
