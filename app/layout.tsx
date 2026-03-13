@@ -53,7 +53,7 @@ export const metadata: Metadata = {
     default: 'qaiik — 7amdi personal website',
   },
   description: siteDescription,
-  keywords: ['qaiik', '7amdi', 'hamdi', 'personal website', 'blog', 'portfolio'],
+  keywords: ['qaiik', '7amdi', 'hamdi', '74mdi', 'mohamed', 'ana7amdi', '7amdi911', 'personal website', 'blog', 'portfolio'],
   authors: [{ name: '7amdi', url: siteUrl }],
   creator: '7amdi',
   applicationName: 'qaiik',
