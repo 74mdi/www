@@ -27,7 +27,16 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/projects', '/projects/', '/siftli', '/siftli/', '/ogc', '/ogc/'],
+        disallow: [
+          '/projects',
+          '/projects/',
+          '/siftli',
+          '/siftli/',
+          '/ogc',
+          '/ogc/',
+          '/quran',
+          '/quran/',
+        ],
       },
     ],
     sitemap: `${siteUrl}/sitemap.xml`,

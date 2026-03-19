@@ -10,6 +10,46 @@ export default withMDX()({
       destination: '/thoughts/:slug',
       permanent: false,
     },
+    {
+      source: '/quraan',
+      destination: '/quran',
+      permanent: false,
+    },
+    {
+      source: '/qur-an',
+      destination: '/quran',
+      permanent: false,
+    },
+    {
+      source: '/quran-kareem',
+      destination: '/quran',
+      permanent: false,
+    },
+    {
+      source: '/quran-karim',
+      destination: '/quran',
+      permanent: false,
+    },
+    {
+      source: '/al-quran',
+      destination: '/quran',
+      permanent: false,
+    },
+    {
+      source: '/holy-quran',
+      destination: '/quran',
+      permanent: false,
+    },
+    {
+      source: '/koran',
+      destination: '/quran',
+      permanent: false,
+    },
+    {
+      source: '/quran/index',
+      destination: '/quran',
+      permanent: false,
+    },
   ],
   experimental: {
     mdxRs: {
