@@ -118,11 +118,9 @@ function providerLabel(value: string | null): string {
 function ProviderIcon({
   provider,
   className,
-  colorful = false,
 }: {
   provider: string | null
   className?: string
-  colorful?: boolean
 }) {
   const normalized = normalizeProvider(provider)
 
@@ -131,7 +129,6 @@ function ProviderIcon({
   }
 
   const icon = PROVIDER_ICONS[normalized]
-  const iconColor = normalized === 'github' ? undefined : `#${icon.hex}`
 
   return (
     <svg
@@ -139,7 +136,6 @@ function ProviderIcon({
       aria-hidden='true'
       className={className}
       fill='currentColor'
-      style={colorful ? { color: iconColor } : undefined}
     >
       <path d={icon.path} />
     </svg>
@@ -523,23 +519,19 @@ export default function GuestbookClient() {
             <p className='text-rurikon-500'>
               Sign in to leave a message. Pick any provider:
             </p>
-            <div className='flex flex-col gap-2 sm:flex-row sm:flex-wrap'>
+            <div className='grid grid-cols-1 gap-2 sm:grid-cols-3'>
               {OAUTH_PROVIDERS.map((provider) => (
                 <button
                   key={provider.id}
                   type='button'
-                  className={`${BUTTON_CLASS} w-full justify-start gap-2 whitespace-nowrap sm:w-auto`}
+                  className={`${BUTTON_CLASS} w-full justify-center gap-2 whitespace-nowrap`}
                   disabled={isAuthBusy}
                   onClick={() => {
                     void handleSignIn(provider.id)
                   }}
                 >
-                  <ProviderIcon
-                    provider={provider.id}
-                    className='h-4 w-4 shrink-0'
-                    colorful
-                  />
-                  <span>Sign in with {provider.label}</span>
+                  <ProviderIcon provider={provider.id} className='h-4 w-4 shrink-0' />
+                  <span>{provider.label}</span>
                 </button>
               ))}
             </div>
