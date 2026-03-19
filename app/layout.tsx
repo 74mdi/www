@@ -50,8 +50,8 @@ const siteDescription =
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    template: '%s - qaiik',
-    default: 'qaiik — 7amdi personal website',
+    template: '%s',
+    default: 'qaiik',
   },
   description: siteDescription,
   keywords: ['qaiik', '7amdi', 'hamdi', '74mdi', 'mohamed', 'ana7amdi', '7amdi911', 'personal website', 'blog', 'portfolio'],
