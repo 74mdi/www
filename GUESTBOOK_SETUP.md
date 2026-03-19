@@ -133,3 +133,32 @@ On Vercel (or your host), add:
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 
 After deploy, make sure production domain is listed in Supabase redirect URLs.
+
+## Troubleshooting
+
+### Error: `requested path is invalid`
+
+This is usually a bad Auth URL config in Supabase.
+
+Use exactly:
+
+- `Site URL`: `https://qaiik.vercel.app`
+- `Redirect URL` (allow list): `https://qaiik.vercel.app/guestbook`
+
+Also add local:
+
+- `http://localhost:5000/guestbook`
+
+Important:
+- Include `https://` in production URLs.
+- Do not set Site URL as `qaiik.vercel.app/guestbook` (without protocol).
+- Keep provider callback as `https://<PROJECT_REF>.supabase.co/auth/v1/callback`.
+
+### Error: `Could not find the table 'public.guestbook_profiles' in the schema cache`
+
+Run the SQL in section 5 in Supabase SQL Editor (same project as your keys).
+
+If you already created the table:
+1. Open `API Docs` in Supabase and verify `public.guestbook_profiles` exists.
+2. Wait a few seconds and retry (schema cache refresh can be delayed briefly).
+3. Confirm your app env keys point to the same project ref where tables were created.

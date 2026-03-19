@@ -46,6 +46,25 @@ function formatError(error: unknown): string {
   return 'Something failed. Please try again.'
 }
 
+function hasMissingTableError(error: unknown, tableName: string): boolean {
+  if (!error || typeof error !== 'object') {
+    return false
+  }
+
+  const code =
+    'code' in error && typeof error.code === 'string' ? error.code : null
+  const message =
+    'message' in error && typeof error.message === 'string'
+      ? error.message
+      : null
+
+  return (
+    code === 'PGRST205' ||
+    message?.includes(`'public.${tableName}'`) === true ||
+    message?.includes(`public.${tableName}`) === true
+  )
+}
+
 function getAvatarUrl(user: User): string | null {
   return (
     pickString(user.user_metadata?.avatar_url) ??
@@ -95,6 +114,7 @@ export default function GuestbookClient() {
 
   const [session, setSession] = useState<Session | null>(null)
   const [entries, setEntries] = useState<GuestbookEntry[]>([])
+  const [profilesTableAvailable, setProfilesTableAvailable] = useState(true)
   const [savedName, setSavedName] = useState('')
   const [nameDraft, setNameDraft] = useState('')
   const [messageDraft, setMessageDraft] = useState('')
@@ -132,9 +152,24 @@ export default function GuestbookClient() {
         .maybeSingle()
 
       if (error) {
+        if (hasMissingTableError(error, 'guestbook_profiles')) {
+          setProfilesTableAvailable(false)
+
+          const fallbackName =
+            typeof window !== 'undefined'
+              ? normalizeName(
+                  window.localStorage.getItem(`guestbook-name:${userId}`) ?? '',
+                )
+              : ''
+
+          setSavedName(fallbackName)
+          setNameDraft(fallbackName)
+          return
+        }
         throw error
       }
 
+      setProfilesTableAvailable(true)
       const nextName = normalizeName(data?.display_name ?? '')
       setSavedName(nextName)
       setNameDraft(nextName)
@@ -274,6 +309,18 @@ export default function GuestbookClient() {
       return
     }
 
+    if (!profilesTableAvailable) {
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(`guestbook-name:${currentUser.id}`, normalized)
+      }
+
+      setSavedName(normalized)
+      setNameDraft(normalized)
+      setErrorMessage(null)
+      setNotice('Name saved locally. Create guestbook_profiles table to sync it.')
+      return
+    }
+
     setIsSavingName(true)
     setErrorMessage(null)
     setNotice(null)
@@ -291,8 +338,23 @@ export default function GuestbookClient() {
     )
 
     if (error) {
-      setErrorMessage(formatError(error))
+      if (hasMissingTableError(error, 'guestbook_profiles')) {
+        setProfilesTableAvailable(false)
+
+        if (typeof window !== 'undefined') {
+          window.localStorage.setItem(`guestbook-name:${currentUser.id}`, normalized)
+        }
+
+        setSavedName(normalized)
+        setNameDraft(normalized)
+        setNotice('Name saved locally. Create guestbook_profiles table to sync it.')
+      } else {
+        setErrorMessage(formatError(error))
+      }
     } else {
+      if (typeof window !== 'undefined') {
+        window.localStorage.removeItem(`guestbook-name:${currentUser.id}`)
+      }
       setSavedName(normalized)
       setNameDraft(normalized)
       setNotice('Name saved.')
@@ -466,6 +528,11 @@ export default function GuestbookClient() {
                   {isSavingName ? 'Saving...' : savedName ? 'Update name' : 'Save name'}
                 </button>
               </div>
+              {!profilesTableAvailable ? (
+                <p className='text-rurikon-400 text-sm'>
+                  Profile table is missing in Supabase. Name is saved locally for now.
+                </p>
+              ) : null}
             </form>
 
             <form className='space-y-2' onSubmit={handlePost}>
