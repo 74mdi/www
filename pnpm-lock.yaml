@@ -83,6 +83,9 @@ dependencies:
   shiki:
     specifier: ^3.2.1
     version: 3.14.0
+  simple-icons:
+    specifier: ^16.12.0
+    version: 16.12.0
 
 devDependencies:
   '@types/node':
@@ -4979,6 +4982,11 @@ packages:
       side-channel-map: 1.0.1
       side-channel-weakmap: 1.0.2
     dev: true
+
+  /simple-icons@16.12.0:
+    resolution: {integrity: sha512-fDJDqXUpkb2twqH+eBQpJsCYUE6jEH7VkuuPL9dH16sbLf6KKnwyijULmcx7SCoy3c2L6pl8WCzt+4rpYjoWfw==}
+    engines: {node: '>=0.12.18'}
+    dev: false
 
   /simple-swizzle@0.2.4:
     resolution: {integrity: sha512-nAu1WFPQSMNr2Zn9PGSZK9AGn4t/y97lEm+MXTtUDwfP0ksAIX4nO+6ruD9Jwut4C49SB1Ws+fbXsm/yScWOHw==}
