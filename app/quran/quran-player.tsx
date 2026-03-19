@@ -87,6 +87,8 @@ const INPUT_CLASS =
 const BUTTON_CLASS =
   'inline-flex min-h-10 items-center justify-center rounded-md border border-[var(--color-rurikon-border)] px-4 py-2 text-rurikon-700 transition-colors hover:border-[var(--color-rurikon-border-strong)] hover:text-rurikon-900 focus-visible:outline focus-visible:outline-rurikon-400 focus-visible:rounded-md focus-visible:outline-offset-2 focus-visible:outline-dotted disabled:opacity-60 disabled:hover:border-[var(--color-rurikon-border)] disabled:hover:text-rurikon-700'
 
+const PLAYER_BUTTON_CLASS = `${BUTTON_CLASS} whitespace-nowrap`
+
 const ARABIC_DIACRITICS_REGEX =
   /[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED\u0640]/g
 
@@ -94,6 +96,17 @@ type AyahReference = { chapterId: number; verseId: number }
 
 function chapterLabel(chapter: { id: number; name: string }): string {
   return `${String(chapter.id).padStart(3, '0')} - ${chapter.name}`
+}
+
+function formatAudioTime(seconds: number): string {
+  if (!Number.isFinite(seconds) || seconds < 0) {
+    return '0:00'
+  }
+
+  const rounded = Math.floor(seconds)
+  const minutes = Math.floor(rounded / 60)
+  const remainingSeconds = rounded % 60
+  return `${minutes}:${String(remainingSeconds).padStart(2, '0')}`
 }
 
 function normalizeForSearch(value: string): string {
@@ -177,6 +190,13 @@ export default function QuranPlayer() {
   const [chapterId, setChapterId] = useState<number>(1)
   const [isPlaying, setIsPlaying] = useState(false)
   const [audioError, setAudioError] = useState<string | null>(null)
+  const [positionSeconds, setPositionSeconds] = useState(0)
+  const [durationSeconds, setDurationSeconds] = useState(0)
+  const [bufferedSeconds, setBufferedSeconds] = useState(0)
+  const [isAudioLoading, setIsAudioLoading] = useState(false)
+  const [volume, setVolume] = useState(1)
+  const [isMuted, setIsMuted] = useState(false)
+  const [playbackRate, setPlaybackRate] = useState(1)
 
   const [quranData, setQuranData] = useState<QuranData | null>(null)
   const [readerError, setReaderError] = useState<string | null>(null)
@@ -307,8 +327,19 @@ export default function QuranPlayer() {
     const audio = audioRef.current
     if (!audio) return
 
+    const updateBuffered = () => {
+      if (audio.buffered.length === 0) {
+        setBufferedSeconds(0)
+        return
+      }
+
+      const end = audio.buffered.end(audio.buffered.length - 1)
+      setBufferedSeconds(Number.isFinite(end) ? end : 0)
+    }
+
     const handlePlay = () => {
       setIsPlaying(true)
+      setIsAudioLoading(false)
     }
 
     const handlePause = () => {
@@ -321,19 +352,80 @@ export default function QuranPlayer() {
 
     const handleError = () => {
       setIsPlaying(false)
+      setIsAudioLoading(false)
       setAudioError('Could not load this recitation. Try another reciter.')
+    }
+
+    const handleLoadedMetadata = () => {
+      setDurationSeconds(Number.isFinite(audio.duration) ? audio.duration : 0)
+      setPositionSeconds(Number.isFinite(audio.currentTime) ? audio.currentTime : 0)
+      updateBuffered()
+      setIsAudioLoading(false)
+    }
+
+    const handleDurationChange = () => {
+      setDurationSeconds(Number.isFinite(audio.duration) ? audio.duration : 0)
+    }
+
+    const handleTimeUpdate = () => {
+      setPositionSeconds(Number.isFinite(audio.currentTime) ? audio.currentTime : 0)
+    }
+
+    const handleProgress = () => {
+      updateBuffered()
+    }
+
+    const handleSeeking = () => {
+      setIsAudioLoading(true)
+    }
+
+    const handleWaiting = () => {
+      setIsAudioLoading(true)
+    }
+
+    const handleCanPlay = () => {
+      setIsAudioLoading(false)
+      setDurationSeconds(Number.isFinite(audio.duration) ? audio.duration : 0)
+      updateBuffered()
+    }
+
+    const handleVolumeChange = () => {
+      setVolume(audio.volume)
+      setIsMuted(audio.muted || audio.volume === 0)
+    }
+
+    const handleRateChange = () => {
+      setPlaybackRate(audio.playbackRate)
     }
 
     audio.addEventListener('play', handlePlay)
     audio.addEventListener('pause', handlePause)
     audio.addEventListener('ended', handleEnded)
     audio.addEventListener('error', handleError)
+    audio.addEventListener('loadedmetadata', handleLoadedMetadata)
+    audio.addEventListener('durationchange', handleDurationChange)
+    audio.addEventListener('timeupdate', handleTimeUpdate)
+    audio.addEventListener('progress', handleProgress)
+    audio.addEventListener('seeking', handleSeeking)
+    audio.addEventListener('waiting', handleWaiting)
+    audio.addEventListener('canplay', handleCanPlay)
+    audio.addEventListener('volumechange', handleVolumeChange)
+    audio.addEventListener('ratechange', handleRateChange)
 
     return () => {
       audio.removeEventListener('play', handlePlay)
       audio.removeEventListener('pause', handlePause)
       audio.removeEventListener('ended', handleEnded)
       audio.removeEventListener('error', handleError)
+      audio.removeEventListener('loadedmetadata', handleLoadedMetadata)
+      audio.removeEventListener('durationchange', handleDurationChange)
+      audio.removeEventListener('timeupdate', handleTimeUpdate)
+      audio.removeEventListener('progress', handleProgress)
+      audio.removeEventListener('seeking', handleSeeking)
+      audio.removeEventListener('waiting', handleWaiting)
+      audio.removeEventListener('canplay', handleCanPlay)
+      audio.removeEventListener('volumechange', handleVolumeChange)
+      audio.removeEventListener('ratechange', handleRateChange)
     }
   }, [])
 
@@ -341,7 +433,17 @@ export default function QuranPlayer() {
     const audio = audioRef.current
     if (!audio) return
 
+    audio.volume = volume
+    audio.muted = isMuted
+    audio.playbackRate = playbackRate
+  }, [isMuted, playbackRate, volume])
+
+  useEffect(() => {
+    const audio = audioRef.current
+    if (!audio) return
+
     audio.pause()
+    audio.currentTime = 0
     audio.load()
   }, [audioUrl])
 
@@ -434,10 +536,84 @@ export default function QuranPlayer() {
     audio.pause()
   }
 
+  const onSeek = (nextValue: number) => {
+    const audio = audioRef.current
+    if (!audio) return
+
+    const clampedValue = Math.max(0, Math.min(nextValue, durationSeconds || 0))
+    audio.currentTime = clampedValue
+    setPositionSeconds(clampedValue)
+  }
+
+  const onStepTime = (stepSeconds: number) => {
+    const audio = audioRef.current
+    if (!audio) return
+
+    const baseDuration = Number.isFinite(audio.duration) ? audio.duration : durationSeconds
+    const maxTime = Math.max(baseDuration, 0)
+    const nextTime = Math.max(0, Math.min(audio.currentTime + stepSeconds, maxTime))
+    audio.currentTime = nextTime
+    setPositionSeconds(nextTime)
+  }
+
+  const onChangeVolume = (nextVolume: number) => {
+    const audio = audioRef.current
+    if (!audio) return
+
+    const safeVolume = Math.max(0, Math.min(nextVolume, 1))
+    audio.volume = safeVolume
+    audio.muted = safeVolume === 0
+    setVolume(safeVolume)
+    setIsMuted(safeVolume === 0)
+  }
+
+  const onToggleMute = () => {
+    const audio = audioRef.current
+    if (!audio) return
+
+    const nextMuted = !audio.muted
+    audio.muted = nextMuted
+    setIsMuted(nextMuted)
+  }
+
+  const onChangePlaybackRate = (nextRate: number) => {
+    const audio = audioRef.current
+    if (!audio) return
+
+    audio.playbackRate = nextRate
+    setPlaybackRate(nextRate)
+  }
+
+  const onChangeChapter = (nextChapterId: number, clearFocus: boolean) => {
+    const boundedChapter = Math.max(1, Math.min(nextChapterId, CHAPTER_COUNT))
+    setAudioError(null)
+    setIsAudioLoading(true)
+    setPositionSeconds(0)
+    setDurationSeconds(0)
+    setBufferedSeconds(0)
+
+    if (clearFocus) {
+      setFocusedAyah(null)
+    }
+
+    setChapterId(boundedChapter)
+  }
+
   const onSelectAyah = (ayah: AyahReference) => {
     setFocusedAyah(ayah)
-    setChapterId(ayah.chapterId)
+
+    if (ayah.chapterId !== chapterId) {
+      onChangeChapter(ayah.chapterId, false)
+    }
   }
+
+  const canGoPreviousChapter = chapterId > 1
+  const canGoNextChapter = chapterId < CHAPTER_COUNT
+  const safeDuration = Number.isFinite(durationSeconds) ? durationSeconds : 0
+  const safePosition = Math.max(0, Math.min(positionSeconds, safeDuration || positionSeconds))
+  const progressPercent = safeDuration > 0 ? (safePosition / safeDuration) * 100 : 0
+  const bufferedPercent = safeDuration > 0 ? (bufferedSeconds / safeDuration) * 100 : 0
+  const volumePercent = Math.round((isMuted ? 0 : volume) * 100)
 
   return (
     <div className='space-y-5'>
@@ -449,7 +625,7 @@ export default function QuranPlayer() {
           </p>
         </div>
 
-        <div className='grid gap-3 sm:grid-cols-2'>
+        <div className='grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]'>
           <label className='block space-y-1'>
             <span className='text-rurikon-500'>Reciter</span>
             <select
@@ -474,9 +650,7 @@ export default function QuranPlayer() {
               className={INPUT_CLASS}
               value={activeChapter?.id ?? 1}
               onChange={(event) => {
-                setAudioError(null)
-                setFocusedAyah(null)
-                setChapterId(Number(event.target.value))
+                onChangeChapter(Number(event.target.value), true)
               }}
             >
               {chapters.map((chapter) => (
@@ -488,16 +662,108 @@ export default function QuranPlayer() {
           </label>
         </div>
 
-        <div className='flex flex-col gap-2 sm:flex-row sm:items-center'>
-          <button type='button' className={BUTTON_CLASS} onClick={() => void onPlayPause()}>
-            {isPlaying ? 'Pause' : 'Play'}
-          </button>
-          <a className={BUTTON_CLASS} href={audioUrl} target='_blank' rel='noreferrer'>
-            Open MP3
-          </a>
+        <div className='rounded-lg border border-[var(--color-rurikon-border)] bg-[var(--background)] p-3 sm:p-4 space-y-4'>
+          <div className='flex flex-wrap items-center gap-2'>
+            <button type='button' className={PLAYER_BUTTON_CLASS} onClick={() => void onPlayPause()}>
+              {isPlaying ? 'Pause' : 'Play'}
+            </button>
+            <button type='button' className={PLAYER_BUTTON_CLASS} onClick={() => onStepTime(-10)}>
+              -10s
+            </button>
+            <button type='button' className={PLAYER_BUTTON_CLASS} onClick={() => onStepTime(10)}>
+              +10s
+            </button>
+            <button
+              type='button'
+              className={PLAYER_BUTTON_CLASS}
+              disabled={!canGoPreviousChapter}
+              onClick={() => onChangeChapter(chapterId - 1, true)}
+            >
+              Prev Surah
+            </button>
+            <button
+              type='button'
+              className={PLAYER_BUTTON_CLASS}
+              disabled={!canGoNextChapter}
+              onClick={() => onChangeChapter(chapterId + 1, true)}
+            >
+              Next Surah
+            </button>
+            <a className={PLAYER_BUTTON_CLASS} href={audioUrl} target='_blank' rel='noreferrer'>
+              Open MP3
+            </a>
+          </div>
+
+          <div className='space-y-2'>
+            <div className='relative h-1.5 rounded-full bg-[var(--color-rurikon-border)] overflow-hidden'>
+              <div
+                className='absolute inset-y-0 left-0 bg-rurikon-300/60'
+                style={{ width: `${Math.max(0, Math.min(bufferedPercent, 100))}%` }}
+              />
+              <div
+                className='absolute inset-y-0 left-0 bg-rurikon-700'
+                style={{ width: `${Math.max(0, Math.min(progressPercent, 100))}%` }}
+              />
+            </div>
+            <input
+              type='range'
+              min={0}
+              max={Math.max(safeDuration, 1)}
+              step={0.1}
+              value={Math.max(0, Math.min(safePosition, Math.max(safeDuration, 1)))}
+              className='w-full accent-[var(--color-rurikon-700)]'
+              onChange={(event) => {
+                onSeek(Number(event.target.value))
+              }}
+            />
+            <div className='flex flex-wrap items-center justify-between gap-2 text-xs text-rurikon-400'>
+              <span>
+                {formatAudioTime(safePosition)} / {formatAudioTime(safeDuration)}
+              </span>
+              <span>{isAudioLoading ? 'Buffering...' : isPlaying ? 'Playing' : 'Paused'}</span>
+            </div>
+          </div>
+
+          <div className='grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]'>
+            <label className='block space-y-1'>
+              <span className='text-rurikon-500 text-sm'>Speed</span>
+              <select
+                className={INPUT_CLASS}
+                value={String(playbackRate)}
+                onChange={(event) => {
+                  onChangePlaybackRate(Number(event.target.value))
+                }}
+              >
+                <option value='0.75'>0.75x</option>
+                <option value='1'>1.0x</option>
+                <option value='1.25'>1.25x</option>
+                <option value='1.5'>1.5x</option>
+              </select>
+            </label>
+
+            <div className='space-y-1'>
+              <span className='text-rurikon-500 text-sm'>Volume ({volumePercent}%)</span>
+              <div className='flex items-center gap-2'>
+                <button type='button' className={PLAYER_BUTTON_CLASS} onClick={onToggleMute}>
+                  {isMuted ? 'Unmute' : 'Mute'}
+                </button>
+                <input
+                  type='range'
+                  min={0}
+                  max={1}
+                  step={0.01}
+                  value={isMuted ? 0 : volume}
+                  className='w-full accent-[var(--color-rurikon-700)]'
+                  onChange={(event) => {
+                    onChangeVolume(Number(event.target.value))
+                  }}
+                />
+              </div>
+            </div>
+          </div>
         </div>
 
-        <audio ref={audioRef} className='w-full' controls preload='none'>
+        <audio ref={audioRef} className='sr-only' preload='none'>
           <source src={audioUrl} type='audio/mpeg' />
           Your browser does not support audio playback.
         </audio>
@@ -525,8 +791,7 @@ export default function QuranPlayer() {
               className={INPUT_CLASS}
               value={activeChapter?.id ?? 1}
               onChange={(event) => {
-                setFocusedAyah(null)
-                setChapterId(Number(event.target.value))
+                onChangeChapter(Number(event.target.value), true)
               }}
             >
               {chapters.map((chapter) => (
