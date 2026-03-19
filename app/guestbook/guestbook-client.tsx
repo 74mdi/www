@@ -6,6 +6,7 @@ import type { Session, User } from '@supabase/supabase-js'
 import { getSupabaseBrowserClient } from '@/app/_lib/supabase-browser'
 
 type OAuthProvider = 'discord' | 'github' | 'google'
+type IconProps = { className?: string }
 
 type GuestbookEntry = {
   id: number
@@ -29,6 +30,61 @@ const INPUT_CLASS =
   'w-full rounded-md border border-[var(--color-rurikon-border)] bg-[var(--background)] px-3 py-2 text-rurikon-600 placeholder:text-rurikon-300 focus-visible:outline focus-visible:outline-rurikon-400 focus-visible:outline-offset-2 focus-visible:outline-dotted'
 
 const ENTRY_LIMIT = 280
+
+function DiscordIcon({ className }: IconProps) {
+  return (
+    <svg
+      viewBox='0 0 24 24'
+      aria-hidden='true'
+      className={className}
+      fill='currentColor'
+    >
+      <path d='M20.32 4.37a16.86 16.86 0 0 0-4.19-1.33l-.2.4a14.9 14.9 0 0 0-3.93 0l-.2-.4a16.9 16.9 0 0 0-4.2 1.34C4.94 8.3 4.2 12.14 4.57 15.93a16.98 16.98 0 0 0 5.14 2.57l1.1-1.5c-.6-.2-1.16-.46-1.7-.77.14-.1.27-.2.4-.3 3.27 1.54 6.82 1.54 10.05 0 .13.1.26.2.4.3-.54.31-1.1.57-1.7.77l1.1 1.5a16.9 16.9 0 0 0 5.14-2.57c.44-4.39-.74-8.2-3.18-11.56ZM10 13.6c-.98 0-1.78-.9-1.78-2s.8-2.01 1.78-2.01 1.79.9 1.78 2.01c0 1.1-.8 2-1.78 2Zm4 0c-.99 0-1.79-.9-1.79-2s.8-2.01 1.78-2.01 1.79.9 1.79 2.01c0 1.1-.8 2-1.79 2Z' />
+    </svg>
+  )
+}
+
+function GitHubIcon({ className }: IconProps) {
+  return (
+    <svg
+      viewBox='0 0 24 24'
+      aria-hidden='true'
+      className={className}
+      fill='currentColor'
+    >
+      <path d='M12 2C6.48 2 2 6.59 2 12.25c0 4.53 2.87 8.37 6.84 9.72.5.1.66-.22.66-.5v-1.74c-2.78.62-3.37-1.22-3.37-1.22-.46-1.2-1.12-1.52-1.12-1.52-.92-.65.07-.64.07-.64 1.01.08 1.55 1.08 1.55 1.08.9 1.58 2.36 1.12 2.94.86.09-.67.35-1.12.63-1.38-2.22-.26-4.56-1.15-4.56-5.11 0-1.13.39-2.05 1.04-2.77-.1-.27-.45-1.33.1-2.78 0 0 .85-.28 2.78 1.06A9.4 9.4 0 0 1 12 7.76c.85 0 1.71.12 2.51.36 1.93-1.34 2.78-1.06 2.78-1.06.55 1.45.2 2.5.1 2.78.64.72 1.03 1.64 1.03 2.77 0 3.97-2.35 4.85-4.58 5.1.36.33.68.97.68 1.96v2.9c0 .28.17.61.67.5A10.26 10.26 0 0 0 22 12.25C22 6.6 17.52 2 12 2Z' />
+    </svg>
+  )
+}
+
+function GoogleIcon({ className }: IconProps) {
+  return (
+    <svg
+      viewBox='0 0 24 24'
+      aria-hidden='true'
+      className={className}
+      fill='currentColor'
+    >
+      <path d='M21.35 12.23c0-.78-.07-1.53-.2-2.23H12v4.2h5.23a4.56 4.56 0 0 1-1.95 2.99v2.5h3.15c1.84-1.74 2.92-4.3 2.92-7.46Z' />
+      <path d='M12 22c2.63 0 4.83-.88 6.45-2.37l-3.15-2.5c-.88.6-2 1-3.3 1-2.53 0-4.68-1.76-5.45-4.12H3.3v2.6A10 10 0 0 0 12 22Z' />
+      <path d='M6.55 14.01A6.1 6.1 0 0 1 6.25 12c0-.7.12-1.37.3-2.01v-2.6H3.3a10.26 10.26 0 0 0 0 9.22l3.25-2.6Z' />
+      <path d='M12 5.88c1.43 0 2.72.5 3.74 1.47l2.8-2.87A9.72 9.72 0 0 0 12 2a10 10 0 0 0-8.7 5.39l3.25 2.6c.77-2.36 2.92-4.11 5.45-4.11Z' />
+    </svg>
+  )
+}
+
+function UnknownProviderIcon({ className }: IconProps) {
+  return (
+    <svg
+      viewBox='0 0 24 24'
+      aria-hidden='true'
+      className={className}
+      fill='currentColor'
+    >
+      <path d='M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm0 15.2a1.15 1.15 0 1 1 1.15-1.15A1.16 1.16 0 0 1 12 17.2Zm1.25-4.58v.38h-2.1V12.4c0-1.03.32-1.56 1.13-2.1.74-.49 1.05-.78 1.05-1.38a1.34 1.34 0 0 0-1.43-1.3 1.44 1.44 0 0 0-1.47 1.4H8.3a3.54 3.54 0 0 1 3.68-3.3 3.4 3.4 0 0 1 3.56 3.17c0 1.41-.72 2.15-1.73 2.8-.4.27-.56.45-.56.93Z' />
+    </svg>
+  )
+}
 
 function normalizeName(value: string): string {
   return value.replace(/\s+/g, ' ').trim().slice(0, 40)
@@ -78,6 +134,46 @@ function titleCase(value: string | null): string {
   return value.charAt(0).toUpperCase() + value.slice(1)
 }
 
+function normalizeProvider(value: string | null): OAuthProvider | null {
+  if (!value) return null
+  if (value === 'discord' || value === 'github' || value === 'google') {
+    return value
+  }
+  return null
+}
+
+function providerLabel(value: string | null): string {
+  const normalized = normalizeProvider(value)
+  if (normalized === 'github') return 'GitHub'
+  if (normalized === 'discord') return 'Discord'
+  if (normalized === 'google') return 'Google'
+  return titleCase(value)
+}
+
+function ProviderIcon({
+  provider,
+  className,
+}: {
+  provider: string | null
+  className?: string
+}) {
+  const normalized = normalizeProvider(provider)
+
+  if (normalized === 'discord') {
+    return <DiscordIcon className={className} />
+  }
+
+  if (normalized === 'github') {
+    return <GitHubIcon className={className} />
+  }
+
+  if (normalized === 'google') {
+    return <GoogleIcon className={className} />
+  }
+
+  return <UnknownProviderIcon className={className} />
+}
+
 function formatDate(iso: string): string {
   const date = new Date(iso)
   if (Number.isNaN(date.getTime())) {
@@ -114,6 +210,7 @@ export default function GuestbookClient() {
 
   const [session, setSession] = useState<Session | null>(null)
   const [entries, setEntries] = useState<GuestbookEntry[]>([])
+  const [entriesTableAvailable, setEntriesTableAvailable] = useState(true)
   const [profilesTableAvailable, setProfilesTableAvailable] = useState(true)
   const [savedName, setSavedName] = useState('')
   const [nameDraft, setNameDraft] = useState('')
@@ -135,9 +232,15 @@ export default function GuestbookClient() {
       .limit(100)
 
     if (error) {
+      if (hasMissingTableError(error, 'guestbook_entries')) {
+        setEntriesTableAvailable(false)
+        setEntries([])
+        return
+      }
       throw error
     }
 
+    setEntriesTableAvailable(true)
     setEntries((data ?? []) as GuestbookEntry[])
   }, [supabase])
 
@@ -241,9 +344,8 @@ export default function GuestbookClient() {
 
   const currentUser = session?.user ?? null
   const currentAvatar = currentUser ? getAvatarUrl(currentUser) : null
-  const currentProvider = titleCase(
-    pickString(currentUser?.app_metadata?.provider) ?? null,
-  )
+  const currentProviderRaw = pickString(currentUser?.app_metadata?.provider) ?? null
+  const currentProvider = providerLabel(currentProviderRaw)
 
   const nameOptions = useMemo(() => {
     if (!currentUser) return []
@@ -368,6 +470,14 @@ export default function GuestbookClient() {
 
     if (!supabase || !currentUser) return
 
+    if (!entriesTableAvailable) {
+      setErrorMessage(
+        'guestbook_entries table is missing in Supabase. Run the SQL setup first.',
+      )
+      setNotice(null)
+      return
+    }
+
     if (!savedName || savedName.length < 2) {
       setErrorMessage('Save your guestbook name before posting.')
       setNotice(null)
@@ -400,8 +510,16 @@ export default function GuestbookClient() {
     })
 
     if (error) {
-      setErrorMessage(formatError(error))
+      if (hasMissingTableError(error, 'guestbook_entries')) {
+        setEntriesTableAvailable(false)
+        setErrorMessage(
+          'guestbook_entries table is missing in Supabase. Run the SQL setup first.',
+        )
+      } else {
+        setErrorMessage(formatError(error))
+      }
     } else {
+      setEntriesTableAvailable(true)
       setMessageDraft('')
       setNotice('Signed the guestbook.')
       await loadEntries()
@@ -433,25 +551,26 @@ export default function GuestbookClient() {
             <p className='text-rurikon-500'>
               Sign in to leave a message. Pick any provider:
             </p>
-            <div className='flex flex-wrap gap-2'>
+            <div className='grid grid-cols-1 gap-2 sm:grid-cols-3'>
               {OAUTH_PROVIDERS.map((provider) => (
                 <button
                   key={provider.id}
                   type='button'
-                  className={BUTTON_CLASS}
+                  className={`${BUTTON_CLASS} w-full justify-start gap-2`}
                   disabled={isAuthBusy}
                   onClick={() => {
                     void handleSignIn(provider.id)
                   }}
                 >
-                  Continue with {provider.label}
+                  <ProviderIcon provider={provider.id} className='h-4 w-4 shrink-0' />
+                  <span>Sign in with {provider.label}</span>
                 </button>
               ))}
             </div>
           </div>
         ) : (
           <div className='space-y-6'>
-            <div className='flex items-center justify-between gap-4'>
+            <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
               <div className='flex min-w-0 items-center gap-3'>
                 <div
                   aria-hidden='true'
@@ -472,15 +591,16 @@ export default function GuestbookClient() {
                   <p className='truncate font-medium text-rurikon-700'>
                     {currentUser.email ?? 'Authenticated user'}
                   </p>
-                  <p className='text-rurikon-400 text-sm'>
-                    Provider: {currentProvider}
+                  <p className='inline-flex items-center gap-1.5 text-rurikon-400 text-sm'>
+                    <ProviderIcon provider={currentProviderRaw} className='h-3.5 w-3.5' />
+                    <span>Provider: {currentProvider}</span>
                   </p>
                 </div>
               </div>
 
               <button
                 type='button'
-                className={BUTTON_CLASS}
+                className={`${BUTTON_CLASS} w-full sm:w-auto`}
                 onClick={() => {
                   void handleSignOut()
                 }}
@@ -514,7 +634,7 @@ export default function GuestbookClient() {
                 </datalist>
               ) : null}
 
-              <div className='flex items-center justify-between gap-3'>
+              <div className='flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between'>
                 <p className='text-rurikon-400 text-sm'>
                   {savedName
                     ? `Current name: ${savedName}`
@@ -522,7 +642,7 @@ export default function GuestbookClient() {
                 </p>
                 <button
                   type='submit'
-                  className={BUTTON_CLASS}
+                  className={`${BUTTON_CLASS} w-full sm:w-auto`}
                   disabled={isSavingName}
                 >
                   {isSavingName ? 'Saving...' : savedName ? 'Update name' : 'Save name'}
@@ -552,18 +672,28 @@ export default function GuestbookClient() {
                   setMessageDraft(event.target.value)
                 }}
               />
-              <div className='flex items-center justify-between gap-3'>
+              <div className='flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between'>
                 <p className='text-rurikon-400 text-sm'>
                   {trimmedMessageLength}/{ENTRY_LIMIT}
                 </p>
                 <button
                   type='submit'
-                  className={BUTTON_CLASS}
-                  disabled={!canPost || isPosting || trimmedMessageLength === 0}
+                  className={`${BUTTON_CLASS} w-full sm:w-auto`}
+                  disabled={
+                    !canPost ||
+                    !entriesTableAvailable ||
+                    isPosting ||
+                    trimmedMessageLength === 0
+                  }
                 >
                   {isPosting ? 'Posting...' : 'Sign guestbook'}
                 </button>
               </div>
+              {!entriesTableAvailable ? (
+                <p className='text-rurikon-400 text-sm'>
+                  Entries table is missing in Supabase. Run SQL setup section 5.
+                </p>
+              ) : null}
             </form>
           </div>
         )}
@@ -578,7 +708,12 @@ export default function GuestbookClient() {
 
       <section>
         <h2 className='text-rurikon-600 font-medium'>Recent entries</h2>
-        {entries.length === 0 ? (
+        {!entriesTableAvailable ? (
+          <p className='mt-3 text-rurikon-400'>
+            Entries table not found. Create <code>guestbook_entries</code> in
+            Supabase SQL editor.
+          </p>
+        ) : entries.length === 0 ? (
           <p className='mt-3 text-rurikon-400'>
             No entries yet. Be the first one to sign.
           </p>
@@ -608,8 +743,9 @@ export default function GuestbookClient() {
                       <span className='font-medium text-rurikon-700'>
                         {entry.display_name}
                       </span>
-                      <span className='text-rurikon-300 text-sm'>
-                        via {titleCase(entry.provider)}
+                      <span className='inline-flex items-center gap-1 text-rurikon-300 text-sm'>
+                        <ProviderIcon provider={entry.provider} className='h-3.5 w-3.5' />
+                        <span>via {providerLabel(entry.provider)}</span>
                       </span>
                       <time
                         dateTime={entry.created_at}

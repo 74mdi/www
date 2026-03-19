@@ -162,3 +162,12 @@ If you already created the table:
 1. Open `API Docs` in Supabase and verify `public.guestbook_profiles` exists.
 2. Wait a few seconds and retry (schema cache refresh can be delayed briefly).
 3. Confirm your app env keys point to the same project ref where tables were created.
+
+### Error: `POST /rest/v1/guestbook_entries` returns `404`
+
+This means `public.guestbook_entries` is missing from Supabase schema cache.
+
+Fix:
+1. Run section 5 SQL (it creates `guestbook_entries` and policies).
+2. In Supabase `API Docs`, confirm `guestbook_entries` appears under `public`.
+3. Retry posting.
