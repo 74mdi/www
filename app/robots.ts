@@ -27,7 +27,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/projects', '/projects/'],
+        disallow: ['/projects', '/projects/', '/siftli', '/siftli/'],
       },
     ],
     sitemap: `${siteUrl}/sitemap.xml`,

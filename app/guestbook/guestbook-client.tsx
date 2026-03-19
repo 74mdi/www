@@ -1,0 +1,566 @@
+'use client'
+
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import type { Session, User } from '@supabase/supabase-js'
+
+import { getSupabaseBrowserClient } from '@/app/_lib/supabase-browser'
+
+type OAuthProvider = 'discord' | 'github' | 'google'
+
+type GuestbookEntry = {
+  id: number
+  display_name: string
+  avatar_url: string | null
+  provider: string | null
+  message: string
+  created_at: string
+}
+
+const OAUTH_PROVIDERS: Array<{ id: OAuthProvider; label: string }> = [
+  { id: 'discord', label: 'Discord' },
+  { id: 'github', label: 'GitHub' },
+  { id: 'google', label: 'Google' },
+]
+
+const BUTTON_CLASS =
+  'inline-flex items-center justify-center rounded-md border border-[var(--color-rurikon-border)] px-3 py-1.5 text-rurikon-600 transition-colors hover:border-[var(--color-rurikon-border-strong)] hover:text-rurikon-800 focus-visible:outline focus-visible:outline-rurikon-400 focus-visible:rounded-md focus-visible:outline-offset-2 focus-visible:outline-dotted disabled:opacity-60 disabled:hover:border-[var(--color-rurikon-border)] disabled:hover:text-rurikon-600'
+
+const INPUT_CLASS =
+  'w-full rounded-md border border-[var(--color-rurikon-border)] bg-[var(--background)] px-3 py-2 text-rurikon-600 placeholder:text-rurikon-300 focus-visible:outline focus-visible:outline-rurikon-400 focus-visible:outline-offset-2 focus-visible:outline-dotted'
+
+const ENTRY_LIMIT = 280
+
+function normalizeName(value: string): string {
+  return value.replace(/\s+/g, ' ').trim().slice(0, 40)
+}
+
+function pickString(value: unknown): string | null {
+  return typeof value === 'string' && value.trim().length > 0 ? value : null
+}
+
+function formatError(error: unknown): string {
+  if (error && typeof error === 'object' && 'message' in error) {
+    return String(error.message)
+  }
+
+  return 'Something failed. Please try again.'
+}
+
+function getAvatarUrl(user: User): string | null {
+  return (
+    pickString(user.user_metadata?.avatar_url) ??
+    pickString(user.user_metadata?.picture) ??
+    null
+  )
+}
+
+function titleCase(value: string | null): string {
+  if (!value) return 'Unknown'
+  return value.charAt(0).toUpperCase() + value.slice(1)
+}
+
+function formatDate(iso: string): string {
+  const date = new Date(iso)
+  if (Number.isNaN(date.getTime())) {
+    return iso
+  }
+
+  return new Intl.DateTimeFormat('en-US', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  }).format(date)
+}
+
+function suggestedNames(user: User, currentName: string): string[] {
+  const localEmailName = user.email?.split('@')[0] ?? ''
+  const candidates = [
+    currentName,
+    pickString(user.user_metadata?.full_name) ?? '',
+    pickString(user.user_metadata?.name) ?? '',
+    pickString(user.user_metadata?.preferred_username) ?? '',
+    localEmailName,
+  ]
+
+  return Array.from(
+    new Set(
+      candidates
+        .map((candidate) => normalizeName(candidate))
+        .filter((candidate) => candidate.length >= 2),
+    ),
+  )
+}
+
+export default function GuestbookClient() {
+  const supabase = useMemo(() => getSupabaseBrowserClient(), [])
+
+  const [session, setSession] = useState<Session | null>(null)
+  const [entries, setEntries] = useState<GuestbookEntry[]>([])
+  const [savedName, setSavedName] = useState('')
+  const [nameDraft, setNameDraft] = useState('')
+  const [messageDraft, setMessageDraft] = useState('')
+  const [isLoading, setIsLoading] = useState(true)
+  const [isAuthBusy, setIsAuthBusy] = useState(false)
+  const [isSavingName, setIsSavingName] = useState(false)
+  const [isPosting, setIsPosting] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [notice, setNotice] = useState<string | null>(null)
+
+  const loadEntries = useCallback(async () => {
+    if (!supabase) return
+
+    const { data, error } = await supabase
+      .from('guestbook_entries')
+      .select('id, display_name, avatar_url, provider, message, created_at')
+      .order('created_at', { ascending: false })
+      .limit(100)
+
+    if (error) {
+      throw error
+    }
+
+    setEntries((data ?? []) as GuestbookEntry[])
+  }, [supabase])
+
+  const loadProfileName = useCallback(
+    async (userId: string) => {
+      if (!supabase) return
+
+      const { data, error } = await supabase
+        .from('guestbook_profiles')
+        .select('display_name')
+        .eq('user_id', userId)
+        .maybeSingle()
+
+      if (error) {
+        throw error
+      }
+
+      const nextName = normalizeName(data?.display_name ?? '')
+      setSavedName(nextName)
+      setNameDraft(nextName)
+    },
+    [supabase],
+  )
+
+  useEffect(() => {
+    if (!supabase) {
+      setIsLoading(false)
+      return
+    }
+
+    let isMounted = true
+
+    const bootstrap = async () => {
+      try {
+        const [{ data: sessionData }] = await Promise.all([
+          supabase.auth.getSession(),
+          loadEntries(),
+        ])
+
+        if (!isMounted) return
+
+        const nextSession = sessionData.session
+        setSession(nextSession)
+
+        if (nextSession?.user) {
+          await loadProfileName(nextSession.user.id)
+        }
+      } catch (error) {
+        if (!isMounted) return
+        setErrorMessage(formatError(error))
+      } finally {
+        if (isMounted) {
+          setIsLoading(false)
+        }
+      }
+    }
+
+    void bootstrap()
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      setSession(nextSession)
+      setNotice(null)
+      setErrorMessage(null)
+
+      if (nextSession?.user) {
+        void loadProfileName(nextSession.user.id).catch((error) => {
+          setErrorMessage(formatError(error))
+        })
+      } else {
+        setSavedName('')
+        setNameDraft('')
+      }
+
+      void loadEntries().catch((error) => {
+        setErrorMessage(formatError(error))
+      })
+    })
+
+    return () => {
+      isMounted = false
+      subscription.unsubscribe()
+    }
+  }, [supabase, loadEntries, loadProfileName])
+
+  const currentUser = session?.user ?? null
+  const currentAvatar = currentUser ? getAvatarUrl(currentUser) : null
+  const currentProvider = titleCase(
+    pickString(currentUser?.app_metadata?.provider) ?? null,
+  )
+
+  const nameOptions = useMemo(() => {
+    if (!currentUser) return []
+    return suggestedNames(currentUser, savedName)
+  }, [currentUser, savedName])
+
+  const canPost = Boolean(currentUser && savedName.length >= 2)
+  const trimmedMessageLength = messageDraft.trim().length
+
+  const handleSignIn = async (provider: OAuthProvider) => {
+    if (!supabase) return
+
+    setErrorMessage(null)
+    setNotice(null)
+    setIsAuthBusy(true)
+
+    const redirectTo =
+      typeof window !== 'undefined'
+        ? `${window.location.origin}/guestbook`
+        : undefined
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: redirectTo ? { redirectTo } : undefined,
+    })
+
+    if (error) {
+      setErrorMessage(formatError(error))
+      setIsAuthBusy(false)
+    }
+  }
+
+  const handleSignOut = async () => {
+    if (!supabase) return
+
+    setErrorMessage(null)
+    setNotice(null)
+    setIsAuthBusy(true)
+
+    const { error } = await supabase.auth.signOut()
+
+    if (error) {
+      setErrorMessage(formatError(error))
+    } else {
+      setSavedName('')
+      setNameDraft('')
+      setMessageDraft('')
+      setNotice('Signed out.')
+    }
+
+    setIsAuthBusy(false)
+  }
+
+  const handleSaveName = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+
+    if (!supabase || !currentUser) return
+
+    const normalized = normalizeName(nameDraft)
+    if (normalized.length < 2) {
+      setErrorMessage('Pick a name between 2 and 40 characters.')
+      setNotice(null)
+      return
+    }
+
+    setIsSavingName(true)
+    setErrorMessage(null)
+    setNotice(null)
+
+    const { error } = await supabase.from('guestbook_profiles').upsert(
+      {
+        user_id: currentUser.id,
+        email: currentUser.email ?? null,
+        display_name: normalized,
+        avatar_url: getAvatarUrl(currentUser),
+        provider: pickString(currentUser.app_metadata?.provider),
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'user_id' },
+    )
+
+    if (error) {
+      setErrorMessage(formatError(error))
+    } else {
+      setSavedName(normalized)
+      setNameDraft(normalized)
+      setNotice('Name saved.')
+    }
+
+    setIsSavingName(false)
+  }
+
+  const handlePost = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+
+    if (!supabase || !currentUser) return
+
+    if (!savedName || savedName.length < 2) {
+      setErrorMessage('Save your guestbook name before posting.')
+      setNotice(null)
+      return
+    }
+
+    const body = messageDraft.trim()
+    if (body.length < 1) {
+      setErrorMessage('Write a short message first.')
+      setNotice(null)
+      return
+    }
+
+    if (body.length > ENTRY_LIMIT) {
+      setErrorMessage(`Message must be ${ENTRY_LIMIT} characters or less.`)
+      setNotice(null)
+      return
+    }
+
+    setIsPosting(true)
+    setErrorMessage(null)
+    setNotice(null)
+
+    const { error } = await supabase.from('guestbook_entries').insert({
+      user_id: currentUser.id,
+      display_name: savedName,
+      avatar_url: getAvatarUrl(currentUser),
+      provider: pickString(currentUser.app_metadata?.provider),
+      message: body,
+    })
+
+    if (error) {
+      setErrorMessage(formatError(error))
+    } else {
+      setMessageDraft('')
+      setNotice('Signed the guestbook.')
+      await loadEntries()
+    }
+
+    setIsPosting(false)
+  }
+
+  if (!supabase) {
+    return (
+      <div className='rounded-lg border border-[var(--color-rurikon-border)] bg-[var(--surface-soft)]/55 px-4 py-4 sm:px-5'>
+        <p className='text-rurikon-500'>
+          Guestbook is disabled right now.
+          <br />
+          Add <code>NEXT_PUBLIC_SUPABASE_URL</code> and{' '}
+          <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code> to enable auth and entries.
+        </p>
+      </div>
+    )
+  }
+
+  return (
+    <div className='space-y-6'>
+      <section className='rounded-lg border border-[var(--color-rurikon-border)] bg-[var(--surface-soft)]/55 px-4 py-4 sm:px-5'>
+        {isLoading ? (
+          <p className='text-rurikon-400'>Loading guestbook...</p>
+        ) : !currentUser ? (
+          <div className='space-y-4'>
+            <p className='text-rurikon-500'>
+              Sign in to leave a message. Pick any provider:
+            </p>
+            <div className='flex flex-wrap gap-2'>
+              {OAUTH_PROVIDERS.map((provider) => (
+                <button
+                  key={provider.id}
+                  type='button'
+                  className={BUTTON_CLASS}
+                  disabled={isAuthBusy}
+                  onClick={() => {
+                    void handleSignIn(provider.id)
+                  }}
+                >
+                  Continue with {provider.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className='space-y-6'>
+            <div className='flex items-center justify-between gap-4'>
+              <div className='flex min-w-0 items-center gap-3'>
+                <div
+                  aria-hidden='true'
+                  className='h-10 w-10 shrink-0 rounded-full border border-[var(--color-rurikon-border)] bg-[var(--frame-background)] text-rurikon-400 bg-cover bg-center'
+                  style={
+                    currentAvatar
+                      ? { backgroundImage: `url(${currentAvatar})` }
+                      : undefined
+                  }
+                >
+                  {!currentAvatar ? (
+                    <span className='flex h-full w-full items-center justify-center text-xs uppercase'>
+                      {(savedName || currentUser.email || '?').slice(0, 1)}
+                    </span>
+                  ) : null}
+                </div>
+                <div className='min-w-0'>
+                  <p className='truncate font-medium text-rurikon-700'>
+                    {currentUser.email ?? 'Authenticated user'}
+                  </p>
+                  <p className='text-rurikon-400 text-sm'>
+                    Provider: {currentProvider}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type='button'
+                className={BUTTON_CLASS}
+                onClick={() => {
+                  void handleSignOut()
+                }}
+                disabled={isAuthBusy}
+              >
+                Sign out
+              </button>
+            </div>
+
+            <form className='space-y-2' onSubmit={handleSaveName}>
+              <label htmlFor='guestbook-name' className='text-rurikon-500'>
+                Select your guestbook name
+              </label>
+              <input
+                id='guestbook-name'
+                name='guestbook-name'
+                list='guestbook-name-options'
+                className={INPUT_CLASS}
+                value={nameDraft}
+                placeholder='Name shown on your messages'
+                maxLength={40}
+                onChange={(event) => {
+                  setNameDraft(event.target.value)
+                }}
+              />
+              {nameOptions.length > 0 ? (
+                <datalist id='guestbook-name-options'>
+                  {nameOptions.map((option) => (
+                    <option key={option} value={option} />
+                  ))}
+                </datalist>
+              ) : null}
+
+              <div className='flex items-center justify-between gap-3'>
+                <p className='text-rurikon-400 text-sm'>
+                  {savedName
+                    ? `Current name: ${savedName}`
+                    : 'Save a name before posting.'}
+                </p>
+                <button
+                  type='submit'
+                  className={BUTTON_CLASS}
+                  disabled={isSavingName}
+                >
+                  {isSavingName ? 'Saving...' : savedName ? 'Update name' : 'Save name'}
+                </button>
+              </div>
+            </form>
+
+            <form className='space-y-2' onSubmit={handlePost}>
+              <label htmlFor='guestbook-message' className='text-rurikon-500'>
+                Message
+              </label>
+              <textarea
+                id='guestbook-message'
+                name='guestbook-message'
+                className={INPUT_CLASS}
+                rows={4}
+                maxLength={ENTRY_LIMIT}
+                placeholder='Write something nice...'
+                value={messageDraft}
+                disabled={!canPost}
+                onChange={(event) => {
+                  setMessageDraft(event.target.value)
+                }}
+              />
+              <div className='flex items-center justify-between gap-3'>
+                <p className='text-rurikon-400 text-sm'>
+                  {trimmedMessageLength}/{ENTRY_LIMIT}
+                </p>
+                <button
+                  type='submit'
+                  className={BUTTON_CLASS}
+                  disabled={!canPost || isPosting || trimmedMessageLength === 0}
+                >
+                  {isPosting ? 'Posting...' : 'Sign guestbook'}
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {notice ? <p className='mt-4 text-rurikon-500'>{notice}</p> : null}
+        {errorMessage ? (
+          <p className='mt-4 text-rurikon-500 underline decoration-rurikon-300'>
+            {errorMessage}
+          </p>
+        ) : null}
+      </section>
+
+      <section>
+        <h2 className='text-rurikon-600 font-medium'>Recent entries</h2>
+        {entries.length === 0 ? (
+          <p className='mt-3 text-rurikon-400'>
+            No entries yet. Be the first one to sign.
+          </p>
+        ) : (
+          <ul className='mt-2 divide-y divide-[var(--color-rurikon-border)]'>
+            {entries.map((entry) => (
+              <li key={entry.id} className='py-4'>
+                <article className='flex gap-3'>
+                  <div
+                    aria-hidden='true'
+                    className='mt-0.5 h-9 w-9 shrink-0 rounded-full border border-[var(--color-rurikon-border)] bg-[var(--frame-background)] text-rurikon-400 bg-cover bg-center'
+                    style={
+                      entry.avatar_url
+                        ? { backgroundImage: `url(${entry.avatar_url})` }
+                        : undefined
+                    }
+                  >
+                    {!entry.avatar_url ? (
+                      <span className='flex h-full w-full items-center justify-center text-xs uppercase'>
+                        {entry.display_name.slice(0, 1)}
+                      </span>
+                    ) : null}
+                  </div>
+
+                  <div className='min-w-0 flex-1'>
+                    <header className='flex flex-wrap items-baseline gap-x-2 gap-y-1'>
+                      <span className='font-medium text-rurikon-700'>
+                        {entry.display_name}
+                      </span>
+                      <span className='text-rurikon-300 text-sm'>
+                        via {titleCase(entry.provider)}
+                      </span>
+                      <time
+                        dateTime={entry.created_at}
+                        className='text-rurikon-300 text-sm'
+                      >
+                        {formatDate(entry.created_at)}
+                      </time>
+                    </header>
+                    <p className='mt-1 whitespace-pre-wrap text-rurikon-500'>
+                      {entry.message}
+                    </p>
+                  </div>
+                </article>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    </div>
+  )
+}

@@ -53,8 +53,7 @@ export default function Navbar() {
           <Item href='/'>Home</Item>
           <Item href='/gallery'>Gallery</Item>
           <Item href='/thoughts'>Thoughts</Item>
-          <Item href='/siftli'>SIFTLI</Item>
-          {/* <Item href='/guestbook'>Guestbook</Item> */}
+          <Item href='/guestbook'>Guestbook</Item>
         </ul>
       </div>
 
@@ -62,8 +61,7 @@ export default function Navbar() {
         <Item href='/'>Home</Item>
         <Item href='/gallery'>Gallery</Item>
         <Item href='/thoughts'>Thoughts</Item>
-        <Item href='/siftli'>SIFTLI</Item>
-        {/* <Item href='/guestbook'>Guestbook</Item> */}
+        <Item href='/guestbook'>Guestbook</Item>
       </ul>
 
       <div className='hidden mobile:flex mobile:fixed mobile:left-6 sm:left-10 md:left-14 mobile:w-24 mobile:bottom-6 sm:bottom-10 md:bottom-14 mobile:z-30 flex-col items-end gap-2'>

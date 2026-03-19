@@ -41,7 +41,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.85,
     },
     {
-      url: `${siteUrl}/siftli`,
+      url: `${siteUrl}/guestbook`,
       lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.8,

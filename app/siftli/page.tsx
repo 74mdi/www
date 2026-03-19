@@ -5,6 +5,10 @@ import SiftliClient from './siftli-client'
 export const metadata: Metadata = {
   title: 'SIFTLI',
   description: 'siftli msg wela aya haja ghir mn site :)',
+  robots: {
+    index: false,
+    follow: false,
+  },
   openGraph: {
     title: 'SIFTLI',
     description: 'siftli msg wela aya haja ghir mn site :)',
