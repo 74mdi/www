@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 
+import { buildOgImageUrl } from '@/app/_lib/og-image-url'
 import { AboutAge } from '@/components/about-age'
 import { HomeLastFm } from '@/components/home-lastfm'
 
@@ -18,13 +19,27 @@ export const metadata: Metadata = {
     title: '7amdi',
     description:
       'salam ana 7amdi. whadi personal website dyalii akankherbeq wsafiiii.',
-    images: ['/opengraph-image'],
+    images: [
+      buildOgImageUrl({
+        variant: 'default',
+        title: '7amdi',
+        description:
+          'salam ana 7amdi. whadi personal website dyalii akankherbeq wsafiiii.',
+      }),
+    ],
   },
   twitter: {
     title: '7amdi',
     description:
       'salam ana 7amdi. whadi personal website dyalii akankherbeq wsafiiii.',
-    images: ['/opengraph-image'],
+    images: [
+      buildOgImageUrl({
+        variant: 'default',
+        title: '7amdi',
+        description:
+          'salam ana 7amdi. whadi personal website dyalii akankherbeq wsafiiii.',
+      }),
+    ],
   },
 }
 

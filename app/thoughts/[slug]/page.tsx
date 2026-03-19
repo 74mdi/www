@@ -3,6 +3,8 @@ import path from 'path'
 import cn from 'clsx'
 import { notFound } from 'next/navigation'
 
+import { buildOgImageUrl } from '@/app/_lib/og-image-url'
+
 function slugToTitle(slug: string): string {
   return slug
     .split('-')
@@ -95,13 +97,25 @@ export async function generateMetadata(props: {
       url: `/thoughts/${params.slug}`,
       title,
       description: normalizedDescription,
-      images: [`/thoughts/${params.slug}/opengraph-image`],
+      images: [
+        buildOgImageUrl({
+          variant: 'thoughts',
+          title,
+          description: normalizedDescription,
+        }),
+      ],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description: normalizedDescription,
-      images: [`/thoughts/${params.slug}/opengraph-image`],
+      images: [
+        buildOgImageUrl({
+          variant: 'thoughts',
+          title,
+          description: normalizedDescription,
+        }),
+      ],
     },
   }
 }

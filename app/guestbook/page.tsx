@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 
+import { buildOgImageUrl } from '@/app/_lib/og-image-url'
 import GuestbookClient from '@/app/guestbook/guestbook-client'
 
 export const metadata: Metadata = {
@@ -11,12 +12,24 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Guestbook',
     description: 'Sign the guestbook with Discord, GitHub, or Google.',
-    images: ['/opengraph-image'],
+    images: [
+      buildOgImageUrl({
+        variant: 'default',
+        title: 'Guestbook',
+        description: 'Sign the guestbook with Discord, GitHub, or Google.',
+      }),
+    ],
   },
   twitter: {
     title: 'Guestbook',
     description: 'Sign the guestbook with Discord, GitHub, or Google.',
-    images: ['/opengraph-image'],
+    images: [
+      buildOgImageUrl({
+        variant: 'default',
+        title: 'Guestbook',
+        description: 'Sign the guestbook with Discord, GitHub, or Google.',
+      }),
+    ],
   },
 }
 
@@ -28,8 +41,7 @@ export default function GuestbookPage() {
           Guestbook
         </h1>
         <p className='max-w-prose text-rurikon-400'>
-          Leave a message for me. Sign in, select your name, and write something
-          short.
+          khlili msg wla ktb aya haja qidqbqmofyigqvchkcvqyie
         </p>
       </header>
 

@@ -1,3 +1,5 @@
+import { buildOgImageUrl } from '@/app/_lib/og-image-url'
+
 export const metadata = {
   title: 'SIFTLI Project',
   description: 'salam ana 7amdi',
@@ -8,12 +10,16 @@ export const metadata = {
   openGraph: {
     title: 'SIFTLI Project',
     description: 'salam ana 7amdi',
-    images: ['/projects/siftli/opengraph-image'],
+    images: [
+      buildOgImageUrl({ title: 'SIFTLI Project', description: 'salam ana 7amdi' }),
+    ],
   },
   twitter: {
     title: 'SIFTLI Project',
     description: 'salam ana 7amdi',
-    images: ['/projects/siftli/opengraph-image'],
+    images: [
+      buildOgImageUrl({ title: 'SIFTLI Project', description: 'salam ana 7amdi' }),
+    ],
   },
 }
 

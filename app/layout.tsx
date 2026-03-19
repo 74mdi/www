@@ -4,6 +4,7 @@ import { Analytics } from '@vercel/analytics/next'
 import cn from 'clsx'
 import localFont from 'next/font/local'
 
+import { buildOgImageUrl } from '@/app/_lib/og-image-url'
 import Navbar from '@/components/navbar'
 import PageTransitionShell from '@/components/page-transition-shell'
 import './globals.css'
@@ -66,13 +67,25 @@ export const metadata: Metadata = {
     siteName: 'qaiik',
     title: 'qaiik',
     description: siteDescription,
-    images: ['/opengraph-image'],
+    images: [
+      buildOgImageUrl({
+        variant: 'default',
+        title: 'qaiik',
+        description: siteDescription,
+      }),
+    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'qaiik',
     description: siteDescription,
-    images: ['/opengraph-image'],
+    images: [
+      buildOgImageUrl({
+        variant: 'default',
+        title: 'qaiik',
+        description: siteDescription,
+      }),
+    ],
   },
   robots: {
     index: true,

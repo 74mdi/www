@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { getGalleryImages } from '@/app/_lib/gallery'
+import { buildOgImageUrl } from '@/app/_lib/og-image-url'
 import GalleryGrid from '@/app/gallery/gallery-grid'
 
 export const runtime = 'nodejs'
@@ -15,12 +16,24 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Gallery',
     description: 'Photo gallery with metadata and capture details.',
-    images: ['/opengraph-image'],
+    images: [
+      buildOgImageUrl({
+        variant: 'default',
+        title: 'Gallery',
+        description: 'Photo gallery with metadata and capture details.',
+      }),
+    ],
   },
   twitter: {
     title: 'Gallery',
     description: 'Photo gallery with metadata and capture details.',
-    images: ['/opengraph-image'],
+    images: [
+      buildOgImageUrl({
+        variant: 'default',
+        title: 'Gallery',
+        description: 'Photo gallery with metadata and capture details.',
+      }),
+    ],
   },
 }
 

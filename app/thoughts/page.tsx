@@ -1,5 +1,6 @@
 import Link from 'next/link'
 
+import { buildOgImageUrl } from '@/app/_lib/og-image-url'
 import { getThoughtArticles } from '@/app/thoughts/articles'
 
 export const metadata = {
@@ -8,12 +9,24 @@ export const metadata = {
   openGraph: {
     title: 'Thoughts',
     description: 'salam ana 7amdi',
-    images: ['/thoughts/opengraph-image'],
+    images: [
+      buildOgImageUrl({
+        variant: 'thoughts',
+        title: 'Thoughts',
+        description: 'salam ana 7amdi',
+      }),
+    ],
   },
   twitter: {
     title: 'Thoughts',
     description: 'salam ana 7amdi',
-    images: ['/thoughts/opengraph-image'],
+    images: [
+      buildOgImageUrl({
+        variant: 'thoughts',
+        title: 'Thoughts',
+        description: 'salam ana 7amdi',
+      }),
+    ],
   },
 }
 
