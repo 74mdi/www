@@ -1,12 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-
-type Reciter = {
-  id: string
-  label: string
-  baseUrl: string
-}
+import { RECITERS, type Reciter } from './reciters'
 
 type Verse = {
   id: number
@@ -37,39 +32,6 @@ const FALLBACK_CHAPTERS: QuranChapter[] = Array.from({ length: CHAPTER_COUNT }, 
   nameAr: '',
   verses: [],
 }))
-
-const RECITERS: Reciter[] = [
-  {
-    id: 'mishari_al_afasy',
-    label: 'Mishari Alafasy',
-    baseUrl: 'https://download.quranicaudio.com/qdc/mishari_al_afasy/murattal',
-  },
-  {
-    id: 'abdurrahmaan_as_sudais',
-    label: 'Abdurrahmaan As-Sudais',
-    baseUrl: 'https://download.quranicaudio.com/qdc/abdurrahmaan_as_sudais/murattal',
-  },
-  {
-    id: 'hani_ar_rifai',
-    label: 'Hani Ar-Rifai',
-    baseUrl: 'https://download.quranicaudio.com/qdc/hani_ar_rifai/murattal',
-  },
-  {
-    id: 'abu_bakr_shatri',
-    label: 'Abu Bakr Ash-Shaatree',
-    baseUrl: 'https://download.quranicaudio.com/qdc/abu_bakr_shatri/murattal',
-  },
-  {
-    id: 'khalil_al_husary',
-    label: 'Khalil Al-Husary',
-    baseUrl: 'https://download.quranicaudio.com/qdc/khalil_al_husary/murattal',
-  },
-  {
-    id: 'abdul_baset_mujawwad',
-    label: 'Abdul Baset Mujawwad',
-    baseUrl: 'https://download.quranicaudio.com/qdc/abdul_baset/mujawwad',
-  },
-]
 
 const INPUT_CLASS =
   'w-full rounded-md border border-[var(--color-rurikon-border)] bg-[var(--background)] px-3 py-2 text-rurikon-600 placeholder:text-rurikon-300 focus-visible:outline focus-visible:outline-rurikon-400 focus-visible:outline-offset-2 focus-visible:outline-dotted'
@@ -153,7 +115,10 @@ export default function QuranPlayer() {
   const audioUrl = useMemo(() => {
     if (expandedChapterId === null) return ''
     const safeReciter = activeReciter ?? RECITERS[0]
-    return `${safeReciter.baseUrl}/${expandedChapterId}.mp3`
+    const chapterIdStr = safeReciter.padding
+      ? String(expandedChapterId).padStart(safeReciter.padding, '0')
+      : String(expandedChapterId)
+    return `${safeReciter.baseUrl}/${chapterIdStr}.mp3`
   }, [expandedChapterId, activeReciter])
 
   useEffect(() => {
