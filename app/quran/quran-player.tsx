@@ -49,6 +49,11 @@ const FALLBACK_CHAPTERS = Array.from({ length: CHAPTER_COUNT }, (_unused, index)
 
 const RECITERS: Reciter[] = [
   {
+    id: 'mahmoud_khalil_al_husary',
+    label: 'Mahmoud Khalil Al-Husary',
+    baseUrl: 'https://archive.org/download/MahmoudKhalilAl-husary',
+  },
+  {
     id: 'mishari_al_afasy',
     label: 'Mishari Alafasy',
     baseUrl: 'https://download.quranicaudio.com/qdc/mishari_al_afasy/murattal',
