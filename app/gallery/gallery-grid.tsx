@@ -113,8 +113,7 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
 
       {activeImage ? (
         <div
-          className='fixed inset-0 z-40 flex items-center justify-center'
-          style={{ height: '100dvh' }}
+          className='fixed inset-0 z-40 flex items-center justify-center h-screen w-screen'
           role='dialog'
           aria-modal='true'
         >
@@ -133,8 +132,7 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
               quality={90}
               placeholder={activeImage.blurDataURL ? 'blur' : 'empty'}
               blurDataURL={activeImage.blurDataURL}
-              style={{ maxHeight: '80dvh' }}
-              className='w-auto max-w-full rounded-2xl object-contain shadow-[0_18px_40px_rgba(0,0,0,0.28)]'
+              className='max-h-[85vh] w-auto max-w-full rounded-2xl object-contain shadow-[0_18px_40px_rgba(0,0,0,0.28)]'
               onClick={() => setActiveIndex(null)}
             />
             {activeImage.dateText ? (
