@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useLayoutEffect, useMemo, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import Image from 'next/image'
 
 type GalleryGridImage = {
@@ -37,6 +37,7 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
   const visibleImages = images.slice(0, visibleCount)
   const activeImage = activeIndex !== null ? visibleImages[activeIndex] : null
   const numCols = useNumCols()
+  const scrollYRef = useRef(0)
 
   const cols = useMemo(() => {
     const result: GalleryGridImage[][] = Array.from({ length: numCols }, () => [])
@@ -46,17 +47,43 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
 
   useEffect(() => {
     if (!activeImage) {
+      const top = document.body.style.top
+      document.body.style.position = ''
+      document.body.style.top = ''
+      document.body.style.left = ''
+      document.body.style.right = ''
+      document.body.style.width = ''
       document.body.style.overflow = ''
+
+      const scrollY = top ? Math.abs(Number.parseInt(top, 10)) || scrollYRef.current : scrollYRef.current
+      if (scrollY) window.scrollTo(0, scrollY)
       return
     }
+
+    scrollYRef.current = window.scrollY
+    document.body.style.position = 'fixed'
+    document.body.style.top = `-${scrollYRef.current}px`
+    document.body.style.left = '0'
+    document.body.style.right = '0'
+    document.body.style.width = '100%'
     document.body.style.overflow = 'hidden'
+
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') setActiveIndex(null)
     }
     window.addEventListener('keydown', onKeyDown)
     return () => {
       window.removeEventListener('keydown', onKeyDown)
+      const top = document.body.style.top
+      document.body.style.position = ''
+      document.body.style.top = ''
+      document.body.style.left = ''
+      document.body.style.right = ''
+      document.body.style.width = ''
       document.body.style.overflow = ''
+
+      const scrollY = top ? Math.abs(Number.parseInt(top, 10)) || scrollYRef.current : scrollYRef.current
+      if (scrollY) window.scrollTo(0, scrollY)
     }
   }, [activeImage])
 
