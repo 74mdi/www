@@ -22,6 +22,23 @@ const PAGE_SIZE = 12
 const PREVIEW_GAP_PX = 10
 const PREVIEW_MARGIN_PX = 10
 
+function extractDateFromSrc(src: string): string | null {
+  const filename = src.split('/').pop() ?? ''
+  const match = filename.match(/^(\d{2})(\d{2})(\d{4})/)
+  if (!match) return null
+
+  const day = Number(match[1])
+  const month = Number(match[2])
+  const year = Number(match[3])
+  if (!Number.isFinite(day) || !Number.isFinite(month) || !Number.isFinite(year)) return null
+  if (day < 1 || day > 31 || month < 1 || month > 12) return null
+
+  const date = new Date(Date.UTC(year, month - 1, day))
+  if (Number.isNaN(date.getTime())) return null
+
+  return new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(date)
+}
+
 const useNumCols = () => {
   const [numCols, setNumCols] = useState(2)
   useLayoutEffect(() => {
@@ -215,10 +232,10 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
                       }
                     />
                   </div>
-                  <div className='px-4 pb-4 pt-1 space-y-2'>
+                  <div className='hidden sm:block px-4 pb-4 pt-1 space-y-2'>
                     <div className='flex items-start justify-between gap-3'>
                       <div className='text-xs text-rurikon-600 [overflow-wrap:anywhere]'>
-                        {activeImage.dateText ?? 'Unknown date'}
+                        {activeImage.dateText ?? extractDateFromSrc(activeImage.src) ?? ''}
                       </div>
                       <button
                         type='button'
