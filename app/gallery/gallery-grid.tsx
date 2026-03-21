@@ -214,6 +214,7 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
               >
                 <div className='rounded-2xl border border-rurikon-border bg-[var(--surface-overlay)] shadow-[var(--overlay-shadow-strong)] overflow-hidden'>
                   <div className='p-2'>
+                    <div className='relative'>
                     <Image
                       src={activeImage.src}
                       alt={activeImage.title}
@@ -231,6 +232,10 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
                           : 'h-auto w-full rounded-xl object-contain bg-[var(--surface-raised)] cursor-zoom-in transition-transform duration-200 ease-out'
                       }
                     />
+                    <div className='sm:hidden absolute inset-x-0 bottom-0 rounded-b-xl bg-[rgb(var(--background-rgb)/0.55)] px-3 py-2 text-[11px] text-rurikon-100 backdrop-blur'>
+                      {activeImage.dateText ?? extractDateFromSrc(activeImage.src) ?? ''}
+                    </div>
+                    </div>
                   </div>
                   <div className='hidden sm:block px-4 pb-4 pt-1 space-y-2'>
                     <div className='flex items-start justify-between gap-3'>
