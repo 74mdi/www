@@ -38,6 +38,7 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
     Math.min(PAGE_SIZE, images.length),
   )
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
+  const [isZoomed, setIsZoomed] = useState(false)
   const visibleImages = images.slice(0, visibleCount)
   const activeImage = activeIndex !== null ? visibleImages[activeIndex] : null
   const numCols = useNumCols()
@@ -54,6 +55,8 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
 
   useEffect(() => {
     if (!activeImage) return
+
+    setIsZoomed(false)
 
     const updatePreviewPosition = () => {
       const button = activeButtonRef.current
@@ -102,16 +105,20 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
       updatePreviewPosition()
     }
 
+    const handleScrollClose = () => {
+      setActiveIndex(null)
+    }
+
     document.addEventListener('pointerdown', handlePointerDown)
     document.addEventListener('keydown', handleEscape)
     window.addEventListener('resize', handleViewportChange)
-    window.addEventListener('scroll', handleViewportChange, true)
+    window.addEventListener('scroll', handleScrollClose, true)
 
     return () => {
       document.removeEventListener('pointerdown', handlePointerDown)
       document.removeEventListener('keydown', handleEscape)
       window.removeEventListener('resize', handleViewportChange)
-      window.removeEventListener('scroll', handleViewportChange, true)
+      window.removeEventListener('scroll', handleScrollClose, true)
     }
   }, [activeImage])
 
@@ -199,16 +206,28 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
                       quality={90}
                       placeholder={activeImage.blurDataURL ? 'blur' : 'empty'}
                       blurDataURL={activeImage.blurDataURL}
-                      className='h-auto w-full rounded-xl object-contain bg-[var(--surface-raised)]'
+                      onDoubleClick={() => setIsZoomed((prev) => !prev)}
+                      style={{ transform: isZoomed ? 'scale(1.6)' : 'scale(1)' }}
+                      className={
+                        isZoomed
+                          ? 'h-auto w-full rounded-xl object-contain bg-[var(--surface-raised)] cursor-zoom-out transition-transform duration-200 ease-out'
+                          : 'h-auto w-full rounded-xl object-contain bg-[var(--surface-raised)] cursor-zoom-in transition-transform duration-200 ease-out'
+                      }
                     />
                   </div>
-                  <div className='px-4 pb-4 pt-1 space-y-1'>
-                    <div className='text-xs text-rurikon-600 [overflow-wrap:anywhere]'>
-                      {activeImage.title}
+                  <div className='px-4 pb-4 pt-1 space-y-2'>
+                    <div className='flex items-start justify-between gap-3'>
+                      <div className='text-xs text-rurikon-600 [overflow-wrap:anywhere]'>
+                        {activeImage.dateText ?? 'Unknown date'}
+                      </div>
+                      <button
+                        type='button'
+                        onClick={() => setIsZoomed((prev) => !prev)}
+                        className='shrink-0 rounded-full border border-rurikon-border bg-[var(--surface-overlay)] px-3 py-1 text-[11px] text-rurikon-600 transition-colors hover:text-rurikon-800'
+                      >
+                        {isZoomed ? 'zoom out' : 'zoom'}
+                      </button>
                     </div>
-                    {activeImage.dateText ? (
-                      <div className='text-xs text-rurikon-400'>{activeImage.dateText}</div>
-                    ) : null}
                   </div>
                 </div>
               </div>
