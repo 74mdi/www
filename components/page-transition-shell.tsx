@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 
 import { useHydrated } from '@/components/use-hydrated'
@@ -15,12 +16,20 @@ export default function PageTransitionShell({
 }: PageTransitionShellProps) {
   const pathname = usePathname()
   const hasHydrated = useHydrated()
+  const [isEntering, setIsEntering] = useState(false)
+
+  useEffect(() => {
+    // Reset and trigger animation on route change
+    setIsEntering(false)
+    const timer = setTimeout(() => setIsEntering(true), 0)
+    return () => clearTimeout(timer)
+  }, [pathname])
 
   return (
     <article
       key={pathname}
       className={className}
-      data-route-transition={hasHydrated ? 'enter' : undefined}
+      data-route-transition={hasHydrated && isEntering ? 'enter' : undefined}
     >
       {children}
     </article>

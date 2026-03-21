@@ -113,33 +113,35 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
 
       {activeImage ? (
         <div
-          className='fixed inset-0 z-40 flex items-center justify-center h-screen w-screen'
+          className='fixed top-0 left-0 right-0 bottom-0 z-50 flex items-center justify-center'
           role='dialog'
           aria-modal='true'
         >
           <div
-            className='absolute inset-0 bg-[rgb(var(--background-rgb)/0.7)] backdrop-blur-sm'
+            className='absolute inset-0 bg-[rgb(var(--background-rgb)/0.8)] backdrop-blur-md'
             aria-hidden='true'
             onClick={() => setActiveIndex(null)}
           />
-          <div className='relative z-10 flex w-full flex-col items-center px-4'>
-            <Image
-              src={activeImage.src}
-              alt={activeImage.title}
-              width={activeImage.width}
-              height={activeImage.height}
-              sizes='(min-width: 640px) 90vw, 96vw'
-              quality={90}
-              placeholder={activeImage.blurDataURL ? 'blur' : 'empty'}
-              blurDataURL={activeImage.blurDataURL}
-              className='max-h-[85vh] w-auto max-w-full rounded-2xl object-contain shadow-[0_18px_40px_rgba(0,0,0,0.28)]'
-              onClick={() => setActiveIndex(null)}
-            />
-            {activeImage.dateText ? (
-              <div className='mt-3 text-xs text-rurikon-400'>
-                {activeImage.dateText}
-              </div>
-            ) : null}
+          <div className='relative z-10 flex h-full w-full items-center justify-center p-4'>
+            <div className='flex flex-col items-center'>
+              <Image
+                src={activeImage.src}
+                alt={activeImage.title}
+                width={activeImage.width}
+                height={activeImage.height}
+                sizes='(min-width: 640px) 90vw, 96vw'
+                quality={90}
+                placeholder={activeImage.blurDataURL ? 'blur' : 'empty'}
+                blurDataURL={activeImage.blurDataURL}
+                className='max-h-[80vh] w-auto max-w-full rounded-2xl object-contain shadow-[0_18px_40px_rgba(0,0,0,0.28)]'
+                onClick={() => setActiveIndex(null)}
+              />
+              {activeImage.dateText ? (
+                <div className='mt-3 text-xs text-rurikon-400'>
+                  {activeImage.dateText}
+                </div>
+              ) : null}
+            </div>
           </div>
           <button
             type='button'
