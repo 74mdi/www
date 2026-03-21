@@ -2,6 +2,7 @@
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import Image from 'next/image'
+import { createPortal } from 'react-dom'
 
 type GalleryGridImage = {
   src: string
@@ -17,6 +18,9 @@ type GalleryGridProps = {
 }
 
 const PAGE_SIZE = 12
+
+const PREVIEW_GAP_PX = 10
+const PREVIEW_MARGIN_PX = 10
 
 const useNumCols = () => {
   const [numCols, setNumCols] = useState(2)
@@ -37,7 +41,10 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
   const visibleImages = images.slice(0, visibleCount)
   const activeImage = activeIndex !== null ? visibleImages[activeIndex] : null
   const numCols = useNumCols()
-  const scrollYRef = useRef(0)
+  const activeButtonRef = useRef<HTMLButtonElement | null>(null)
+  const previewRef = useRef<HTMLDivElement | null>(null)
+  const [previewPosition, setPreviewPosition] = useState({ left: 0, top: 0 })
+  const isClient = typeof window !== 'undefined'
 
   const cols = useMemo(() => {
     const result: GalleryGridImage[][] = Array.from({ length: numCols }, () => [])
@@ -46,44 +53,65 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
   }, [visibleImages, numCols])
 
   useEffect(() => {
-    if (!activeImage) {
-      const top = document.body.style.top
-      document.body.style.position = ''
-      document.body.style.top = ''
-      document.body.style.left = ''
-      document.body.style.right = ''
-      document.body.style.width = ''
-      document.body.style.overflow = ''
+    if (!activeImage) return
 
-      const scrollY = top ? Math.abs(Number.parseInt(top, 10)) || scrollYRef.current : scrollYRef.current
-      if (scrollY) window.scrollTo(0, scrollY)
-      return
+    const updatePreviewPosition = () => {
+      const button = activeButtonRef.current
+      if (!button) return
+
+      const rect = button.getBoundingClientRect()
+      const previewWidth = window.matchMedia('(min-width: 640px)').matches
+        ? 520
+        : Math.min(360, window.innerWidth - PREVIEW_MARGIN_PX * 2)
+
+      const clampedLeft = Math.min(
+        Math.max(rect.left + rect.width / 2 - previewWidth / 2, PREVIEW_MARGIN_PX),
+        window.innerWidth - previewWidth - PREVIEW_MARGIN_PX,
+      )
+
+      const previewHeight = Math.min(
+        Math.floor(window.innerHeight * 0.72),
+        window.matchMedia('(min-width: 640px)').matches ? 520 : 420,
+      )
+
+      let top = rect.bottom + PREVIEW_GAP_PX
+      if (top + previewHeight > window.innerHeight - PREVIEW_MARGIN_PX) {
+        top = Math.max(
+          PREVIEW_MARGIN_PX,
+          rect.top - previewHeight - PREVIEW_GAP_PX,
+        )
+      }
+
+      setPreviewPosition({ left: clampedLeft, top })
     }
 
-    scrollYRef.current = window.scrollY
-    document.body.style.position = 'fixed'
-    document.body.style.top = `-${scrollYRef.current}px`
-    document.body.style.left = '0'
-    document.body.style.right = '0'
-    document.body.style.width = '100%'
-    document.body.style.overflow = 'hidden'
+    updatePreviewPosition()
 
-    const onKeyDown = (event: KeyboardEvent) => {
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target as Node
+      if (activeButtonRef.current?.contains(target)) return
+      if (previewRef.current?.contains(target)) return
+      setActiveIndex(null)
+    }
+
+    const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') setActiveIndex(null)
     }
-    window.addEventListener('keydown', onKeyDown)
-    return () => {
-      window.removeEventListener('keydown', onKeyDown)
-      const top = document.body.style.top
-      document.body.style.position = ''
-      document.body.style.top = ''
-      document.body.style.left = ''
-      document.body.style.right = ''
-      document.body.style.width = ''
-      document.body.style.overflow = ''
 
-      const scrollY = top ? Math.abs(Number.parseInt(top, 10)) || scrollYRef.current : scrollYRef.current
-      if (scrollY) window.scrollTo(0, scrollY)
+    const handleViewportChange = () => {
+      updatePreviewPosition()
+    }
+
+    document.addEventListener('pointerdown', handlePointerDown)
+    document.addEventListener('keydown', handleEscape)
+    window.addEventListener('resize', handleViewportChange)
+    window.addEventListener('scroll', handleViewportChange, true)
+
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown)
+      document.removeEventListener('keydown', handleEscape)
+      window.removeEventListener('resize', handleViewportChange)
+      window.removeEventListener('scroll', handleViewportChange, true)
     }
   }, [activeImage])
 
@@ -98,7 +126,10 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
                 <button
                   key={image.src}
                   type='button'
-                  onClick={() => setActiveIndex(globalIndex)}
+                  onClick={(event) => {
+                    activeButtonRef.current = event.currentTarget
+                    setActiveIndex(globalIndex)
+                  }}
                   className='block w-full text-left focus-visible:outline focus-visible:outline-rurikon-400 focus-visible:outline-dotted focus-visible:outline-offset-4'
                   aria-haspopup='dialog'
                   aria-expanded={activeIndex === globalIndex}
@@ -138,48 +169,53 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
         </div>
       ) : null}
 
-      {activeImage ? (
-        <div
-          className='fixed top-0 left-0 right-0 bottom-0 z-50 flex items-center justify-center'
-          role='dialog'
-          aria-modal='true'
-        >
-          <div
-            className='absolute inset-0 bg-[rgb(var(--background-rgb)/0.8)] backdrop-blur-md'
-            aria-hidden='true'
-            onClick={() => setActiveIndex(null)}
-          />
-          <div className='relative z-10 flex h-full w-full items-center justify-center p-4'>
-            <div className='flex flex-col items-center'>
-              <Image
-                src={activeImage.src}
-                alt={activeImage.title}
-                width={activeImage.width}
-                height={activeImage.height}
-                sizes='(min-width: 640px) 90vw, 96vw'
-                quality={90}
-                placeholder={activeImage.blurDataURL ? 'blur' : 'empty'}
-                blurDataURL={activeImage.blurDataURL}
-                className='max-h-[80vh] w-auto max-w-full rounded-2xl object-contain shadow-[0_18px_40px_rgba(0,0,0,0.28)]'
-                onClick={() => setActiveIndex(null)}
-              />
-              {activeImage.dateText ? (
-                <div className='mt-3 text-xs text-rurikon-400'>
-                  {activeImage.dateText}
+      {isClient && activeImage
+        ? createPortal(
+            <div
+              className='fixed inset-0 z-50 pointer-events-none'
+              aria-hidden={activeImage ? undefined : true}
+            >
+              <div
+                ref={previewRef}
+                role='dialog'
+                aria-modal='false'
+                className={`absolute origin-top-left transition-all duration-200 ease-out ${activeImage ? 'pointer-events-auto opacity-100 scale-100 translate-y-0' : 'pointer-events-none opacity-0 scale-95 -translate-y-1'}`}
+                style={{
+                  left: `${previewPosition.left}px`,
+                  top: `${previewPosition.top}px`,
+                  width: window.matchMedia('(min-width: 640px)').matches
+                    ? '520px'
+                    : `${Math.min(360, window.innerWidth - PREVIEW_MARGIN_PX * 2)}px`,
+                }}
+              >
+                <div className='rounded-2xl border border-rurikon-border bg-[var(--surface-overlay)] shadow-[var(--overlay-shadow-strong)] overflow-hidden'>
+                  <div className='p-2'>
+                    <Image
+                      src={activeImage.src}
+                      alt={activeImage.title}
+                      width={activeImage.width}
+                      height={activeImage.height}
+                      sizes='(min-width: 640px) 520px, 90vw'
+                      quality={90}
+                      placeholder={activeImage.blurDataURL ? 'blur' : 'empty'}
+                      blurDataURL={activeImage.blurDataURL}
+                      className='h-auto w-full rounded-xl object-contain bg-[var(--surface-raised)]'
+                    />
+                  </div>
+                  <div className='px-4 pb-4 pt-1 space-y-1'>
+                    <div className='text-xs text-rurikon-600 [overflow-wrap:anywhere]'>
+                      {activeImage.title}
+                    </div>
+                    {activeImage.dateText ? (
+                      <div className='text-xs text-rurikon-400'>{activeImage.dateText}</div>
+                    ) : null}
+                  </div>
                 </div>
-              ) : null}
-            </div>
-          </div>
-          <button
-            type='button'
-            aria-label='Close image'
-            onClick={() => setActiveIndex(null)}
-            className='absolute right-4 top-4 z-20 rounded-full border border-rurikon-border bg-[var(--surface-overlay)] px-3 py-1 text-xs text-rurikon-600 transition-colors hover:text-rurikon-800'
-          >
-            close
-          </button>
-        </div>
-      ) : null}
+              </div>
+            </div>,
+            document.body,
+          )
+        : null}
     </>
   )
 }
