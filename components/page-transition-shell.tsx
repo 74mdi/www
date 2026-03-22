@@ -16,20 +16,17 @@ export default function PageTransitionShell({
 }: PageTransitionShellProps) {
   const pathname = usePathname()
   const hasHydrated = useHydrated()
-  const [isEntering, setIsEntering] = useState(false)
+  const [transitionKey, setTransitionKey] = useState(0)
 
   useEffect(() => {
-    // Reset and trigger animation on route change
-    setIsEntering(false)
-    const timer = setTimeout(() => setIsEntering(true), 0)
-    return () => clearTimeout(timer)
+    setTransitionKey((value) => value + 1)
   }, [pathname])
 
   return (
     <article
-      key={pathname}
+      key={transitionKey}
       className={className}
-      data-route-transition={hasHydrated && isEntering ? 'enter' : undefined}
+      data-route-transition={hasHydrated ? 'enter' : undefined}
     >
       {children}
     </article>

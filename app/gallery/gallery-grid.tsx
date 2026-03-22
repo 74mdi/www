@@ -232,8 +232,11 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
                           : 'h-auto w-full rounded-xl object-contain bg-[var(--surface-raised)] cursor-zoom-in transition-transform duration-200 ease-out'
                       }
                     />
-                    <div className='sm:hidden absolute inset-x-0 bottom-0 rounded-b-xl bg-[rgb(var(--background-rgb)/0.55)] px-3 py-2 text-[11px] text-rurikon-100 backdrop-blur'>
-                      {activeImage.dateText ?? extractDateFromSrc(activeImage.src) ?? ''}
+                    <div className='sm:hidden absolute inset-x-0 bottom-0 rounded-b-xl px-3 py-2 text-[11px] text-white'>
+                      <div className='absolute inset-0 rounded-b-xl bg-gradient-to-t from-black/70 via-black/35 to-transparent' />
+                      <div className='relative drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]'>
+                        {activeImage.dateText ?? extractDateFromSrc(activeImage.src) ?? ''}
+                      </div>
                     </div>
                     </div>
                   </div>
