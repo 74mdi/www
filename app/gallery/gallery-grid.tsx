@@ -212,48 +212,43 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
                     : `${Math.min(360, window.innerWidth - PREVIEW_MARGIN_PX * 2)}px`,
                 }}
               >
-                <div className='rounded-2xl border border-rurikon-border bg-[var(--surface-overlay)] shadow-[var(--overlay-shadow-strong)] overflow-hidden'>
-                  <div className='p-2'>
-                    <div className='relative'>
-                    <Image
-                      src={activeImage.src}
-                      alt={activeImage.title}
-                      width={activeImage.width}
-                      height={activeImage.height}
-                      sizes='(min-width: 640px) 520px, 90vw'
-                      quality={90}
-                      placeholder={activeImage.blurDataURL ? 'blur' : 'empty'}
-                      blurDataURL={activeImage.blurDataURL}
-                      onDoubleClick={() => setIsZoomed((prev) => !prev)}
-                      style={{ transform: isZoomed ? 'scale(1.6)' : 'scale(1)' }}
-                      className={
-                        isZoomed
-                          ? 'h-auto w-full rounded-xl object-contain bg-[var(--surface-raised)] cursor-zoom-out transition-transform duration-200 ease-out'
-                          : 'h-auto w-full rounded-xl object-contain bg-[var(--surface-raised)] cursor-zoom-in transition-transform duration-200 ease-out'
-                      }
-                    />
-                    <div className='sm:hidden absolute inset-x-0 bottom-0 rounded-b-xl px-3 py-2 text-[11px] text-white'>
-                      <div className='absolute inset-0 rounded-b-xl bg-gradient-to-t from-black/70 via-black/35 to-transparent' />
-                      <div className='relative drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]'>
-                        {activeImage.dateText ?? extractDateFromSrc(activeImage.src) ?? ''}
-                      </div>
-                    </div>
+                <div className='relative'>
+                  <Image
+                    src={activeImage.src}
+                    alt={activeImage.title}
+                    width={activeImage.width}
+                    height={activeImage.height}
+                    sizes='(min-width: 640px) 520px, 90vw'
+                    quality={90}
+                    placeholder={activeImage.blurDataURL ? 'blur' : 'empty'}
+                    blurDataURL={activeImage.blurDataURL}
+                    onDoubleClick={() => setIsZoomed((prev) => !prev)}
+                    style={{ transform: isZoomed ? 'scale(1.6)' : 'scale(1)' }}
+                    className={
+                      isZoomed
+                        ? 'h-auto w-full rounded-xl object-contain bg-[var(--surface-raised)] cursor-zoom-out transition-transform duration-200 ease-out'
+                        : 'h-auto w-full rounded-xl object-contain bg-[var(--surface-raised)] cursor-zoom-in transition-transform duration-200 ease-out'
+                    }
+                  />
+                  <div className='sm:hidden absolute inset-x-0 bottom-0 rounded-b-xl px-3 py-2 text-[11px] text-white'>
+                    <div className='absolute inset-0 rounded-b-xl bg-gradient-to-t from-black/70 via-black/35 to-transparent' />
+                    <div className='relative drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]'>
+                      {activeImage.dateText ?? extractDateFromSrc(activeImage.src) ?? ''}
                     </div>
                   </div>
-                  <div className='hidden sm:block px-4 pb-4 pt-1 space-y-2'>
-                    <div className='flex items-start justify-between gap-3'>
-                      <div className='text-xs text-rurikon-600 [overflow-wrap:anywhere]'>
-                        {activeImage.dateText ?? extractDateFromSrc(activeImage.src) ?? ''}
-                      </div>
-                      <button
-                        type='button'
-                        onClick={() => setIsZoomed((prev) => !prev)}
-                        className='shrink-0 rounded-full border border-rurikon-border bg-[var(--surface-overlay)] px-3 py-1 text-[11px] text-rurikon-600 transition-colors hover:text-rurikon-800'
-                      >
-                        {isZoomed ? 'zoom out' : 'zoom'}
-                      </button>
-                    </div>
+                </div>
+
+                <div className='hidden sm:flex items-start justify-between gap-3 pt-3'>
+                  <div className='text-xs text-rurikon-600 [overflow-wrap:anywhere]'>
+                    {activeImage.dateText ?? extractDateFromSrc(activeImage.src) ?? ''}
                   </div>
+                  <button
+                    type='button'
+                    onClick={() => setIsZoomed((prev) => !prev)}
+                    className='shrink-0 rounded-full border border-rurikon-border bg-[var(--surface-overlay)] px-3 py-1 text-[11px] text-rurikon-600 transition-colors hover:text-rurikon-800'
+                  >
+                    {isZoomed ? 'zoom out' : 'zoom'}
+                  </button>
                 </div>
               </div>
             </div>,
