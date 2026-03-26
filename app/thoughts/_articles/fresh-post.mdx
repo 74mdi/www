@@ -1,0 +1,208 @@
+export const metadata = {
+  title: 'ArchBang on 1GB RAM + YouTube in Terminal',
+  description:
+    'A practical low-RAM optimization guide for Atom-era hardware, plus terminal YouTube workflows.',
+  date: '2026.03.26',
+  draft: false,
+}
+
+# ArchBang Optimization for 1GB RAM (Atom) + YouTube in Terminal
+
+If your machine has only 1GB RAM and an old Atom CPU, you can still make ArchBang feel usable with a few focused tweaks.
+
+<BlockSideTitle title='Apply one section at a time, test, then continue. This makes troubleshooting much easier.'>
+
+These settings reduce memory pressure, but they can also disable features you may need (printing, bluetooth, audit logs).
+
+</BlockSideTitle>
+
+![Low-RAM setup mindset](photography.jpeg "Small changes, done in order, give the biggest stability gain.")
+
+| Section | Goal | Impact |
+| ------ | ----------- | ----------- |
+| zram + swappiness | Better memory behavior | Fewer freezes under pressure |
+| Service cleanup | Lower idle RAM use | More free memory at boot |
+| Firefox tuning | Lighter browsing | Better tab stability |
+| Terminal YouTube workflow | Lightweight media flow | Less overhead than full browser use |
+
+## Step 1 - Enable zram (compressed RAM)
+
+```bash
+sudo pacman -S zram-generator
+echo -e "[zram0]\nzram-size = ram / 2" | sudo tee /etc/systemd/zram-generator.conf
+sudo systemctl daemon-reload
+sudo systemctl start systemd-zram-setup@zram0
+```
+
+For a 1GB machine, `ram / 2` gives a 512MB zram device.
+
+## Step 2 - Reduce swappiness
+
+```bash
+echo "vm.swappiness=10" | sudo tee -a /etc/sysctl.d/99-sysctl.conf
+sudo sysctl -p /etc/sysctl.d/99-sysctl.conf
+```
+
+Lower swappiness usually makes desktop usage feel less laggy.
+
+## Step 3 - Disable heavy services you do not use
+
+```bash
+sudo systemctl disable bluetooth
+sudo systemctl disable cups
+sudo systemctl mask systemd-journald-audit.socket
+```
+
+<mark>Important:</mark> only disable these if you really do not need them.
+
+## Step 4 - Limit journal log size
+
+Edit `/etc/systemd/journald.conf` and set:
+
+```ini
+SystemMaxUse=50M
+```
+
+This prevents logs from eating too much disk and memory cache.
+
+## Step 5 - Install lighter tools
+
+```bash
+# Lightweight browser
+sudo pacman -S firefox
+
+# Fast terminal file manager
+sudo pacman -S ranger
+
+# RAM monitor
+sudo pacman -S htop
+```
+
+## Step 6 - Firefox tweaks for low RAM
+
+Open `about:config`, then set:
+
+```text
+browser.cache.disk.capacity = 51200
+browser.sessionhistory.max_entries = 5
+browser.tabs.unloadOnLowMemory = true
+```
+
+`browser.tabs.unloadOnLowMemory = true` helps a lot on 1GB systems.
+
+### Quick memory intuition
+
+One simple way to think about it is:
+<InlineMath math={'\\text{usable RAM} \\approx \\text{physical RAM} + \\text{compression gain from zram}'} />
+
+If compression is decent, a tiny machine can behave like it has more headroom:
+
+<BlockMath math={'1\\text{ GB RAM} + 0.5\\text{ GB zram} \\times 2 \\approx 2\\text{ GB effective working set (rough estimate)}'} />
+
+## Step 7 - Check RAM and reboot
+
+```bash
+free -h
+sudo reboot
+```
+
+---
+
+## YouTube in Terminal
+
+Here are practical methods, from simplest to most feature-rich.
+
+### Method 1 - `yt-dlp` + `mpv` (best starting point)
+
+```bash
+sudo pacman -S yt-dlp mpv
+mpv "https://youtube.com/watch?v=VIDEO_ID"
+```
+
+### Method 2 - `ytfzf` (search + watch from terminal)
+
+```bash
+sudo pacman -S ytfzf
+# or from AUR
+yay -S ytfzf
+ytfzf
+```
+
+### Method 3 - `pipe-viewer` (full TUI workflow)
+
+```bash
+yay -S pipe-viewer
+pipe-viewer
+```
+
+### Low-RAM playback modes
+
+Use lower quality to save memory and CPU:
+
+```bash
+mpv --ytdl-format="worst" "https://youtube.com/watch?v=VIDEO_ID"
+yt-dlp -f "bestvideo[height<=360]+bestaudio" --merge-output-format mp4 -o - "URL" | mpv -
+```
+
+### Optional helper alias
+
+```bash
+echo 'alias ytlite='\''mpv --ytdl-format="worst"'\''' >> ~/.bashrc
+source ~/.bashrc
+```
+
+Then run:
+
+```bash
+ytlite "https://youtube.com/watch?v=VIDEO_ID"
+```
+
+## Recommended order
+
+1. Do steps 1 to 3 first, then reboot.
+2. Apply steps 4 to 6 and test browser behavior.
+3. Add terminal YouTube tools last.
+
+<ins>Best practical combo for your hardware:</ins> `yt-dlp + mpv`.
+
+<Card
+  image='https://placehold.co/1200x630/f8fafc/0f172a?text=ArchBang+Low+RAM+Checklist'
+  title='ArchBang Low-RAM Checklist'
+  desc='Keep this as a quick visual summary while tuning your machine.'
+  link='https://wiki.archlinux.org/title/Improving_performance'
+/>
+
+<Card
+  image='https://placehold.co/1200x630/f8fafc/0f172a?text=Terminal+YouTube+Stack'
+  title='Terminal YouTube Stack'
+  desc='Official project pages and docs for the tools used above.'
+  link='https://github.com/yt-dlp/yt-dlp'
+/>
+
+<Image
+  src='/next.svg'
+  alt='MDX Image component demo'
+  width={180}
+  height={37}
+/>
+
+## Component demo
+
+The site also supports interactive MDX components:
+
+<DoubleSlitPlayground
+  simple
+  description='Small demo block to showcase custom MDX component usage.'
+  code={`which(
+  () => {
+    console.log("left path");
+    return -0.5;
+  },
+  () => {
+    console.log("right path");
+    return 0.5;
+  }
+)`}
+/>
+
+For official references, see [Arch Wiki performance tips](https://wiki.archlinux.org/title/Improving_performance) and [zram on Arch](https://wiki.archlinux.org/title/Zram).
