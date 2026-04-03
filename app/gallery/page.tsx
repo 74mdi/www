@@ -68,7 +68,7 @@ export default async function GalleryPage() {
             gallery
           </div>
           <h1 className='m-0 font-semibold tracking-normal text-[1.78rem] leading-[1.04] text-rurikon-700 sm:text-[2.08rem]'>
-            Quiet frames.
+            ikhan
           </h1>
           <p className='max-w-prose text-sm leading-6 text-rurikon-500 sm:text-[15px]'>
           koko hna kanposti chi ikhn kansowro b nokia dyali wsf
