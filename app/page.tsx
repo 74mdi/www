@@ -11,8 +11,6 @@ import EmailLink from '@/components/email-link'
 import { HomeLastFm } from '@/components/home-lastfm'
 import StructuredData from '@/components/structured-data'
 
-const INITIAL_NOW_MS = Date.now()
-
 export const metadata: Metadata = {
   title: {
     absolute: SITE_NAME,
@@ -64,12 +62,12 @@ export default function Page() {
         7amdi
       </h1>
 
+      <HomeLastFm />
+
       <p className='mt-5 max-w-prose text-rurikon-500'>
         personal website dyl 7amdi. kankteb (kdob) ikhan ela web development,
         design, performance, wchi experiments, wkan posti notes and photos.
       </p>
-
-      <HomeLastFm />
 
       <div className='mt-7 flex flex-wrap items-center gap-x-5 gap-y-2'>
         <a
@@ -103,7 +101,7 @@ export default function Page() {
         />
       </div>
 
-      <AboutAge initialNowMs={INITIAL_NOW_MS} />
+      <AboutAge />
     </section>
   )
 }

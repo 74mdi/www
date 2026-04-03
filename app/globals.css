@@ -159,7 +159,6 @@ body {
   letter-spacing: 0.0085em;
   word-spacing: -0.04em;
   background-color: var(--background);
-  text-rendering: geometricPrecision;
   text-autospace: normal;
 
   /* Debugger */

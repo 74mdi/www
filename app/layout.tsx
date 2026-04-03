@@ -18,7 +18,7 @@ import './globals.css'
 
 const sans = localFont({
   src: './_fonts/InterVariable.woff2',
-  preload: false,
+  preload: true,
   variable: '--sans',
 })
 

@@ -1,7 +1,5 @@
-'use client'
-
-import { LastFmStatus } from '@/components/lastfm-status'
+import HomeLastFmDeferred from '@/components/home-lastfm-deferred'
 
 export function HomeLastFm() {
-  return <LastFmStatus />
+  return <HomeLastFmDeferred />
 }
