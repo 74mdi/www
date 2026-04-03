@@ -56,6 +56,7 @@ function resolveDateText(image: GalleryGridImage): string {
 
 export default function GalleryGrid({ images }: GalleryGridProps) {
   const [sortOrder, setSortOrder] = useState<GallerySortOrder>('oldest')
+  const [columnCount, setColumnCount] = useState(2)
   const [visibleCount, setVisibleCount] = useState(
     Math.min(INITIAL_BATCH, images.length),
   )
@@ -94,6 +95,18 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
     () => sortedImages.slice(0, deferredVisibleCount),
     [deferredVisibleCount, sortedImages],
   )
+  const imageColumns = useMemo(() => {
+    const columns = Array.from({ length: columnCount }, () => [] as Array<{
+      image: GalleryGridImage
+      index: number
+    }>)
+
+    visibleImages.forEach((image, index) => {
+      columns[index % columnCount]?.push({ image, index })
+    })
+
+    return columns
+  }, [columnCount, visibleImages])
   const activeImageIndex = useMemo(() => {
     if (!activeSrc) return -1
     return sortedImages.findIndex((image) => image.src === activeSrc)
@@ -238,6 +251,29 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
   }, [isViewerOpen])
 
   useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const desktopQuery = window.matchMedia('(min-width: 1024px)')
+    const updateColumnCount = () => {
+      setColumnCount(desktopQuery.matches ? 3 : 2)
+    }
+
+    updateColumnCount()
+
+    if (typeof desktopQuery.addEventListener === 'function') {
+      desktopQuery.addEventListener('change', updateColumnCount)
+      return () => {
+        desktopQuery.removeEventListener('change', updateColumnCount)
+      }
+    }
+
+    desktopQuery.addListener(updateColumnCount)
+    return () => {
+      desktopQuery.removeListener(updateColumnCount)
+    }
+  }, [])
+
+  useEffect(() => {
     visibleImages
       .slice(0, EAGER_IMAGE_COUNT)
       .forEach((image) => preloadImage(image.src))
@@ -376,37 +412,46 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
         </div>
       </div>
 
-      <div className='columns-2 gap-3 sm:columns-2 lg:columns-3 [column-gap:0.85rem] sm:[column-gap:1rem]'>
-        {visibleImages.map((image, index) => (
-          <button
-            key={image.src}
-            type='button'
-            onClick={() => setActiveSrc(image.src)}
-            className='gallery-card-enter group mb-3 block w-full break-inside-avoid text-left focus-visible:outline focus-visible:outline-rurikon-400 focus-visible:outline-dotted focus-visible:outline-offset-4 sm:mb-4'
-            style={{
-              animationDelay: `${Math.min(index * 26, 240)}ms`,
-            }}
-            aria-haspopup='dialog'
-            aria-expanded={activeImage?.src === image.src}
-          >
-            <span className='block overflow-hidden rounded-[1.18rem] bg-[var(--surface-soft)] shadow-[0_8px_22px_rgba(0,0,0,0.06)] transition-transform duration-500 ease-out group-hover:-translate-y-0.5'>
-              <Image
-                src={image.src}
-                alt={image.title}
-                width={image.width}
-                height={image.height}
-                sizes={GRID_IMAGE_SIZES}
-                quality={66}
-                priority={index < EAGER_IMAGE_COUNT}
-                loading={index < EAGER_IMAGE_COUNT ? 'eager' : 'lazy'}
-                fetchPriority={index < EAGER_IMAGE_COUNT ? 'high' : 'auto'}
-                placeholder={image.blurDataURL ? 'blur' : 'empty'}
-                blurDataURL={image.blurDataURL}
-                decoding='async'
-                className='h-auto w-full transition-transform duration-700 ease-out group-hover:scale-[1.015]'
-              />
-            </span>
-          </button>
+      <div
+        className='grid grid-cols-2 gap-x-[0.85rem] gap-y-3 sm:gap-x-4 sm:gap-y-4'
+        style={{
+          gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))`,
+        }}
+      >
+        {imageColumns.map((column, columnIndex) => (
+          <div key={columnIndex} className='flex flex-col gap-3 sm:gap-4'>
+            {column.map(({ image, index }) => (
+              <button
+                key={image.src}
+                type='button'
+                onClick={() => setActiveSrc(image.src)}
+                className='gallery-card-enter group block w-full text-left focus-visible:outline focus-visible:outline-rurikon-400 focus-visible:outline-dotted focus-visible:outline-offset-4'
+                style={{
+                  animationDelay: `${Math.min(index * 26, 240)}ms`,
+                }}
+                aria-haspopup='dialog'
+                aria-expanded={activeImage?.src === image.src}
+              >
+                <span className='block overflow-hidden rounded-[1.18rem] bg-[var(--surface-soft)] shadow-[0_8px_22px_rgba(0,0,0,0.06)] transition-transform duration-500 ease-out group-hover:-translate-y-0.5'>
+                  <Image
+                    src={image.src}
+                    alt={image.title}
+                    width={image.width}
+                    height={image.height}
+                    sizes={GRID_IMAGE_SIZES}
+                    quality={66}
+                    priority={index < EAGER_IMAGE_COUNT}
+                    loading={index < EAGER_IMAGE_COUNT ? 'eager' : 'lazy'}
+                    fetchPriority={index < EAGER_IMAGE_COUNT ? 'high' : 'auto'}
+                    placeholder={image.blurDataURL ? 'blur' : 'empty'}
+                    blurDataURL={image.blurDataURL}
+                    decoding='async'
+                    className='h-auto w-full transition-transform duration-700 ease-out group-hover:scale-[1.015]'
+                  />
+                </span>
+              </button>
+            ))}
+          </div>
         ))}
       </div>
 
