@@ -641,18 +641,13 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
                           <div
                             className='flex h-full w-full items-center justify-center'
                             style={{
-                              opacity: index === 1 ? 1 : isDragging ? 0.92 : 0.78,
-                              transform:
-                                index === 1
-                                  ? 'scale(1)'
-                                  : isDragging
-                                    ? 'scale(0.992)'
-                                    : 'scale(0.985)',
-                              filter: index === 1 ? 'none' : 'saturate(0.92)',
+                              opacity: isDragging && index !== 1 ? 0.96 : 1,
+                              transform: 'translate3d(0, 0, 0)',
+                              filter: 'none',
                               transition: isDragging
                                 ? 'none'
-                                : 'transform 280ms cubic-bezier(0.22, 0.8, 0.2, 1), opacity 220ms ease-out, filter 220ms ease-out',
-                              willChange: 'transform, opacity, filter',
+                                : 'opacity 180ms ease-out',
+                              willChange: 'opacity',
                             }}
                           >
                             <Image
