@@ -2,6 +2,7 @@ import 'katex/dist/katex.min.css'
 import type { Metadata } from 'next'
 
 import { buildOgImageUrl } from '@/app/_lib/og-image-url'
+import { SITE_DESCRIPTION } from '@/app/_lib/site'
 
 export const metadata: Metadata = {
   openGraph: {
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
       buildOgImageUrl({
         variant: 'thoughts',
         title: 'Thoughts',
-        description: 'salam ana 7amdi',
+        description: SITE_DESCRIPTION,
       }),
     ],
   },
@@ -18,7 +19,7 @@ export const metadata: Metadata = {
       buildOgImageUrl({
         variant: 'thoughts',
         title: 'Thoughts',
-        description: 'salam ana 7amdi',
+        description: SITE_DESCRIPTION,
       }),
     ],
   },

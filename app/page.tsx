@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 
 import { buildOgImageUrl } from '@/app/_lib/og-image-url'
+import { SITE_DESCRIPTION, SITE_NAME } from '@/app/_lib/site'
 import { AboutAge } from '@/components/about-age'
 import { HomeLastFm } from '@/components/home-lastfm'
 
@@ -8,36 +9,32 @@ const INITIAL_NOW_MS = Date.now()
 
 export const metadata: Metadata = {
   title: {
-    absolute: '7amdi',
+    absolute: SITE_NAME,
   },
-  description:
-    'salam ana 7amdi. whadi personal website dyalii akankherbeq wsafiiii.',
+  description: SITE_DESCRIPTION,
   alternates: {
     canonical: '/',
   },
   openGraph: {
-    title: '7amdi',
-    description:
-      'salam ana 7amdi. whadi personal website dyalii akankherbeq wsafiiii.',
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+    url: '/',
     images: [
       buildOgImageUrl({
         variant: 'default',
-        title: '7amdi',
-        description:
-          'salam ana 7amdi. whadi personal website dyalii akankherbeq wsafiiii.',
+        title: SITE_NAME,
+        description: SITE_DESCRIPTION,
       }),
     ],
   },
   twitter: {
-    title: '7amdi',
-    description:
-      'salam ana 7amdi. whadi personal website dyalii akankherbeq wsafiiii.',
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
     images: [
       buildOgImageUrl({
         variant: 'default',
-        title: '7amdi',
-        description:
-          'salam ana 7amdi. whadi personal website dyalii akankherbeq wsafiiii.',
+        title: SITE_NAME,
+        description: SITE_DESCRIPTION,
       }),
     ],
   },

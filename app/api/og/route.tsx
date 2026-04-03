@@ -1,6 +1,6 @@
-import { ImageResponse } from '@vercel/og'
+import { ImageResponse } from 'next/og'
 
-export const runtime = 'edge'
+import { SITE_DESCRIPTION, SITE_DOMAIN, SITE_NAME } from '@/app/_lib/site'
 
 const SIZE = { width: 1200, height: 630 }
 type ThemeMode = 'light' | 'dark'
@@ -68,14 +68,9 @@ export async function GET(request: Request) {
 
   const theme = pickTheme(searchParams, 'light')
   const accent = pickAccent(searchParams, theme === 'dark' ? '#fafafa' : '#171717')
-  const title = pickText(searchParams, 'title', 'qaiik', 120)
-  const description = pickText(
-    searchParams,
-    'description',
-    'salam ana 7amdi. whadi personal website dyalii akankherbeq wsafiiii.',
-    220,
-  )
-  const site = pickText(searchParams, 'site', 'qaiik.vercel.app', 80)
+  const title = pickText(searchParams, 'title', SITE_NAME, 120)
+  const description = pickText(searchParams, 'description', SITE_DESCRIPTION, 220)
+  const site = pickText(searchParams, 'site', SITE_DOMAIN, 80)
   const tag = pickText(searchParams, 'tag', 'personal notes', 80)
 
   const colors =
@@ -143,7 +138,7 @@ export async function GET(request: Request) {
             color: colors.subdued,
           }}
         >
-          <span>qaiik</span>
+          <span>{SITE_NAME}</span>
           <span
             style={{
               width: 42,

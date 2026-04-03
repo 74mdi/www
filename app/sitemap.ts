@@ -1,25 +1,7 @@
 import type { MetadataRoute } from 'next'
 
+import { getSiteUrl } from '@/app/_lib/site'
 import { getThoughtArticles } from '@/app/thoughts/articles'
-
-function getSiteUrl(): string {
-  const explicit = process.env.NEXT_PUBLIC_SITE_URL?.trim()
-  if (explicit) {
-    return explicit.replace(/\/+$/, '')
-  }
-
-  const production = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim()
-  if (production) {
-    return `https://${production.replace(/\/+$/, '')}`
-  }
-
-  const preview = process.env.VERCEL_URL?.trim()
-  if (preview) {
-    return `https://${preview.replace(/\/+$/, '')}`
-  }
-
-  return 'https://qaiik.vercel.app'
-}
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = getSiteUrl()

@@ -4,6 +4,7 @@ import cn from 'clsx'
 import { notFound } from 'next/navigation'
 
 import { buildOgImageUrl } from '@/app/_lib/og-image-url'
+import { isSitePlaceholder, SITE_DESCRIPTION } from '@/app/_lib/site'
 
 function slugToTitle(slug: string): string {
   return slug
@@ -15,10 +16,10 @@ function slugToTitle(slug: string): string {
 
 function resolveArticleTitle(rawTitle: string | undefined, slug: string): string {
   const title = rawTitle?.trim()
-  if (!title || title.toLowerCase() === 'qaiik') {
+  if (isSitePlaceholder(title)) {
     return slugToTitle(slug)
   }
-  return title
+  return title ?? slugToTitle(slug)
 }
 
 export default async function Page(props: {
@@ -82,9 +83,7 @@ export async function generateMetadata(props: {
   const title = resolveArticleTitle(articleModule.metadata?.title, params.slug)
   const description = articleModule.metadata?.description?.trim()
   const normalizedDescription =
-    description && description.toLowerCase() !== 'qaiik'
-      ? description
-      : 'salam ana 7amdi'
+    description && !isSitePlaceholder(description) ? description : SITE_DESCRIPTION
 
   return {
     title,

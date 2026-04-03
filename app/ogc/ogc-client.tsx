@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { useMemo, useState } from 'react'
 
 import { buildOgImageUrl } from '@/app/_lib/og-image-url'
+import { SITE_DESCRIPTION, SITE_DOMAIN, SITE_NAME } from '@/app/_lib/site'
 
 type OgVariant = 'default' | 'thoughts'
 type OgTheme = 'light' | 'dark'
@@ -43,7 +44,7 @@ function normalizeColorForPicker(input: string): string {
 export default function OgCreatorClient() {
   const [origin] = useState(() =>
     typeof window === 'undefined'
-      ? 'https://qaiik.vercel.app'
+      ? `https://${SITE_DOMAIN}`
       : window.location.origin,
   )
   const [variant, setVariant] = useState<OgVariant>('default')
@@ -109,9 +110,9 @@ export default function OgCreatorClient() {
   const applyWebsitePreset = () => {
     setVariant('default')
     setTheme('light')
-    setTitle('Welcome to my website')
-    setDescription('Design, writing, and experiments from my corner of the web.')
-    setSite('yourdomain.com')
+    setTitle(SITE_NAME)
+    setDescription(SITE_DESCRIPTION)
+    setSite(SITE_DOMAIN)
     setTag('personal notes')
     setAccent('#171717')
     setNotice('Website preset loaded.')
@@ -132,8 +133,8 @@ export default function OgCreatorClient() {
     setVariant('thoughts')
     setTheme('dark')
     setTitle('Thoughts')
-    setDescription('A place for essays, notes, and internet fragments.')
-    setSite('yourdomain.com/thoughts')
+    setDescription(SITE_DESCRIPTION)
+    setSite(`${SITE_DOMAIN}/thoughts`)
     setTag('essays and notes')
     setSection('thoughts')
     setAccent('#d4d4d4')

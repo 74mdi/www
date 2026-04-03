@@ -5,28 +5,28 @@ import OgCreatorClient from '@/app/ogc/ogc-client'
 
 export const metadata: Metadata = {
   title: 'OG Creator',
-  description: 'Create customizable Open Graph images powered by @vercel/og.',
+  description: 'Create customizable Open Graph images powered by next/og.',
   robots: {
     index: false,
     follow: false,
   },
   openGraph: {
     title: 'OG Creator',
-    description: 'Create customizable Open Graph images powered by @vercel/og.',
+    description: 'Create customizable Open Graph images powered by next/og.',
     images: [
       buildOgImageUrl({
         title: 'OG Creator',
-        description: 'Create customizable Open Graph images powered by @vercel/og.',
+        description: 'Create customizable Open Graph images powered by next/og.',
       }),
     ],
   },
   twitter: {
     title: 'OG Creator',
-    description: 'Create customizable Open Graph images powered by @vercel/og.',
+    description: 'Create customizable Open Graph images powered by next/og.',
     images: [
       buildOgImageUrl({
         title: 'OG Creator',
-        description: 'Create customizable Open Graph images powered by @vercel/og.',
+        description: 'Create customizable Open Graph images powered by next/og.',
       }),
     ],
   },

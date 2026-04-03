@@ -5,6 +5,12 @@ import cn from 'clsx'
 import localFont from 'next/font/local'
 
 import { buildOgImageUrl } from '@/app/_lib/og-image-url'
+import {
+  getSiteUrl,
+  SITE_DESCRIPTION,
+  SITE_KEYWORDS,
+  SITE_NAME,
+} from '@/app/_lib/site'
 import Navbar from '@/components/navbar'
 import PageTransitionShell from '@/components/page-transition-shell'
 import './globals.css'
@@ -30,60 +36,46 @@ const mono = localFont({
 const enableVercelAnalytics =
   process.env.NEXT_PUBLIC_ENABLE_VERCEL_ANALYTICS === '1'
 
-function getSiteUrl(): string {
-  const explicit = process.env.NEXT_PUBLIC_SITE_URL?.trim()
-  if (explicit) return explicit
-
-  const production = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim()
-  if (production) return `https://${production}`
-
-  const preview = process.env.VERCEL_URL?.trim()
-  if (preview) return `https://${preview}`
-
-  return 'https://qaiik.vercel.app'
-}
-
 const siteUrl = getSiteUrl().replace(/\/+$/, '')
-const siteDescription =
-  'salam ana 7amdi. whadi personal website dyalii akankherbeq wsafiiii.'
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    template: '%s',
-    default: 'qaiik',
+    template: `%s | ${SITE_NAME}`,
+    default: SITE_NAME,
   },
-  description: siteDescription,
-  keywords: ['qaiik', '7amdi', 'hamdi', '74mdi', 'mohamed', 'ana7amdi', '7amdi911', 'personal website', 'blog', 'portfolio'],
+  description: SITE_DESCRIPTION,
+  keywords: SITE_KEYWORDS,
   authors: [{ name: '7amdi', url: siteUrl }],
   creator: '7amdi',
-  applicationName: 'qaiik',
+  applicationName: SITE_NAME,
   alternates: {
     canonical: '/',
   },
   openGraph: {
     type: 'website',
     url: '/',
-    siteName: 'qaiik',
-    title: 'qaiik',
-    description: siteDescription,
+    siteName: SITE_NAME,
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+    locale: 'en_US',
     images: [
       buildOgImageUrl({
         variant: 'default',
-        title: 'qaiik',
-        description: siteDescription,
+        title: SITE_NAME,
+        description: SITE_DESCRIPTION,
       }),
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'qaiik',
-    description: siteDescription,
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
     images: [
       buildOgImageUrl({
         variant: 'default',
-        title: 'qaiik',
-        description: siteDescription,
+        title: SITE_NAME,
+        description: SITE_DESCRIPTION,
       }),
     ],
   },

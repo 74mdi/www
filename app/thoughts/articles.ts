@@ -1,6 +1,8 @@
 import { promises as fs } from 'fs'
 import path from 'path'
 
+import { isSitePlaceholder } from '@/app/_lib/site'
+
 type ThoughtMetadata = {
   title?: string
   description?: string
@@ -33,10 +35,10 @@ function slugToTitle(slug: string): string {
 
 function resolveArticleTitle(rawTitle: string | undefined, slug: string): string {
   const title = rawTitle?.trim()
-  if (!title || title.toLowerCase() === 'qaiik') {
+  if (isSitePlaceholder(title)) {
     return slugToTitle(slug)
   }
-  return title
+  return title ?? slugToTitle(slug)
 }
 
 export async function getThoughtArticles(): Promise<ThoughtArticle[]> {

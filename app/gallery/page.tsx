@@ -6,9 +6,7 @@ import GalleryGrid from '@/app/gallery/gallery-grid'
 export const runtime = 'nodejs'
 
 export const metadata: Metadata = {
-  title: {
-    absolute: 'Gallery',
-  },
+  title: 'Gallery',
   description: 'Photo gallery with metadata and capture details.',
   alternates: {
     canonical: '/gallery',
@@ -16,6 +14,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Gallery',
     description: 'Photo gallery with metadata and capture details.',
+    url: '/gallery',
     images: [
       buildOgImageUrl({
         variant: 'default',

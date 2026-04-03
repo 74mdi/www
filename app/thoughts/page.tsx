@@ -1,30 +1,36 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 
 import { buildOgImageUrl } from '@/app/_lib/og-image-url'
+import { SITE_DESCRIPTION } from '@/app/_lib/site'
 import { getThoughtArticles } from '@/app/thoughts/articles'
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'Thoughts',
-  description: 'salam ana 7amdi',
+  description: SITE_DESCRIPTION,
+  alternates: {
+    canonical: '/thoughts',
+  },
   openGraph: {
     title: 'Thoughts',
-    description: 'salam ana 7amdi',
+    description: SITE_DESCRIPTION,
+    url: '/thoughts',
     images: [
       buildOgImageUrl({
         variant: 'thoughts',
         title: 'Thoughts',
-        description: 'salam ana 7amdi',
+        description: SITE_DESCRIPTION,
       }),
     ],
   },
   twitter: {
     title: 'Thoughts',
-    description: 'salam ana 7amdi',
+    description: SITE_DESCRIPTION,
     images: [
       buildOgImageUrl({
         variant: 'thoughts',
         title: 'Thoughts',
-        description: 'salam ana 7amdi',
+        description: SITE_DESCRIPTION,
       }),
     ],
   },
