@@ -1,5 +1,6 @@
 export const SITE_NAME = '7amdi'
-export const SITE_DESCRIPTION = 'salam ana 7amdi'
+export const SITE_DESCRIPTION =
+  'personal website dyl 7amdi. kankteb (kdob) ikhan ela web development, design, performance, wchi experiments, wkan posti notes and photos.'
 export const SITE_DOMAIN = '7amdi.vercel.app'
 export const LEGACY_SITE_NAME = '7amdi'
 export const LEGACY_SITE_DOMAIN = '7amdi.vercel.app'

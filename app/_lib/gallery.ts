@@ -66,7 +66,7 @@ export const getGalleryImages = cache(async (): Promise<GalleryImage[]> => {
   }))
 
   images.sort((a, b) => {
-    const dateScore = (b.date?.getTime() ?? 0) - (a.date?.getTime() ?? 0)
+    const dateScore = (a.date?.getTime() ?? 0) - (b.date?.getTime() ?? 0)
     if (dateScore !== 0) return dateScore
     return a.filename.localeCompare(b.filename)
   })

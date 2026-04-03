@@ -1,21 +1,22 @@
 import { buildOgImageUrl } from '@/app/_lib/og-image-url'
+import { SITE_DESCRIPTION } from '@/app/_lib/site'
 
 export const metadata = {
   title: 'Projects',
-  description: 'salam ana 7amdi',
+  description: SITE_DESCRIPTION,
   robots: {
     index: false,
     follow: false,
   },
   openGraph: {
     title: 'Projects',
-    description: 'salam ana 7amdi',
-    images: [buildOgImageUrl({ title: 'Projects', description: 'salam ana 7amdi' })],
+    description: SITE_DESCRIPTION,
+    images: [buildOgImageUrl({ title: 'Projects', description: SITE_DESCRIPTION })],
   },
   twitter: {
     title: 'Projects',
-    description: 'salam ana 7amdi',
-    images: [buildOgImageUrl({ title: 'Projects', description: 'salam ana 7amdi' })],
+    description: SITE_DESCRIPTION,
+    images: [buildOgImageUrl({ title: 'Projects', description: SITE_DESCRIPTION })],
   },
 }
 

@@ -7,32 +7,32 @@ export const runtime = 'nodejs'
 
 export const metadata: Metadata = {
   title: 'Gallery',
-  description: 'A fast masonry photo gallery of moments, textures, and small observations by 7amdi.',
+  description: 'koko hna kanposti chi ikhn kansowro b nokia dyali wsf.',
   alternates: {
     canonical: '/gallery',
   },
   openGraph: {
     title: 'Gallery',
-    description: 'A fast masonry photo gallery of moments, textures, and small observations by 7amdi.',
+    description: 'koko hna kanposti chi ikhn kansowro b nokia dyali wsf.',
     url: '/gallery',
     images: [
       buildOgImageUrl({
         variant: 'default',
         title: 'Gallery',
         description:
-          'A fast masonry photo gallery of moments, textures, and small observations by 7amdi.',
+          'koko hna kanposti chi ikhn kansowro b nokia dyali wsf.',
       }),
     ],
   },
   twitter: {
     title: 'Gallery',
-    description: 'A fast masonry photo gallery of moments, textures, and small observations by 7amdi.',
+    description: 'oko hna kanposti chi ikhn kansowro b nokia dyali wsf.',
     images: [
       buildOgImageUrl({
         variant: 'default',
         title: 'Gallery',
         description:
-          'A fast masonry photo gallery of moments, textures, and small observations by 7amdi.',
+          'koko hna kanposti chi ikhn kansowro b nokia dyali wsf.',
       }),
     ],
   },
@@ -54,7 +54,8 @@ function formatDate(value?: Date) {
 export default async function GalleryPage() {
   const images = await getGalleryImages()
   const countLabel = images.length === 1 ? '1 photo' : `${images.length} photos`
-  const latestLabel = formatDate(images[0]?.date)
+  const oldestLabel = formatDate(images[0]?.date)
+  const latestLabel = formatDate(images[images.length - 1]?.date)
   const gridImages = images.map((image) => ({
     src: image.src,
     width: image.width,
@@ -75,11 +76,12 @@ export default async function GalleryPage() {
             Quiet frames.
           </h1>
           <p className='max-w-prose text-sm leading-6 text-rurikon-500 sm:text-[15px]'>
-            Minimal masonry view. Tap any image to open it full screen.
-          </p>
+          koko hna kanposti chi ikhn kansowro b nokia dyali wsf
+                    </p>
         </div>
         <div className='flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.18em] text-rurikon-400'>
           <span>{countLabel}</span>
+          {oldestLabel ? <span>from {oldestLabel}</span> : null}
           {latestLabel ? <span>latest {latestLabel}</span> : null}
         </div>
       </header>

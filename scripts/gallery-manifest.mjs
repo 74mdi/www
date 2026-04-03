@@ -99,7 +99,7 @@ async function main() {
   }
 
   images.sort((a, b) => {
-    const dateScore = (b.date ? Date.parse(b.date) : 0) - (a.date ? Date.parse(a.date) : 0)
+    const dateScore = (a.date ? Date.parse(a.date) : 0) - (b.date ? Date.parse(b.date) : 0)
     if (dateScore !== 0) return dateScore
     return a.filename.localeCompare(b.filename)
   })

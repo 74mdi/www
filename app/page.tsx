@@ -66,8 +66,8 @@ export default function Page() {
       </h1>
 
       <p className='mt-5 max-w-prose text-rurikon-500'>
-        personal website dyl 7amdi (ana).  kankteb (kdob) ikhan ela web development, design,
-        performance, wchi experiments, wkan posti notes and photos.
+        personal website dyl 7amdi. kankteb (kdob) ikhan ela web development,
+        design, performance, wchi experiments, wkan posti notes and photos.
       </p>
 
       <HomeLastFm />
