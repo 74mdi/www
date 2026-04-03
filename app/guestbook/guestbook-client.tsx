@@ -674,7 +674,7 @@ export default function GuestbookClient() {
         ) : null}
       </section>
 
-      <section>
+      <section style={{ contentVisibility: 'auto' }}>
         <h2 className='text-rurikon-600 font-medium'>Recent entries</h2>
         {!entriesTableAvailable ? (
           <p className='mt-3 text-rurikon-400'>
@@ -688,7 +688,11 @@ export default function GuestbookClient() {
         ) : (
           <ul className='mt-2 divide-y divide-[var(--color-rurikon-border)]'>
             {entries.map((entry) => (
-              <li key={entry.id} className='py-4'>
+              <li
+                key={entry.id}
+                className='py-4'
+                style={{ contentVisibility: 'auto' }}
+              >
                 <article className='flex gap-3'>
                   <div
                     aria-hidden='true'

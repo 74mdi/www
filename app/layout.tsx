@@ -1,9 +1,9 @@
 import type { Metadata, Viewport } from 'next'
 import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from '@vercel/speed-insights/next'
-
 import cn from 'clsx'
 import localFont from 'next/font/local'
+import Script from 'next/script'
 
 import { buildOgImageUrl } from '@/app/_lib/og-image-url'
 import {
@@ -179,10 +179,6 @@ export default function RootLayout({
       className='overflow-x-hidden touch-manipulation'
       suppressHydrationWarning
     >
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
-        <script dangerouslySetInnerHTML={{ __html: chunkRecoveryScript }} />
-      </head>
       <body
         className={cn(
           sans.variable,
@@ -205,6 +201,12 @@ export default function RootLayout({
           </main>
         </div>
         {enableVercelAnalytics ? <Analytics /> : null}
+        <Script id='theme-init' strategy='beforeInteractive'>
+          {themeInitScript}
+        </Script>
+        <Script id='chunk-recovery' strategy='afterInteractive'>
+          {chunkRecoveryScript}
+        </Script>
         <SpeedInsights />
       </body>
     </html>

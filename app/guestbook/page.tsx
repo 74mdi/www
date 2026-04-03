@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 import { buildOgImageUrl } from '@/app/_lib/og-image-url'
-import GuestbookClient from '@/app/guestbook/guestbook-client'
+import GuestbookDeferred from '@/app/guestbook/guestbook-deferred'
 
 export const metadata: Metadata = {
   title: 'Guestbook',
@@ -45,7 +45,7 @@ export default function GuestbookPage() {
         </p>
       </header>
 
-      <GuestbookClient />
+      <GuestbookDeferred />
     </section>
   )
 }
