@@ -2,6 +2,12 @@ export const SITE_NAME = '7amdi'
 export const SITE_DESCRIPTION = 'salam ana 7amdi'
 export const SITE_DOMAIN = '7amdi.vercel.app'
 export const LEGACY_SITE_NAME = 'qaiik'
+export const SITE_AUTHOR_NAME = '7amdi'
+export const SITE_SOCIAL_URLS = [
+  'https://x.com/74mdi',
+  'https://github.com/74mdi',
+  'https://www.tiktok.com/@74mdi',
+]
 export const SITE_KEYWORDS = [
   '7amdi',
   'hamdi',
@@ -32,4 +38,8 @@ export function getSiteUrl(): string {
   if (preview) return `https://${preview.replace(/\/+$/, '')}`
 
   return `https://${SITE_DOMAIN}`
+}
+
+export function toAbsoluteUrl(pathname = '/'): string {
+  return new URL(pathname, `${getSiteUrl()}/`).toString()
 }

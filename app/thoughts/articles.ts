@@ -1,6 +1,7 @@
 import { promises as fs } from 'fs'
 import path from 'path'
 
+import { parseDottedDate } from '@/app/_lib/seo'
 import { isSitePlaceholder } from '@/app/_lib/site'
 
 type ThoughtMetadata = {
@@ -16,6 +17,7 @@ export type ThoughtArticle = {
   description: string
   date: string
   sort: number
+  lastModified?: string
 }
 
 const articlesDirectory = path.join(
@@ -66,6 +68,7 @@ export async function getThoughtArticles(): Promise<ThoughtArticle[]> {
       description: articleModule.metadata.description || '',
       date: normalizedDate,
       sort: Number(normalizedDate.replaceAll('.', '')) || 0,
+      lastModified: parseDottedDate(articleModule.metadata.date),
     })
   }
 

@@ -5,6 +5,11 @@ import { notFound } from 'next/navigation'
 
 import { buildOgImageUrl } from '@/app/_lib/og-image-url'
 import { isSitePlaceholder, SITE_DESCRIPTION } from '@/app/_lib/site'
+import {
+  buildArticleStructuredData,
+  buildBreadcrumbStructuredData,
+} from '@/app/_lib/seo'
+import StructuredData from '@/components/structured-data'
 
 function slugToTitle(slug: string): string {
   return slug
@@ -22,6 +27,13 @@ function resolveArticleTitle(rawTitle: string | undefined, slug: string): string
   return title ?? slugToTitle(slug)
 }
 
+function resolveArticleDescription(rawDescription: string | undefined): string {
+  const description = rawDescription?.trim()
+  return description && !isSitePlaceholder(description)
+    ? description
+    : SITE_DESCRIPTION
+}
+
 export default async function Page(props: {
   params: Promise<{
     slug: string
@@ -36,13 +48,33 @@ export default async function Page(props: {
     notFound()
   }
 
+  const title = resolveArticleTitle(metadata?.title, params.slug)
+  const description = resolveArticleDescription(metadata?.description)
+
   return (
-    <div
-      className={cn(metadata.chinese && 'text-justify font-zh')}
-      lang={metadata.chinese ? 'zh-Hans' : 'en'}
-    >
-      <MDXContent />
-    </div>
+    <>
+      <StructuredData
+        data={[
+          buildBreadcrumbStructuredData([
+            { name: '7amdi', path: '/' },
+            { name: 'Thoughts', path: '/thoughts' },
+            { name: title, path: `/thoughts/${params.slug}` },
+          ]),
+          buildArticleStructuredData({
+            slug: params.slug,
+            title,
+            description,
+            date: metadata?.date,
+          }),
+        ]}
+      />
+      <div
+        className={cn(metadata.chinese && 'text-justify font-zh')}
+        lang={metadata.chinese ? 'zh-Hans' : 'en'}
+      >
+        <MDXContent />
+      </div>
+    </>
   )
 }
 
@@ -81,9 +113,9 @@ export async function generateMetadata(props: {
   }
 
   const title = resolveArticleTitle(articleModule.metadata?.title, params.slug)
-  const description = articleModule.metadata?.description?.trim()
-  const normalizedDescription =
-    description && !isSitePlaceholder(description) ? description : SITE_DESCRIPTION
+  const normalizedDescription = resolveArticleDescription(
+    articleModule.metadata?.description,
+  )
 
   return {
     title,
