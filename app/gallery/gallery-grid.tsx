@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { ArrowLeftIcon, ArrowRightIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import Image from 'next/image'
 import { createPortal } from 'react-dom'
+import { startTransition, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
 
 type GalleryGridImage = {
   src: string
@@ -18,9 +19,9 @@ type GalleryGridProps = {
 }
 
 const PAGE_SIZE = 12
-
-const PREVIEW_GAP_PX = 10
-const PREVIEW_MARGIN_PX = 10
+const INITIAL_BATCH = 14
+const GRID_IMAGE_SIZES =
+  '(min-width: 1280px) 24vw, (min-width: 1024px) 30vw, (min-width: 640px) 44vw, 50vw'
 
 function extractDateFromSrc(src: string): string | null {
   const filename = src.split('/').pop() ?? ''
@@ -39,216 +40,288 @@ function extractDateFromSrc(src: string): string | null {
   return new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(date)
 }
 
-const useNumCols = () => {
-  const [numCols, setNumCols] = useState(2)
-  useLayoutEffect(() => {
-    const update = () => setNumCols(window.innerWidth >= 1024 ? 3 : 2)
-    update()
-    window.addEventListener('resize', update)
-    return () => window.removeEventListener('resize', update)
-  }, [])
-  return numCols
+function resolveDateText(image: GalleryGridImage): string {
+  return image.dateText ?? extractDateFromSrc(image.src) ?? 'undated'
+}
+
+function getOrientationLabel(image: GalleryGridImage): string {
+  const ratio = image.width / image.height
+  if (ratio >= 1.18) return 'landscape'
+  if (ratio <= 0.82) return 'portrait'
+  return 'square'
 }
 
 export default function GalleryGrid({ images }: GalleryGridProps) {
   const [visibleCount, setVisibleCount] = useState(
-    Math.min(PAGE_SIZE, images.length),
+    Math.min(INITIAL_BATCH, images.length),
   )
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
-  const [isZoomed, setIsZoomed] = useState(false)
-  const visibleImages = images.slice(0, visibleCount)
-  const activeImage = activeIndex !== null ? visibleImages[activeIndex] : null
-  const numCols = useNumCols()
-  const activeButtonRef = useRef<HTMLButtonElement | null>(null)
-  const previewRef = useRef<HTMLDivElement | null>(null)
-  const [previewPosition, setPreviewPosition] = useState({ left: 0, top: 0 })
+  const loadMoreRef = useRef<HTMLDivElement | null>(null)
   const isClient = typeof window !== 'undefined'
+  const deferredVisibleCount = useDeferredValue(visibleCount)
+  const visibleImages = useMemo(
+    () => images.slice(0, deferredVisibleCount),
+    [deferredVisibleCount, images],
+  )
+  const activeImage = activeIndex !== null ? images[activeIndex] : null
+  const activeImageIndex = activeIndex ?? 0
 
-  const cols = useMemo(() => {
-    const result: GalleryGridImage[][] = Array.from({ length: numCols }, () => [])
-    visibleImages.forEach((img, i) => result[i % numCols].push(img))
-    return result
-  }, [visibleImages, numCols])
+  const openImage = (index: number) => {
+    setActiveIndex(index)
+  }
+
+  const ensureImageIsLoaded = (index: number) => {
+    startTransition(() => {
+      setVisibleCount((count) => Math.min(Math.max(count, index + 1), images.length))
+    })
+  }
+
+  const loadMore = () => {
+    startTransition(() => {
+      setVisibleCount((count) => Math.min(count + PAGE_SIZE, images.length))
+    })
+  }
 
   useEffect(() => {
-    if (!activeImage) return
+    if (visibleCount >= images.length) return
+    const node = loadMoreRef.current
+    if (!node) return
 
-    setIsZoomed(false)
+    let cooldown: ReturnType<typeof setTimeout> | null = null
+    let isLocked = false
 
-    const updatePreviewPosition = () => {
-      const button = activeButtonRef.current
-      if (!button) return
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries[0]?.isIntersecting || isLocked) return
+        isLocked = true
+        loadMore()
+        cooldown = setTimeout(() => {
+          isLocked = false
+        }, 240)
+      },
+      {
+        rootMargin: '900px 0px',
+      },
+    )
 
-      const rect = button.getBoundingClientRect()
-      const previewWidth = window.matchMedia('(min-width: 640px)').matches
-        ? 520
-        : Math.min(360, window.innerWidth - PREVIEW_MARGIN_PX * 2)
-
-      const clampedLeft = Math.min(
-        Math.max(rect.left + rect.width / 2 - previewWidth / 2, PREVIEW_MARGIN_PX),
-        window.innerWidth - previewWidth - PREVIEW_MARGIN_PX,
-      )
-
-      const previewHeight = Math.min(
-        Math.floor(window.innerHeight * 0.72),
-        window.matchMedia('(min-width: 640px)').matches ? 520 : 420,
-      )
-
-      let top = rect.bottom + PREVIEW_GAP_PX
-      if (top + previewHeight > window.innerHeight - PREVIEW_MARGIN_PX) {
-        top = Math.max(
-          PREVIEW_MARGIN_PX,
-          rect.top - previewHeight - PREVIEW_GAP_PX,
-        )
-      }
-
-      setPreviewPosition({ left: clampedLeft, top })
-    }
-
-    updatePreviewPosition()
-
-    const handlePointerDown = (event: PointerEvent) => {
-      const target = event.target as Node
-      if (activeButtonRef.current?.contains(target)) return
-      if (previewRef.current?.contains(target)) return
-      setActiveIndex(null)
-    }
-
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setActiveIndex(null)
-    }
-
-    const handleViewportChange = () => {
-      updatePreviewPosition()
-    }
-
-    const handleScrollClose = () => {
-      setActiveIndex(null)
-    }
-
-    document.addEventListener('pointerdown', handlePointerDown)
-    document.addEventListener('keydown', handleEscape)
-    window.addEventListener('resize', handleViewportChange)
-    window.addEventListener('scroll', handleScrollClose, true)
+    observer.observe(node)
 
     return () => {
-      document.removeEventListener('pointerdown', handlePointerDown)
-      document.removeEventListener('keydown', handleEscape)
-      window.removeEventListener('resize', handleViewportChange)
-      window.removeEventListener('scroll', handleScrollClose, true)
+      observer.disconnect()
+      if (cooldown) window.clearTimeout(cooldown)
     }
-  }, [activeImage])
+  }, [images.length, visibleCount])
+
+  useEffect(() => {
+    if (activeIndex === null) return
+    ensureImageIsLoaded(activeIndex)
+  }, [activeIndex])
+
+  useEffect(() => {
+    if (activeIndex === null) return
+
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setActiveIndex(null)
+        return
+      }
+
+      if (event.key === 'ArrowRight') {
+        setActiveIndex((current) => {
+          if (current === null) return current
+          const next = Math.min(current + 1, images.length - 1)
+          ensureImageIsLoaded(next)
+          return next
+        })
+      }
+
+      if (event.key === 'ArrowLeft') {
+        setActiveIndex((current) => {
+          if (current === null) return current
+          return Math.max(current - 1, 0)
+        })
+      }
+    }
+
+    document.addEventListener('keydown', handleEscape)
+
+    return () => {
+      document.body.style.overflow = previousOverflow
+      document.removeEventListener('keydown', handleEscape)
+    }
+  }, [activeIndex, images.length])
 
   return (
     <>
-      <div className='flex gap-2'>
-        {cols.map((col, ci) => (
-          <div key={ci} className='flex flex-1 flex-col gap-2'>
-            {col.map((image, index) => {
-              const globalIndex = ci + index * numCols
-              return (
-                <button
-                  key={image.src}
-                  type='button'
-                  onClick={(event) => {
-                    activeButtonRef.current = event.currentTarget
-                    setActiveIndex(globalIndex)
-                  }}
-                  className='block w-full text-left focus-visible:outline focus-visible:outline-rurikon-400 focus-visible:outline-dotted focus-visible:outline-offset-4'
-                  aria-haspopup='dialog'
-                  aria-expanded={activeIndex === globalIndex}
-                >
-                  <Image
-                    src={image.src}
-                    alt={image.title}
-                    width={image.width}
-                    height={image.height}
-                    sizes='(min-width: 1024px) 33vw, 50vw'
-                    quality={60}
-                    priority={globalIndex < 4}
-                    placeholder={image.blurDataURL ? 'blur' : 'empty'}
-                    blurDataURL={image.blurDataURL}
-                    className='h-auto w-full rounded-lg'
-                  />
-                </button>
-              )
-            })}
-          </div>
+      <div className='columns-2 gap-3 sm:columns-2 lg:columns-3 [column-gap:0.85rem] sm:[column-gap:1rem]'>
+        {visibleImages.map((image, index) => (
+          <button
+            key={image.src}
+            type='button'
+            onClick={() => openImage(index)}
+            className='gallery-card-enter group mb-3 block w-full break-inside-avoid text-left focus-visible:outline focus-visible:outline-rurikon-400 focus-visible:outline-dotted focus-visible:outline-offset-4 sm:mb-4'
+            style={{
+              animationDelay: `${Math.min(index * 32, 320)}ms`,
+            }}
+            aria-haspopup='dialog'
+            aria-expanded={activeIndex === index}
+          >
+            <span className='relative block overflow-hidden rounded-[1.4rem] border border-[var(--color-rurikon-border)] bg-[var(--surface-overlay)] shadow-[0_14px_34px_rgba(0,0,0,0.08)] transition-transform duration-500 ease-out group-hover:-translate-y-1 group-active:translate-y-0'>
+              <Image
+                src={image.src}
+                alt={image.title}
+                width={image.width}
+                height={image.height}
+                sizes={GRID_IMAGE_SIZES}
+                quality={68}
+                priority={index < 4}
+                placeholder={image.blurDataURL ? 'blur' : 'empty'}
+                blurDataURL={image.blurDataURL}
+                decoding='async'
+                className='h-auto w-full transition-transform duration-700 ease-out group-hover:scale-[1.025]'
+              />
+
+              <span className='pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/75 via-black/18 to-transparent opacity-100 transition-opacity duration-300 sm:opacity-0 sm:group-hover:opacity-100' />
+
+              <span className='absolute left-3 top-3 rounded-full border border-white/15 bg-black/35 px-2.5 py-1 text-[10px] uppercase tracking-[0.18em] text-white/90 backdrop-blur-sm'>
+                {getOrientationLabel(image)}
+              </span>
+
+              <span className='absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-3 text-white transition-all duration-300 sm:translate-y-2 sm:opacity-0 sm:group-hover:translate-y-0 sm:group-hover:opacity-100'>
+                <span className='min-w-0 truncate text-[12px] font-medium tracking-[0.01em]'>
+                  {image.title}
+                </span>
+                <span className='shrink-0 text-[11px] uppercase tracking-[0.16em] text-white/88'>
+                  {resolveDateText(image)}
+                </span>
+              </span>
+            </span>
+          </button>
         ))}
       </div>
 
-      {visibleCount < images.length ? (
-        <div className='flex justify-center pt-4'>
+      <div
+        ref={loadMoreRef}
+        className='flex flex-col items-center gap-3 pt-3 sm:pt-4'
+      >
+        {visibleCount < images.length ? (
           <button
             type='button'
-            onClick={() =>
-              setVisibleCount((count) =>
-                Math.min(count + PAGE_SIZE, images.length),
-              )
-            }
-            className='rounded-full border border-rurikon-border bg-[var(--surface-overlay)] px-4 py-2 text-xs text-rurikon-600 transition-colors hover:text-rurikon-700'
+            onClick={loadMore}
+            className='rounded-full border border-[var(--color-rurikon-border)] bg-[var(--surface-overlay)] px-4 py-2 text-xs uppercase tracking-[0.18em] text-rurikon-600 transition-all duration-300 hover:-translate-y-0.5 hover:text-rurikon-800'
           >
-            load more
+            load {Math.min(PAGE_SIZE, images.length - visibleCount)} more
           </button>
-        </div>
-      ) : null}
+        ) : (
+          <p className='text-[11px] uppercase tracking-[0.2em] text-rurikon-400'>
+            all moments loaded
+          </p>
+        )}
+      </div>
 
       {isClient && activeImage
         ? createPortal(
             <div
-              className='fixed inset-0 z-50 pointer-events-none'
+              className='fixed inset-0 z-50'
               aria-hidden={activeImage ? undefined : true}
             >
-              <div
-                ref={previewRef}
-                role='dialog'
-                aria-modal='false'
-                className={`absolute origin-top-left transition-all duration-200 ease-out ${activeImage ? 'pointer-events-auto opacity-100 scale-100 translate-y-0' : 'pointer-events-none opacity-0 scale-95 -translate-y-1'}`}
-                style={{
-                  left: `${previewPosition.left}px`,
-                  top: `${previewPosition.top}px`,
-                  width: window.matchMedia('(min-width: 640px)').matches
-                    ? '520px'
-                    : `${Math.min(360, window.innerWidth - PREVIEW_MARGIN_PX * 2)}px`,
-                }}
-              >
-                <div className='relative'>
-                  <Image
-                    src={activeImage.src}
-                    alt={activeImage.title}
-                    width={activeImage.width}
-                    height={activeImage.height}
-                    sizes='(min-width: 640px) 520px, 90vw'
-                    quality={90}
-                    placeholder={activeImage.blurDataURL ? 'blur' : 'empty'}
-                    blurDataURL={activeImage.blurDataURL}
-                    onDoubleClick={() => setIsZoomed((prev) => !prev)}
-                    style={{ transform: isZoomed ? 'scale(1.6)' : 'scale(1)' }}
-                    className={
-                      isZoomed
-                        ? 'h-auto w-full rounded-xl object-contain bg-[var(--surface-raised)] cursor-zoom-out transition-transform duration-200 ease-out'
-                        : 'h-auto w-full rounded-xl object-contain bg-[var(--surface-raised)] cursor-zoom-in transition-transform duration-200 ease-out'
-                    }
-                  />
-                  <div className='sm:hidden absolute inset-x-0 bottom-0 rounded-b-xl px-3 py-2 text-[11px] text-white'>
-                    <div className='absolute inset-0 rounded-b-xl bg-gradient-to-t from-black/70 via-black/35 to-transparent' />
-                    <div className='relative drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]'>
-                      {activeImage.dateText ?? extractDateFromSrc(activeImage.src) ?? ''}
+              <button
+                type='button'
+                aria-label='Close image preview'
+                className='gallery-overlay-enter absolute inset-0 bg-black/82'
+                onClick={() => setActiveIndex(null)}
+              />
+              <div className='absolute inset-0 overflow-y-auto overscroll-contain p-3 sm:p-5'>
+                <div className='mx-auto flex min-h-full max-w-6xl items-center justify-center'>
+                  <div
+                    role='dialog'
+                    aria-modal='true'
+                    aria-label={activeImage.title}
+                    className='gallery-lightbox-enter relative w-full overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#0a0a0a] text-white shadow-[0_36px_90px_rgba(0,0,0,0.48)]'
+                    onClick={(event) => event.stopPropagation()}
+                  >
+                    <div className='flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3 sm:px-5 sm:py-4'>
+                      <div className='min-w-0'>
+                        <p className='truncate text-sm font-medium text-white'>
+                          {activeImage.title}
+                        </p>
+                        <p className='mt-1 text-[11px] uppercase tracking-[0.18em] text-white/60'>
+                          {activeIndex !== null ? `${activeIndex + 1} / ${images.length}` : ''}
+                        </p>
+                      </div>
+                      <button
+                        type='button'
+                        onClick={() => setActiveIndex(null)}
+                        className='inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/12 bg-white/6 text-white/85 transition-colors duration-200 hover:bg-white/12'
+                      >
+                        <XMarkIcon className='h-5 w-5' />
+                      </button>
+                    </div>
+
+                    <div className='relative flex justify-center px-2 py-2 sm:px-4 sm:py-4'>
+                      {activeImageIndex > 0 ? (
+                        <button
+                          type='button'
+                          onClick={() => setActiveIndex((current) => (current === null ? current : Math.max(current - 1, 0)))}
+                          className='absolute left-3 top-1/2 z-10 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/12 bg-black/35 text-white transition-colors duration-200 hover:bg-black/55'
+                          aria-label='Previous image'
+                        >
+                          <ArrowLeftIcon className='h-5 w-5' />
+                        </button>
+                      ) : null}
+
+                      {activeImageIndex < images.length - 1 ? (
+                        <button
+                          type='button'
+                          onClick={() =>
+                            setActiveIndex((current) => {
+                              if (current === null) return current
+                              const next = Math.min(current + 1, images.length - 1)
+                              ensureImageIsLoaded(next)
+                              return next
+                            })
+                          }
+                          className='absolute right-3 top-1/2 z-10 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/12 bg-black/35 text-white transition-colors duration-200 hover:bg-black/55'
+                          aria-label='Next image'
+                        >
+                          <ArrowRightIcon className='h-5 w-5' />
+                        </button>
+                      ) : null}
+
+                      <div className='flex w-full items-center justify-center rounded-[1.35rem] bg-[#050505] p-1.5 sm:p-2.5'>
+                        <Image
+                          src={activeImage.src}
+                          alt={activeImage.title}
+                          width={activeImage.width}
+                          height={activeImage.height}
+                          sizes='100vw'
+                          quality={92}
+                          priority
+                          placeholder={activeImage.blurDataURL ? 'blur' : 'empty'}
+                          blurDataURL={activeImage.blurDataURL}
+                          className='h-auto max-h-[78vh] w-auto max-w-full rounded-[1rem] object-contain'
+                        />
+                      </div>
+                    </div>
+
+                    <div className='grid gap-3 border-t border-white/10 px-4 py-4 text-sm text-white/72 sm:grid-cols-[1fr_auto] sm:px-5'>
+                      <div>
+                        <p className='text-[11px] uppercase tracking-[0.18em] text-white/48'>
+                          captured
+                        </p>
+                        <p className='mt-1 text-white/82'>{resolveDateText(activeImage)}</p>
+                      </div>
+                      <div>
+                        <p className='text-[11px] uppercase tracking-[0.18em] text-white/48'>
+                          frame
+                        </p>
+                        <p className='mt-1 text-white/82'>{getOrientationLabel(activeImage)}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
-
-                <div className='hidden sm:flex items-start justify-between gap-3 pt-3'>
-                  <div className='text-xs text-rurikon-600 [overflow-wrap:anywhere]'>
-                    {activeImage.dateText ?? extractDateFromSrc(activeImage.src) ?? ''}
-                  </div>
-                  <button
-                    type='button'
-                    onClick={() => setIsZoomed((prev) => !prev)}
-                    className='shrink-0 rounded-full border border-rurikon-border bg-[var(--surface-overlay)] px-3 py-1 text-[11px] text-rurikon-600 transition-colors hover:text-rurikon-800'
-                  >
-                    {isZoomed ? 'zoom out' : 'zoom'}
-                  </button>
                 </div>
               </div>
             </div>,

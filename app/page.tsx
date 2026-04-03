@@ -65,26 +65,9 @@ export default function Page() {
       </h1>
 
       <p className='mt-5 max-w-prose text-rurikon-500'>
-        personal website of 7amdi. i write about web development, design,
-        performance, and small experiments, and i post notes and photos here.
+        personal website dyl 7amdi(ana). kankteb(kdob) ikhan ela web development, design,
+        performance, wchi experiments, wkan posti notes and photos.
       </p>
-
-      <div className='mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm'>
-        <Link
-          href='/thoughts'
-          className='break-words decoration-from-font underline underline-offset-2 decoration-rurikon-300 hover:decoration-rurikon-600 focus-visible:outline focus-visible:outline-rurikon-400 focus-visible:rounded-xs focus-visible:outline-offset-1 focus-visible:outline-dotted'
-          draggable={false}
-        >
-          thoughts
-        </Link>
-        <Link
-          href='/gallery'
-          className='break-words decoration-from-font underline underline-offset-2 decoration-rurikon-300 hover:decoration-rurikon-600 focus-visible:outline focus-visible:outline-rurikon-400 focus-visible:rounded-xs focus-visible:outline-offset-1 focus-visible:outline-dotted'
-          draggable={false}
-        >
-          gallery
-        </Link>
-      </div>
 
       <HomeLastFm />
 
