@@ -22,6 +22,19 @@ const cssVariablesTheme = createCssVariablesTheme({})
 const headingAnchorClass =
   'absolute md:w-14 sm:w-10 mobile:w-6 w-6 -translate-x-[calc(100%-2px)] text-center opacity-0 blur-xs group-hover:opacity-100 group-hover:blur-none text-rurikon-200 hover:text-rurikon-500 transition-all delay-0 duration-500 group-target:blur-none group-target:opacity-100 group-hover:delay-300 select-none'
 
+function resolveMarkdownImageSrc(src?: string): string {
+  if (!src) return ''
+  if (
+    src.startsWith('https://') ||
+    src.startsWith('http://') ||
+    src.startsWith('/')
+  ) {
+    return src
+  }
+
+  return `/images/${src.replace(/^\.?\//, '')}`
+}
+
 function getHeadingText(node: any): string {
   if (typeof node === 'string') return node
   if (Array.isArray(node)) return node.map(getHeadingText).join('')
@@ -211,32 +224,20 @@ export const components: Record<
   },
   Card,
   Image,
-  img: async ({ src, alt, title }) => {
-    let img: React.ReactNode
+  img: ({ src, alt, title }) => {
+    const normalizedSrc = resolveMarkdownImageSrc(src)
 
-    if (src.startsWith('https://') || src.startsWith('http://')) {
-      img = (
-        <img
-          className='mt-7 w-full h-auto'
-          src={src}
-          alt={alt ?? ''}
-          loading='lazy'
-          draggable={false}
-        />
-      )
-    } else {
-      const image = await import('./assets/images/' + src)
-      img = (
-        <Image
-          className='mt-7'
-          src={image.default}
-          alt={alt}
-          quality={95}
-          placeholder='blur'
-          draggable={false}
-        />
-      )
-    }
+    if (!normalizedSrc) return null
+
+    const img = (
+      <img
+        className='mt-7 w-full h-auto'
+        src={normalizedSrc}
+        alt={alt ?? ''}
+        loading='lazy'
+        draggable={false}
+      />
+    )
 
     if (title) {
       return <BlockSideTitle title={title}>{img}</BlockSideTitle>
