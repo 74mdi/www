@@ -179,6 +179,9 @@ export default function RootLayout({
       className='overflow-x-hidden touch-manipulation'
       suppressHydrationWarning
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body
         className={cn(
           sans.variable,
@@ -201,9 +204,6 @@ export default function RootLayout({
           </main>
         </div>
         {enableVercelAnalytics ? <Analytics /> : null}
-        <Script id='theme-init' strategy='beforeInteractive'>
-          {themeInitScript}
-        </Script>
         <Script id='chunk-recovery' strategy='afterInteractive'>
           {chunkRecoveryScript}
         </Script>
