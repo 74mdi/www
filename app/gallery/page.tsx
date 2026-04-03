@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { formatGalleryDate } from '@/app/_lib/gallery-date'
 import { getGalleryImages } from '@/app/_lib/gallery'
 import { buildOgImageUrl } from '@/app/_lib/og-image-url'
 import GalleryGrid from '@/app/gallery/gallery-grid'
@@ -44,25 +45,19 @@ function humanizeFilename(filename: string) {
   return spaced.length ? spaced : filename
 }
 
-function formatDate(value?: Date) {
-  if (!value) return undefined
-  return new Intl.DateTimeFormat('en-US', {
-    dateStyle: 'medium',
-  }).format(value)
-}
-
 export default async function GalleryPage() {
   const images = await getGalleryImages()
   const countLabel = images.length === 1 ? '1 photo' : `${images.length} photos`
-  const oldestLabel = formatDate(images[0]?.date)
-  const latestLabel = formatDate(images[images.length - 1]?.date)
+  const oldestLabel = formatGalleryDate(images[0]?.date)
+  const latestLabel = formatGalleryDate(images[images.length - 1]?.date)
   const gridImages = images.map((image) => ({
     src: image.src,
     width: image.width,
     height: image.height,
     blurDataURL: image.blurDataURL,
     title: humanizeFilename(image.filename),
-    dateText: formatDate(image.date),
+    dateText: formatGalleryDate(image.date),
+    sortTime: image.date?.getTime() ?? null,
   }))
 
   return (

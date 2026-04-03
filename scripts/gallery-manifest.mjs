@@ -34,6 +34,28 @@ function parseExifDate(value) {
   return parsed
 }
 
+function parseFilenameDate(filename) {
+  const match = filename.match(/^(\d{2})(\d{2})(\d{4})/)
+  if (!match) return undefined
+
+  const day = Number(match[1])
+  const month = Number(match[2])
+  const year = Number(match[3])
+
+  if (!Number.isFinite(day) || !Number.isFinite(month) || !Number.isFinite(year)) {
+    return undefined
+  }
+
+  if (day < 1 || day > 31 || month < 1 || month > 12) {
+    return undefined
+  }
+
+  const parsed = new Date(Date.UTC(year, month - 1, day, 12))
+  if (Number.isNaN(parsed.getTime())) return undefined
+
+  return parsed
+}
+
 async function main() {
   let entries = []
   try {
@@ -63,20 +85,22 @@ async function main() {
     const width = metadata.width ?? 1
     const height = metadata.height ?? 1
 
-    let date
+    let exifDate
     if (metadata.exif) {
       try {
         const exifData = exifReader(metadata.exif)
         const imageTags = exifData?.image ?? {}
         const exifTags = exifData?.exif ?? {}
-        date =
+        exifDate =
           parseExifDate(exifTags.DateTimeOriginal) ??
           parseExifDate(exifTags.CreateDate) ??
           parseExifDate(imageTags.DateTime)
       } catch {
-        date = undefined
+        exifDate = undefined
       }
     }
+
+    const date = parseFilenameDate(filename) ?? exifDate
 
     let blurDataURL
     if (index < BLUR_LIMIT) {
@@ -99,7 +123,9 @@ async function main() {
   }
 
   images.sort((a, b) => {
-    const dateScore = (a.date ? Date.parse(a.date) : 0) - (b.date ? Date.parse(b.date) : 0)
+    const aDate = a.date ? Date.parse(a.date) : Number.POSITIVE_INFINITY
+    const bDate = b.date ? Date.parse(b.date) : Number.POSITIVE_INFINITY
+    const dateScore = aDate - bDate
     if (dateScore !== 0) return dateScore
     return a.filename.localeCompare(b.filename)
   })

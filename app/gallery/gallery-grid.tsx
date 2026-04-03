@@ -11,6 +11,11 @@ import {
   useRef,
   useState,
 } from 'react'
+import {
+  formatGalleryDate,
+  getGalleryDateSortTime,
+  parseGalleryFilenameDate,
+} from '@/app/_lib/gallery-date'
 
 type GalleryGridImage = {
   src: string
@@ -19,6 +24,7 @@ type GalleryGridImage = {
   blurDataURL?: string
   title: string
   dateText?: string
+  sortTime?: number | null
 }
 
 type GalleryGridProps = {
@@ -35,27 +41,17 @@ const GRID_IMAGE_SIZES =
 const SWIPE_THRESHOLD_PX = 54
 const LIGHTBOX_SLIDE_MS = 260
 
-function extractDateFromSrc(src: string): string | null {
-  const filename = src.split('/').pop() ?? ''
-  const match = filename.match(/^(\d{2})(\d{2})(\d{4})/)
-  if (!match) return null
-
-  const day = Number(match[1])
-  const month = Number(match[2])
-  const year = Number(match[3])
-  if (!Number.isFinite(day) || !Number.isFinite(month) || !Number.isFinite(year)) {
-    return null
+function getImageSortTime(image: GalleryGridImage): number | null {
+  if (typeof image.sortTime === 'number' && Number.isFinite(image.sortTime)) {
+    return image.sortTime
   }
-  if (day < 1 || day > 31 || month < 1 || month > 12) return null
 
-  const date = new Date(Date.UTC(year, month - 1, day))
-  if (Number.isNaN(date.getTime())) return null
-
-  return new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(date)
+  return getGalleryDateSortTime(undefined, image.src)
 }
 
 function resolveDateText(image: GalleryGridImage): string {
-  return image.dateText ?? extractDateFromSrc(image.src) ?? 'undated'
+  const parsedFromFilename = parseGalleryFilenameDate(image.src)
+  return image.dateText ?? formatGalleryDate(parsedFromFilename) ?? 'undated'
 }
 
 export default function GalleryGrid({ images }: GalleryGridProps) {
@@ -74,8 +70,24 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
   const viewerWidthRef = useRef(0)
   const navTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const sortedImages = useMemo(() => {
-    if (sortOrder === 'oldest') return images
-    return [...images].reverse()
+    return [...images].sort((a, b) => {
+      const aDate = getImageSortTime(a)
+      const bDate = getImageSortTime(b)
+      const fallbackScore =
+        sortOrder === 'oldest'
+          ? a.src.localeCompare(b.src)
+          : b.src.localeCompare(a.src)
+
+      if (aDate === null && bDate === null) return fallbackScore
+      if (aDate === null) return 1
+      if (bDate === null) return -1
+
+      const dateScore =
+        sortOrder === 'oldest' ? aDate - bDate : bDate - aDate
+
+      if (dateScore !== 0) return dateScore
+      return fallbackScore
+    })
   }, [images, sortOrder])
   const deferredVisibleCount = useDeferredValue(visibleCount)
   const visibleImages = useMemo(
@@ -329,38 +341,37 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
 
   return (
     <>
-      <div className='mb-4 flex flex-wrap items-center justify-between gap-3 sm:mb-5'>
-        <div className='text-[11px] uppercase tracking-[0.2em] text-rurikon-400'>
-          sort
-        </div>
+      <div className='mb-4 flex items-center justify-end sm:mb-5'>
         <div
           role='group'
           aria-label='Sort gallery images'
-          className='inline-flex rounded-full border border-[var(--color-rurikon-border)] bg-[var(--surface-overlay)] p-1'
+          className='flex flex-wrap items-center justify-end gap-2 text-[10px] uppercase tracking-[0.16em] sm:text-[11px]'
         >
+          <span className='text-rurikon-300'>sort</span>
           <button
             type='button'
             onClick={() => setSortOrder('oldest')}
             aria-pressed={sortOrder === 'oldest'}
-            className={`rounded-full px-3 py-1.5 text-[11px] uppercase tracking-[0.18em] transition-colors duration-200 ${
+            className={`border-b px-0 py-1 transition-colors duration-200 focus-visible:outline focus-visible:outline-rurikon-400 focus-visible:outline-dotted focus-visible:outline-offset-4 ${
               sortOrder === 'oldest'
-                ? 'bg-rurikon-700 text-white'
-                : 'text-rurikon-500 hover:text-rurikon-700'
+                ? 'border-[var(--color-rurikon-border-strong)] text-rurikon-700'
+                : 'border-transparent text-rurikon-400 hover:text-rurikon-600'
             }`}
           >
-            oldest
+            oldest first
           </button>
+          <span className='text-rurikon-300'>/</span>
           <button
             type='button'
             onClick={() => setSortOrder('newest')}
             aria-pressed={sortOrder === 'newest'}
-            className={`rounded-full px-3 py-1.5 text-[11px] uppercase tracking-[0.18em] transition-colors duration-200 ${
+            className={`border-b px-0 py-1 transition-colors duration-200 focus-visible:outline focus-visible:outline-rurikon-400 focus-visible:outline-dotted focus-visible:outline-offset-4 ${
               sortOrder === 'newest'
-                ? 'bg-rurikon-700 text-white'
-                : 'text-rurikon-500 hover:text-rurikon-700'
+                ? 'border-[var(--color-rurikon-border-strong)] text-rurikon-700'
+                : 'border-transparent text-rurikon-400 hover:text-rurikon-600'
             }`}
           >
-            newest
+            newest first
           </button>
         </div>
       </div>
