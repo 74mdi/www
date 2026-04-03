@@ -463,6 +463,22 @@ article {
   }
 }
 
+.gallery-lightbox-image-enter {
+  animation: gallery-lightbox-image-enter 220ms ease-out both;
+  will-change: opacity, transform;
+}
+
+@keyframes gallery-lightbox-image-enter {
+  0% {
+    opacity: 0;
+    transform: translateX(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   [data-route-transition='enter'] {
     animation: none;
@@ -479,7 +495,8 @@ article {
 
   .gallery-card-enter,
   .gallery-overlay-enter,
-  .gallery-lightbox-enter {
+  .gallery-lightbox-enter,
+  .gallery-lightbox-image-enter {
     animation: none;
     opacity: 1;
     transform: none;

@@ -8,6 +8,7 @@ import {
   buildWebsiteStructuredData,
 } from '@/app/_lib/seo'
 import { AboutAge } from '@/components/about-age'
+import EmailLink from '@/components/email-link'
 import { HomeLastFm } from '@/components/home-lastfm'
 import StructuredData from '@/components/structured-data'
 
@@ -65,7 +66,7 @@ export default function Page() {
       </h1>
 
       <p className='mt-5 max-w-prose text-rurikon-500'>
-        personal website dyl 7amdi(ana). kankteb(kdob) ikhan ela web development, design,
+        personal website dyl 7amdi (ana).  kankteb (kdob) ikhan ela web development, design,
         performance, wchi experiments, wkan posti notes and photos.
       </p>
 
@@ -97,7 +98,10 @@ export default function Page() {
         >
           tiktok
         </a>
-        <span className='text-rurikon-400'>email</span>
+        <EmailLink
+          email='apah@tuta.io'
+          className='break-words decoration-from-font underline underline-offset-2 decoration-rurikon-300 hover:decoration-rurikon-600 focus-visible:outline focus-visible:outline-rurikon-400 focus-visible:rounded-xs focus-visible:outline-offset-1 focus-visible:outline-dotted'
+        />
       </div>
 
       <AboutAge initialNowMs={INITIAL_NOW_MS} />

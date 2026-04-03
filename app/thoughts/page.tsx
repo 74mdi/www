@@ -46,7 +46,7 @@ export default async function Page() {
           Thoughts
         </h1>
         <p className='max-w-prose text-rurikon-400'>
-          notes and essays on programming, design, performance, and internet
+          kannote aya haja b7l programming shi, design, performance, and some
           experiments.
         </p>
       </header>
