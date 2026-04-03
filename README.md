@@ -1,4 +1,4 @@
-# qaiik
+# 7amdi
 
 - Next.js v16
 - MDX Rust & Shiki inside React Server Components

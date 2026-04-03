@@ -107,7 +107,7 @@ const themeInitScript = `
 (() => {
   try {
     const root = document.documentElement;
-    const storedMode = window.localStorage.getItem('qaiik-theme-mode');
+    const storedMode = window.localStorage.getItem('7amdi-theme-mode');
     if (storedMode === 'light' || storedMode === 'dark') {
       root.setAttribute('data-theme-mode', storedMode);
       return;
@@ -122,7 +122,7 @@ const themeInitScript = `
 
 const chunkRecoveryScript = `
 (() => {
-  const reloadKey = 'qaiik-chunk-reload-once';
+  const reloadKey = '7amdi-chunk-reload-once';
 
   const shouldReload = (source) => {
     if (!source) return false;

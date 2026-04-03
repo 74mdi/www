@@ -142,8 +142,8 @@ This is usually a bad Auth URL config in Supabase.
 
 Use exactly:
 
-- `Site URL`: `https://qaiik.vercel.app`
-- `Redirect URL` (allow list): `https://qaiik.vercel.app/guestbook`
+- `Site URL`: `https://7amdi.vercel.app`
+- `Redirect URL` (allow list): `https://7amdi.vercel.app/guestbook`
 
 Also add local:
 
@@ -151,7 +151,7 @@ Also add local:
 
 Important:
 - Include `https://` in production URLs.
-- Do not set Site URL as `qaiik.vercel.app/guestbook` (without protocol).
+- Do not set Site URL as `7amdi.vercel.app/guestbook` (without protocol).
 - Keep provider callback as `https://<PROJECT_REF>.supabase.co/auth/v1/callback`.
 
 ### Error: `Could not find the table 'public.guestbook_profiles' in the schema cache`

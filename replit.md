@@ -1,4 +1,4 @@
-# qaiik
+# 7amdi
 
 A Next.js 16 (canary) personal website migrated from Vercel to Replit.
 

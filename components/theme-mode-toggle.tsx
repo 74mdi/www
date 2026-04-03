@@ -6,8 +6,8 @@ import { useHydrated } from '@/components/use-hydrated'
 
 type ThemeMode = 'light' | 'dark'
 
-const MODE_STORAGE_KEY = 'qaiik-theme-mode'
-const THEME_MODE_CHANGE_EVENT = 'qaiik:theme-mode-change'
+const MODE_STORAGE_KEY = '7amdi-theme-mode'
+const THEME_MODE_CHANGE_EVENT = '7amdi:theme-mode-change'
 const DEFAULT_MODE: ThemeMode = 'light'
 
 function isThemeMode(value: string | null): value is ThemeMode {
