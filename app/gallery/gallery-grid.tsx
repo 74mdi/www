@@ -197,6 +197,9 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
     const image = new window.Image()
     image.decoding = 'async'
     image.src = src
+    if (typeof image.decode === 'function') {
+      void image.decode().catch(() => {})
+    }
     preloadedImagesRef.current.add(src)
   }
 
@@ -636,9 +639,21 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
                       >
                         {image ? (
                           <div
-                            className={`flex h-full w-full items-center justify-center ${
-                              index === 1 ? 'gallery-lightbox-image-enter' : ''
-                            }`}
+                            className='flex h-full w-full items-center justify-center'
+                            style={{
+                              opacity: index === 1 ? 1 : isDragging ? 0.92 : 0.78,
+                              transform:
+                                index === 1
+                                  ? 'scale(1)'
+                                  : isDragging
+                                    ? 'scale(0.992)'
+                                    : 'scale(0.985)',
+                              filter: index === 1 ? 'none' : 'saturate(0.92)',
+                              transition: isDragging
+                                ? 'none'
+                                : 'transform 280ms cubic-bezier(0.22, 0.8, 0.2, 1), opacity 220ms ease-out, filter 220ms ease-out',
+                              willChange: 'transform, opacity, filter',
+                            }}
                           >
                             <Image
                               src={image.src}
