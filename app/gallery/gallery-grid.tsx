@@ -34,7 +34,6 @@ type GalleryGridProps = {
 type GallerySortOrder = 'oldest' | 'newest'
 
 const PAGE_SIZE = 12
-const INITIAL_BATCH = 14
 const EAGER_IMAGE_COUNT = 9
 const GRID_IMAGE_SIZES =
   '(min-width: 1280px) 24vw, (min-width: 1024px) 30vw, (min-width: 640px) 44vw, 50vw'
@@ -57,9 +56,7 @@ function resolveDateText(image: GalleryGridImage): string {
 export default function GalleryGrid({ images }: GalleryGridProps) {
   const [sortOrder, setSortOrder] = useState<GallerySortOrder>('oldest')
   const [columnCount, setColumnCount] = useState(2)
-  const [visibleCount, setVisibleCount] = useState(
-    Math.min(INITIAL_BATCH, images.length),
-  )
+  const [visibleCount, setVisibleCount] = useState(images.length)
   const [activeSrc, setActiveSrc] = useState<string | null>(null)
   const [slideOffsetPx, setSlideOffsetPx] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
