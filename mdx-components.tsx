@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { MDXComponents } from 'mdx/types'
 import type { ReactNode } from 'react'
 import { codeToHtml, createCssVariablesTheme } from 'shiki'
@@ -10,7 +12,7 @@ import {
 import Link from 'next/link'
 import Image from 'next/image'
 
-// @ts-ignore
+// @ts-expect-error react-katex does not ship the types this import shape expects here.
 import { InlineMath, BlockMath } from 'react-katex'
 
 import { Card } from '@/components/tweet-card'
@@ -230,6 +232,7 @@ export const components: Record<
     if (!normalizedSrc) return null
 
     const img = (
+      // eslint-disable-next-line @next/next/no-img-element
       <img
         className='mt-7 w-full h-auto'
         src={normalizedSrc}

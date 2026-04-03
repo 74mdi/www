@@ -1,5 +1,7 @@
 'use client'
 
+import type { CSSProperties } from 'react'
+
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react'
 import { Editor } from 'codice'
 import { runExperiment, type LogEntry } from './sandbox'
@@ -464,7 +466,7 @@ export function DoubleSlitPlayground({
                 '--codice-font-family': `var(--mono)`,
                 '--codice-font-size': '13px',
                 '--codice-caret-color': 'var(--color-rurikon-500)',
-              } as any
+              } as CSSProperties
             }
           >
             <Editor
@@ -546,7 +548,7 @@ export function DoubleSlitPlayground({
                 '--codice-font-family': `var(--mono)`,
                 '--codice-font-size': '13px',
                 '--codice-caret-color': 'var(--color-rurikon-500)',
-              } as any
+              } as CSSProperties
             }
           >
             <Editor

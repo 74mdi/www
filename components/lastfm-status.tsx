@@ -323,6 +323,7 @@ export function LastFmStatus() {
               aria-expanded={showCoverPreview}
               aria-controls='lastfm-cover-preview'
             >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={track!.coverUrl!}
                 alt='Current album cover'
@@ -386,6 +387,7 @@ export function LastFmStatus() {
                   top: `${previewPosition.top}px`,
                 }}
               >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={track!.coverUrl!}
                   alt='Album cover preview'

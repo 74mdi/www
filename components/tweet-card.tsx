@@ -1,5 +1,7 @@
 'use client'
 
+/* eslint-disable @next/next/no-img-element */
+
 export function Card({
   image,
   title,
@@ -21,6 +23,7 @@ export function Card({
     >
       <img
         src={image}
+        alt={title}
         className='m-0 w-full aspect-[1.9/1] object-cover border-b border-rurikon-border'
       />
       <p className='m-4 mt-3 mb-1 font-semibold'>{title}</p>

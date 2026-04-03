@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 
 import { buildOgImageUrl } from '@/app/_lib/og-image-url'
 import { SITE_DESCRIPTION, SITE_NAME } from '@/app/_lib/site'

@@ -217,7 +217,7 @@ export async function runExperiment(
     vm.dispose()
 
     return JSON.parse(resultJson as string)
-  } catch (err) {
+  } catch {
     vm.dispose()
     // Return a default interference result on error
     return {

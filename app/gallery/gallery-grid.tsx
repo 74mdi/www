@@ -7,6 +7,7 @@ import {
   startTransition,
   useDeferredValue,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -34,6 +35,7 @@ type GalleryGridProps = {
 type GallerySortOrder = 'oldest' | 'newest'
 
 const PAGE_SIZE = 12
+const INITIAL_BATCH = 14
 const EAGER_IMAGE_COUNT = 9
 const GRID_IMAGE_SIZES =
   '(min-width: 1280px) 24vw, (min-width: 1024px) 30vw, (min-width: 640px) 44vw, 50vw'
@@ -56,7 +58,9 @@ function resolveDateText(image: GalleryGridImage): string {
 export default function GalleryGrid({ images }: GalleryGridProps) {
   const [sortOrder, setSortOrder] = useState<GallerySortOrder>('oldest')
   const [columnCount, setColumnCount] = useState(2)
-  const [visibleCount, setVisibleCount] = useState(images.length)
+  const [visibleCount, setVisibleCount] = useState(
+    Math.min(INITIAL_BATCH, images.length),
+  )
   const [activeSrc, setActiveSrc] = useState<string | null>(null)
   const [slideOffsetPx, setSlideOffsetPx] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
@@ -67,6 +71,7 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
   const preloadedImagesRef = useRef<Set<string>>(new Set())
   const viewerWidthRef = useRef(0)
   const navTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const goToIndexRef = useRef<(nextIndex: number) => void>(() => {})
   const sortedImages = useMemo(() => {
     return [...images].sort((a, b) => {
       const aDate = getImageSortTime(a)
@@ -119,18 +124,20 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
   const isViewerOpen = activeImageIndex >= 0
   const isClient = typeof window !== 'undefined'
 
-  const ensureImageIsLoaded = (index: number) => {
-    startTransition(() => {
-      setVisibleCount((count) =>
-        Math.min(Math.max(count, index + 1), sortedImages.length),
-      )
-    })
-  }
-
   const loadMore = () => {
     startTransition(() => {
       setVisibleCount((count) => Math.min(count + PAGE_SIZE, sortedImages.length))
     })
+  }
+
+  const handleSortChange = (nextSortOrder: GallerySortOrder) => {
+    if (nextSortOrder === sortOrder) return
+
+    clearNavTimer()
+    setSlideOffsetPx(0)
+    setIsDragging(false)
+    setIsSettling(false)
+    setSortOrder(nextSortOrder)
   }
 
   const updateViewerWidth = () => {
@@ -151,37 +158,6 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
     setSlideOffsetPx(0)
 
     navTimerRef.current = setTimeout(() => {
-      setIsSettling(false)
-      navTimerRef.current = null
-    }, LIGHTBOX_SLIDE_MS)
-  }
-
-  const goToIndex = (nextIndex: number) => {
-    if (activeImageIndex < 0) return
-
-    const next = Math.max(0, Math.min(nextIndex, sortedImages.length - 1))
-    if (next === activeImageIndex) {
-      resetSlidePosition()
-      return
-    }
-
-    updateViewerWidth()
-    ensureImageIsLoaded(next)
-    preloadImage(sortedImages[next]?.src)
-    preloadImage(sortedImages[next + 1]?.src)
-    preloadImage(sortedImages[next - 1]?.src)
-
-    const direction = next > activeImageIndex ? 1 : -1
-    const width = viewerWidthRef.current || window.innerWidth
-
-    clearNavTimer()
-    setIsDragging(false)
-    setIsSettling(true)
-    setSlideOffsetPx(direction > 0 ? -width : width)
-
-    navTimerRef.current = setTimeout(() => {
-      setActiveSrc(sortedImages[next]?.src ?? null)
-      setSlideOffsetPx(0)
       setIsSettling(false)
       navTimerRef.current = null
     }, LIGHTBOX_SLIDE_MS)
@@ -212,7 +188,9 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
       (entries) => {
         if (!entries[0]?.isIntersecting || isLocked) return
         isLocked = true
-        loadMore()
+        startTransition(() => {
+          setVisibleCount((count) => Math.min(count + PAGE_SIZE, sortedImages.length))
+        })
         cooldown = setTimeout(() => {
           isLocked = false
         }, 240)
@@ -231,9 +209,58 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
   }, [sortedImages.length, visibleCount])
 
   useEffect(() => {
+    goToIndexRef.current = (nextIndex: number) => {
+      if (activeImageIndex < 0) return
+
+      const next = Math.max(0, Math.min(nextIndex, sortedImages.length - 1))
+      if (next === activeImageIndex) {
+        clearNavTimer()
+        setIsDragging(false)
+        setIsSettling(true)
+        setSlideOffsetPx(0)
+
+        navTimerRef.current = setTimeout(() => {
+          setIsSettling(false)
+          navTimerRef.current = null
+        }, LIGHTBOX_SLIDE_MS)
+        return
+      }
+
+      updateViewerWidth()
+      startTransition(() => {
+        setVisibleCount((count) =>
+          Math.min(Math.max(count, next + 1), sortedImages.length),
+        )
+      })
+      preloadImage(sortedImages[next]?.src)
+      preloadImage(sortedImages[next + 1]?.src)
+      preloadImage(sortedImages[next - 1]?.src)
+
+      const direction = next > activeImageIndex ? 1 : -1
+      const width = viewerWidthRef.current || window.innerWidth
+
+      clearNavTimer()
+      setIsDragging(false)
+      setIsSettling(true)
+      setSlideOffsetPx(direction > 0 ? -width : width)
+
+      navTimerRef.current = setTimeout(() => {
+        setActiveSrc(sortedImages[next]?.src ?? null)
+        setSlideOffsetPx(0)
+        setIsSettling(false)
+        navTimerRef.current = null
+      }, LIGHTBOX_SLIDE_MS)
+    }
+  }, [activeImageIndex, sortedImages])
+
+  useEffect(() => {
     if (activeImageIndex < 0) return
-    ensureImageIsLoaded(activeImageIndex)
-  }, [activeImageIndex])
+    startTransition(() => {
+      setVisibleCount((count) =>
+        Math.min(Math.max(count, activeImageIndex + 1), sortedImages.length),
+      )
+    })
+  }, [activeImageIndex, sortedImages.length])
 
   useEffect(() => {
     if (!isViewerOpen || typeof window === 'undefined') return
@@ -250,28 +277,33 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
     }
   }, [isViewerOpen])
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (typeof window === 'undefined') return
 
     const desktopQuery = window.matchMedia('(min-width: 1024px)')
-    const updateColumnCount = () => {
-      setColumnCount(desktopQuery.matches ? 3 : 2)
+    const syncResponsiveLayout = () => {
+      const isDesktop = desktopQuery.matches
+      setColumnCount(isDesktop ? 3 : 2)
+      setVisibleCount((count) => {
+        if (isDesktop) return images.length
+        return Math.min(Math.max(count, INITIAL_BATCH), images.length)
+      })
     }
 
-    updateColumnCount()
+    syncResponsiveLayout()
 
     if (typeof desktopQuery.addEventListener === 'function') {
-      desktopQuery.addEventListener('change', updateColumnCount)
+      desktopQuery.addEventListener('change', syncResponsiveLayout)
       return () => {
-        desktopQuery.removeEventListener('change', updateColumnCount)
+        desktopQuery.removeEventListener('change', syncResponsiveLayout)
       }
     }
 
-    desktopQuery.addListener(updateColumnCount)
+    desktopQuery.addListener(syncResponsiveLayout)
     return () => {
-      desktopQuery.removeListener(updateColumnCount)
+      desktopQuery.removeListener(syncResponsiveLayout)
     }
-  }, [])
+  }, [images.length])
 
   useEffect(() => {
     visibleImages
@@ -287,13 +319,6 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
     preloadImage(sortedImages[activeImageIndex - 1]?.src)
     preloadImage(sortedImages[activeImageIndex + 2]?.src)
   }, [activeImageIndex, sortedImages])
-
-  useEffect(() => {
-    clearNavTimer()
-    setSlideOffsetPx(0)
-    setIsDragging(false)
-    setIsSettling(false)
-  }, [sortOrder])
 
   useEffect(() => {
     if (!isViewerOpen || typeof window === 'undefined') return
@@ -360,11 +385,11 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
       }
 
       if (event.key === 'ArrowRight') {
-        goToIndex(activeImageIndex + 1)
+        goToIndexRef.current(activeImageIndex + 1)
       }
 
       if (event.key === 'ArrowLeft') {
-        goToIndex(activeImageIndex - 1)
+        goToIndexRef.current(activeImageIndex - 1)
       }
     }
 
@@ -386,7 +411,7 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
           <span className='text-rurikon-300'>sort</span>
           <button
             type='button'
-            onClick={() => setSortOrder('oldest')}
+            onClick={() => handleSortChange('oldest')}
             aria-pressed={sortOrder === 'oldest'}
             className={`border-b px-0 py-1 transition-colors duration-200 focus-visible:outline focus-visible:outline-rurikon-400 focus-visible:outline-dotted focus-visible:outline-offset-4 ${
               sortOrder === 'oldest'
@@ -399,7 +424,7 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
           <span className='text-rurikon-300'>/</span>
           <button
             type='button'
-            onClick={() => setSortOrder('newest')}
+            onClick={() => handleSortChange('newest')}
             aria-pressed={sortOrder === 'newest'}
             className={`border-b px-0 py-1 transition-colors duration-200 focus-visible:outline focus-visible:outline-rurikon-400 focus-visible:outline-dotted focus-visible:outline-offset-4 ${
               sortOrder === 'newest'
@@ -548,7 +573,7 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
                     deltaX < 0 &&
                     activeImageIndex < sortedImages.length - 1
                   ) {
-                    goToIndex(activeImageIndex + 1)
+                    goToIndexRef.current(activeImageIndex + 1)
                     return
                   }
 
@@ -558,7 +583,7 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
                     deltaX > 0 &&
                     activeImageIndex > 0
                   ) {
-                    goToIndex(activeImageIndex - 1)
+                    goToIndexRef.current(activeImageIndex - 1)
                     return
                   }
 
@@ -591,7 +616,7 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
                 {activeImageIndex > 0 ? (
                   <button
                     type='button'
-                    onClick={() => goToIndex(activeImageIndex - 1)}
+                    onClick={() => goToIndexRef.current(activeImageIndex - 1)}
                     className='pointer-events-auto absolute left-0 top-0 bottom-0 z-10 hidden w-[18vw] min-w-16 items-center justify-start pl-4 text-white/72 transition-opacity duration-200 hover:text-white sm:flex'
                     aria-label='Previous image'
                   >
@@ -604,7 +629,7 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
                 {activeImageIndex < sortedImages.length - 1 ? (
                   <button
                     type='button'
-                    onClick={() => goToIndex(activeImageIndex + 1)}
+                    onClick={() => goToIndexRef.current(activeImageIndex + 1)}
                     className='pointer-events-auto absolute right-0 top-0 bottom-0 z-10 hidden w-[18vw] min-w-16 items-center justify-end pr-4 text-white/72 transition-opacity duration-200 hover:text-white sm:flex'
                     aria-label='Next image'
                   >
@@ -673,7 +698,7 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
                   <div className='pointer-events-auto flex items-center gap-2 sm:hidden'>
                     <button
                       type='button'
-                      onClick={() => goToIndex(activeImageIndex - 1)}
+                      onClick={() => goToIndexRef.current(activeImageIndex - 1)}
                       disabled={activeImageIndex === 0}
                       className='inline-flex h-10 w-10 items-center justify-center rounded-full bg-black/30 text-white/80 backdrop-blur-sm transition-colors duration-200 disabled:opacity-30'
                       aria-label='Previous image'
@@ -682,7 +707,7 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
                     </button>
                     <button
                       type='button'
-                      onClick={() => goToIndex(activeImageIndex + 1)}
+                      onClick={() => goToIndexRef.current(activeImageIndex + 1)}
                       disabled={activeImageIndex === sortedImages.length - 1}
                       className='inline-flex h-10 w-10 items-center justify-center rounded-full bg-black/30 text-white/80 backdrop-blur-sm transition-colors duration-200 disabled:opacity-30'
                       aria-label='Next image'
