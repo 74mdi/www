@@ -41,6 +41,9 @@ dependencies:
   '@vercel/og':
     specifier: ^0.8.6
     version: 0.8.6
+  '@vercel/speed-insights':
+    specifier: ^2.0.0
+    version: 2.0.0(next@16.1.1-canary.6)(react@0.0.0-experimental-408b38ef-20251023)
   clsx:
     specifier: ^2.1.0
     version: 2.1.1
@@ -1788,6 +1791,36 @@ packages:
     dependencies:
       '@resvg/resvg-wasm': 2.4.0
       satori: 0.16.0
+    dev: false
+
+  /@vercel/speed-insights@2.0.0(next@16.1.1-canary.6)(react@0.0.0-experimental-408b38ef-20251023):
+    resolution: {integrity: sha512-jwkNcrTeafWxjmWq4AHBaptSqZiJkYU5adLC9QBSqeim0GcqDMgN5Ievh8OG1rJ6W3A4l1oiP7qr9CWxGuzu3w==}
+    peerDependencies:
+      '@sveltejs/kit': ^1 || ^2
+      next: '>= 13'
+      nuxt: '>= 3'
+      react: ^18 || ^19 || ^19.0.0-rc
+      svelte: '>= 4'
+      vue: ^3
+      vue-router: ^4
+    peerDependenciesMeta:
+      '@sveltejs/kit':
+        optional: true
+      next:
+        optional: true
+      nuxt:
+        optional: true
+      react:
+        optional: true
+      svelte:
+        optional: true
+      vue:
+        optional: true
+      vue-router:
+        optional: true
+    dependencies:
+      next: 16.1.1-canary.6(@babel/core@7.29.0)(react-dom@0.0.0-experimental-408b38ef-20251023)(react@0.0.0-experimental-408b38ef-20251023)
+      react: 0.0.0-experimental-408b38ef-20251023
     dev: false
 
   /acorn-jsx@5.3.2(acorn@8.15.0):
