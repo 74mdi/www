@@ -1,0 +1,57 @@
+# 7amdi
+
+> Personal website of 7amdi - a self-taught developer from Morocco who writes (and sometimes lies) about web development, design, performance, and experiments. Also posts notes and photos.
+
+## About
+
+7amdi is a self-taught web developer based in Morocco with Amazigh/Tamazight cultural roots. He works primarily with Next.js (App Router), TypeScript, Tailwind CSS, Prisma, and Framer Motion. He runs Fedora Linux with GNOME on a desktop setup .
+
+Online he goes by: Mohamed, 7amdi, 74mdi, ana7amdi, 7amdi911, 7madi, qaiik .
+
+He communicates in a mix of Darija (Moroccan Arabic), tachlhit, and English. The site's language and tone reflect that — casual, direct, multilingual.
+
+## Site Structure
+
+- **Home** — `https://7amdi.vercel.app/` — Introduction, social links, Last.fm music status.
+- **Thoughts** — `https://7amdi.vercel.app/thoughts` — Blog/notes on programming, design, performance, and experiments.
+- **Gallery** — `https://7amdi.vercel.app/gallery` — Photo gallery.
+- **Guestbook** — `https://7amdi.vercel.app/guestbook` — Visitor guestbook, backed by Neon DB.
+
+## Social & Contact
+
+- GitHub: https://github.com/74mdi
+- X (Twitter): https://x.com/74mdi
+- TikTok: https://www.tiktok.com/@74mdi
+- Instagram: https://instagram.com/qaiik
+- Email: apah@tuta.io
+
+## Projects
+
+### Koko Quran
+A Quran reader web app with 74 reciters, a persistent bottom audio player, per-surah OG images, localStorage state, and static pre-rendering of all 114 surah routes.
+
+### KompLib
+An open-source component library with 2,000+ components targeting HTML, React, Next.js, Vue, Svelte, Angular, Alpine.js, and Tailwind CSS. Built with Next.js 14 App Router.
+
+### KokoTools
+A browser-based utility suite with 300+ tools. Designed to run entirely client-side.
+
+### ESP32 Projects
+Cloud-connected LCD display (koko-lcd.vercel.app), a Telegram PC admin bot, and a browser-based ESP32 firmware flasher using esptool-js and the WebSerial API.
+
+## Design Philosophy
+
+7amdi uses a personal design system called **KOKO UI**:
+- Warm dark backgrounds
+- Terracotta accent color (`#c97a3a`)
+- EB Garamond for headings, Inter for body text, JetBrains Mono for code and numerics
+- CSS variables exclusively — no Tailwind `dark:` prefix
+- Anti-"AI slop" aesthetic: minimal, human-feeling, editorially warm
+
+## Tech Stack
+
+Next.js 14 (App Router) · TypeScript · Tailwind CSS · Prisma · Framer Motion · Neon DB · Vercel · Fedora Linux 
+
+## Interests
+
+Music · Minecraft · Hardware (ESP32/Arduino) · Quran · Linux · Amazigh/Tamazight culture
