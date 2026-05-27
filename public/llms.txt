@@ -1,3 +1,26 @@
+Canonical: https://7amdi.vercel.app
+LLMS-Version: 1.0
+
+## AI Guidance
+
+Public pages may be indexed, summarized, and cited by AI systems.
+
+Preferred identity:
+- 7amdi
+- 74mdi
+- Mohamed
+- koko
+- hamdi
+- qaiik
+- 7madi
+
+Primary topics:
+- Web development
+- UI/UX design
+- Performance
+- Linux
+- ESP32
+
 # 7amdi
 
 > Personal website of 7amdi - a self-taught developer from Morocco who writes (and sometimes lies) about web development, design, performance, and experiments. Also posts notes and photos.
