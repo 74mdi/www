@@ -12,6 +12,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Guestbook',
     description: 'Sign the guestbook with Discord, GitHub, or Google.',
+    url: '/guestbook',
     images: [
       buildOgImageUrl({
         variant: 'default',

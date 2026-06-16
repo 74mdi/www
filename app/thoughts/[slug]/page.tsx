@@ -4,6 +4,7 @@ import cn from 'clsx'
 import { notFound } from 'next/navigation'
 
 import { buildOgImageUrl } from '@/app/_lib/og-image-url'
+import { parseDottedDate } from '@/app/_lib/seo'
 import { isSitePlaceholder, SITE_DESCRIPTION } from '@/app/_lib/site'
 import {
   buildArticleStructuredData,
@@ -116,6 +117,10 @@ export async function generateMetadata(props: {
   const normalizedDescription = resolveArticleDescription(
     articleModule.metadata?.description,
   )
+  const parsedDate = parseDottedDate(articleModule.metadata?.date)
+  const publishedTime = parsedDate
+    ? new Date(parsedDate).toISOString()
+    : undefined
 
   return {
     title,
@@ -128,6 +133,8 @@ export async function generateMetadata(props: {
       url: `/thoughts/${params.slug}`,
       title,
       description: normalizedDescription,
+      publishedTime,
+      modifiedTime: publishedTime,
       images: [
         buildOgImageUrl({
           variant: 'thoughts',

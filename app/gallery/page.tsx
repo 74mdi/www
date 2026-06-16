@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     title: 'Gallery',
-    description: 'oko hna kanposti chi ikhn kansowro b nokia dyali wsf.',
+    description: 'koko hna kanposti chi ikhn kansowro b nokia dyali wsf.',
     images: [
       buildOgImageUrl({
         variant: 'default',

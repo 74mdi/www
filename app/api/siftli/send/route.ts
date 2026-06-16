@@ -144,6 +144,22 @@ async function safeReadBody(response: Response): Promise<string> {
 }
 
 export async function POST(request: NextRequest) {
+  // Require a secret token to prevent unauthorized usage
+  const expectedToken = process.env.SIFTLI_API_TOKEN
+  if (expectedToken) {
+    const authHeader = request.headers.get('authorization')
+    const providedToken = authHeader?.startsWith('Bearer ')
+      ? authHeader.slice(7)
+      : request.headers.get('x-api-token')
+
+    if (providedToken !== expectedToken) {
+      return NextResponse.json(
+        { error: 'Unauthorized. Provide a valid SIFTLI_API_TOKEN.' },
+        { status: 401 },
+      )
+    }
+  }
+
   let formData: FormData
   try {
     formData = await request.formData()
