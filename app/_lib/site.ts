@@ -53,15 +53,18 @@ function isLegacySiteUrl(candidate: string | null): boolean {
 }
 
 export function getSiteUrl(): string {
+  // Always respect explicit NEXT_PUBLIC_SITE_URL
   const explicit = normalizeSiteUrl(process.env.NEXT_PUBLIC_SITE_URL)
-  if (explicit && !isLegacySiteUrl(explicit)) return explicit
+  if (explicit) return explicit
 
+  // Fallback to Vercel production URL if not legacy
   const production = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim()
   const normalizedProduction = normalizeSiteUrl(production)
   if (normalizedProduction && !isLegacySiteUrl(normalizedProduction)) {
     return normalizedProduction
   }
 
+  // Fallback to Vercel preview URL if not legacy
   const preview = process.env.VERCEL_URL?.trim()
   const normalizedPreview = normalizeSiteUrl(preview)
   if (normalizedPreview && !isLegacySiteUrl(normalizedPreview)) {
