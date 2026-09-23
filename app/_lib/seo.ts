@@ -4,7 +4,7 @@ import {
   SITE_DESCRIPTION,
   SITE_NAME,
   SITE_SOCIAL_URLS,
-  toAbsoluteUrl,
+  toCanonicalAbsoluteUrl as toAbsoluteUrl,
 } from '@/app/_lib/site'
 
 type BreadcrumbItem = {

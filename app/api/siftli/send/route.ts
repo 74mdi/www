@@ -146,7 +146,14 @@ async function safeReadBody(response: Response): Promise<string> {
 export async function POST(request: NextRequest) {
   // Require a secret token to prevent unauthorized usage
   const expectedToken = process.env.SIFTLI_API_TOKEN
-  if (expectedToken) {
+  if (!expectedToken) {
+    // Fail closed: never run the endpoint unauthenticated
+    return NextResponse.json(
+      { error: 'Server misconfigured. SIFTLI_API_TOKEN is not set.' },
+      { status: 500 },
+    )
+  }
+  {
     const authHeader = request.headers.get('authorization')
     const providedToken = authHeader?.startsWith('Bearer ')
       ? authHeader.slice(7)
@@ -262,24 +269,27 @@ export async function POST(request: NextRequest) {
   if (selectedSet.has('telegram')) {
     try {
       if (message) {
-        const telegramMessage = message.slice(0, TELEGRAM_MAX_MESSAGE)
-        const response = await fetchWithTimeout(
-          `https://api.telegram.org/bot${telegramBotToken}/sendMessage`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              chat_id: telegramChatId,
-              text: telegramMessage,
-              disable_web_page_preview: true,
-            }),
-          },
-        )
+        const messageChunks = splitMessage(message, TELEGRAM_MAX_MESSAGE)
+        for (const chunk of messageChunks) {
+          const response = await fetchWithTimeout(
+            `https://api.telegram.org/bot${telegramBotToken}/sendMessage`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                chat_id: telegramChatId,
+                text: chunk,
+                disable_web_page_preview: true,
+              }),
+            },
+          )
 
-        const body = await response.json()
-        if (!response.ok || !body?.ok) {
-          results.telegram.error =
-            body?.description || 'Failed to send message to Telegram.'
+          const body = await response.json()
+          if (!response.ok || !body?.ok) {
+            results.telegram.error =
+              body?.description || 'Failed to send message to Telegram.'
+            break
+          }
         }
       }
 

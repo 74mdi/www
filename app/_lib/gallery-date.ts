@@ -23,6 +23,15 @@ export function parseGalleryFilenameDate(candidate: string): Date | undefined {
   const parsed = new Date(Date.UTC(year, month - 1, day, 12))
   if (Number.isNaN(parsed.getTime())) return undefined
 
+  // Reject dates that rolled over (e.g. Feb 31 -> Mar 3)
+  if (
+    parsed.getUTCFullYear() !== year ||
+    parsed.getUTCMonth() !== month - 1 ||
+    parsed.getUTCDate() !== day
+  ) {
+    return undefined
+  }
+
   return parsed
 }
 

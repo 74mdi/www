@@ -41,9 +41,13 @@ export default async function Page(props: {
   }>
 }) {
   const params = await props.params
-  const { default: MDXContent, metadata } = await import(
-    '../_articles/' + `${params.slug}.mdx`
-  )
+  let articleModule
+  try {
+    articleModule = await import('../_articles/' + `${params.slug}.mdx`)
+  } catch {
+    notFound()
+  }
+  const { default: MDXContent, metadata } = articleModule
 
   if (metadata.draft) {
     notFound()
@@ -84,18 +88,14 @@ export async function generateStaticParams() {
     path.join(process.cwd(), 'app', 'thoughts', '_articles'),
   )
 
-  const slugs: { params: { slug: string } }[] = []
+  const slugs: { slug: string }[] = []
   for (const name of articles) {
     if (!name.endsWith('.mdx')) continue
 
     const articleModule = await import('../_articles/' + name)
     if (articleModule.metadata?.draft) continue
 
-    slugs.push({
-      params: {
-        slug: name.replace(/\.mdx$/, ''),
-      },
-    })
+    slugs.push({ slug: name.replace(/\.mdx$/, '') })
   }
 
   return slugs
@@ -107,7 +107,12 @@ export async function generateMetadata(props: {
   }>
 }) {
   const params = await props.params
-  const articleModule = await import('../_articles/' + `${params.slug}.mdx`)
+  let articleModule
+  try {
+    articleModule = await import('../_articles/' + `${params.slug}.mdx`)
+  } catch {
+    notFound()
+  }
 
   if (articleModule.metadata?.draft) {
     notFound()

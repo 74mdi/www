@@ -46,12 +46,14 @@ export default function GalleryLightbox({
   const preloadedImagesRef = useRef<Set<string>>(new Set())
   const viewerWidthRef = useRef(0)
   const navTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const pendingIndexRef = useRef<number | null>(null)
 
   const clearNavTimer = useCallback(() => {
     if (navTimerRef.current) {
       clearTimeout(navTimerRef.current)
       navTimerRef.current = null
     }
+    pendingIndexRef.current = null
   }, [])
 
   const updateViewerWidth = useCallback(() => {
@@ -94,8 +96,19 @@ export default function GalleryLightbox({
   const goToIndex = useCallback((nextIndex: number) => {
     if (!activeImage) return
 
+    // If a previous navigation is still pending, commit it immediately so
+    // rapid navigation cannot desync the shown image from activeIndex.
+    const pending = pendingIndexRef.current
+    const baseIndex = pending ?? activeIndex
+    if (pending !== null) {
+      clearNavTimer()
+      onSelectIndex(pending)
+      setSlideOffsetPx(0)
+      setIsSettling(false)
+    }
+
     const next = Math.max(0, Math.min(nextIndex, images.length - 1))
-    if (next === activeIndex) {
+    if (next === baseIndex) {
       resetSlidePosition()
       return
     }
@@ -105,15 +118,17 @@ export default function GalleryLightbox({
     preloadImage(images[next + 1]?.src)
     preloadImage(images[next - 1]?.src)
 
-    const direction = next > activeIndex ? 1 : -1
+    const direction = next > baseIndex ? 1 : -1
     const width = viewerWidthRef.current || window.innerWidth
 
     clearNavTimer()
     setIsDragging(false)
     setIsSettling(true)
     setSlideOffsetPx(direction > 0 ? -width : width)
+    pendingIndexRef.current = next
 
     navTimerRef.current = setTimeout(() => {
+      pendingIndexRef.current = null
       onSelectIndex(next)
       setSlideOffsetPx(0)
       setIsSettling(false)

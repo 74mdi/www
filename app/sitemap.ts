@@ -1,10 +1,10 @@
 import type { MetadataRoute } from 'next'
 
-import { getSiteUrl } from '@/app/_lib/site'
+import { getCanonicalSiteUrl } from '@/app/_lib/site'
 import { getThoughtArticles } from '@/app/thoughts/articles'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const siteUrl = getSiteUrl()
+  const siteUrl = getCanonicalSiteUrl()
   const now = new Date()
   const thoughtArticles = await getThoughtArticles()
 

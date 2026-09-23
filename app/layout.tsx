@@ -7,7 +7,7 @@ import Script from 'next/script'
 
 import { buildOgImageUrl } from '@/app/_lib/og-image-url'
 import {
-  getSiteUrl,
+  getCanonicalSiteUrl,
   SITE_DESCRIPTION,
   SITE_KEYWORDS,
   SITE_NAME,
@@ -37,7 +37,7 @@ const mono = localFont({
 const enableVercelAnalytics =
   process.env.NEXT_PUBLIC_ENABLE_VERCEL_ANALYTICS === '1'
 
-const siteUrl = getSiteUrl().replace(/\/+$/, '')
+const siteUrl = getCanonicalSiteUrl().replace(/\/+$/, '')
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

@@ -77,3 +77,25 @@ export function getSiteUrl(): string {
 export function toAbsoluteUrl(pathname = '/'): string {
   return new URL(pathname, `${getSiteUrl()}/`).toString()
 }
+
+/**
+ * Canonical site URL for SEO-critical output (sitemap, robots, canonical
+ * links). Unlike getSiteUrl(), this never falls back to Vercel preview
+ * deployment URLs, which are not allowed in a sitemap.
+ */
+export function getCanonicalSiteUrl(): string {
+  const explicit = normalizeSiteUrl(process.env.NEXT_PUBLIC_SITE_URL)
+  if (explicit) return explicit
+
+  const production = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim()
+  const normalizedProduction = normalizeSiteUrl(production)
+  if (normalizedProduction && !isLegacySiteUrl(normalizedProduction)) {
+    return normalizedProduction
+  }
+
+  return `https://${SITE_DOMAIN}`
+}
+
+export function toCanonicalAbsoluteUrl(pathname = '/'): string {
+  return new URL(pathname, `${getCanonicalSiteUrl()}/`).toString()
+}
