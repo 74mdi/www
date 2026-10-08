@@ -6,7 +6,7 @@ import { getListeningHistory } from '@/app/_lib/lastfm-history'
 export const metadata: Metadata = {
   title: 'Listening history',
   description: 'Recent tracks from Last.fm.',
-  robots: { index: false, follow: false },
+  robots: { index: true, follow: true },
 }
 
 export default async function ListeningHistoryPage() {

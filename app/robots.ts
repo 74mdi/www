@@ -17,8 +17,6 @@ export default function robots(): MetadataRoute.Robots {
           '/siftli/',
           '/ogc',
           '/ogc/',
-          '/mh',
-          '/mh/',
         ],
       },
     ],
