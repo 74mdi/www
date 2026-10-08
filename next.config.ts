@@ -24,9 +24,6 @@ export default withMDX()({
     contentDispositionType: 'inline',
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     formats: ['image/avif', 'image/webp'],
-    remotePatterns: [
-      { protocol: 'https', hostname: 'lastfm.freetls.fastly.net' },
-    ],
     deviceSizes: [640, 828, 1080, 1200],
     imageSizes: [16, 32, 64, 128, 256, 384, 512],
   },

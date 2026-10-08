@@ -57,9 +57,13 @@ export async function getListeningHistory(): Promise<ListeningTrack[]> {
       const artist = typeof track.artist === 'string'
         ? track.artist.trim()
         : track.artist?.['#text']?.trim() || ''
-      const cover = track.image?.find((image) => image.size === 'large')?.['#text']
-        || track.image?.find((image) => image['#text'])?.['#text']
-        || null
+      const coverImage = ['extralarge', 'large', 'medium', 'small']
+        .map((size) => track.image?.find((image) => image.size === size)?.['#text'])
+        .find((url) => url?.startsWith('https://') && !url.includes('2a96cbd8b46e442fc41c2b86b821562f'))
+        ?? track.image?.map((image) => image['#text']).find(
+          (url) => url?.startsWith('https://') && !url.includes('2a96cbd8b46e442fc41c2b86b821562f'),
+        )
+      const cover = coverImage ?? null
       const nowPlaying = track['@attr']?.nowplaying === 'true'
       const seconds = Number(track.date?.uts)
 
@@ -67,7 +71,7 @@ export async function getListeningHistory(): Promise<ListeningTrack[]> {
         title,
         artist: artist || 'Unknown artist',
         album: track.album?.['#text']?.trim() || '',
-        cover: cover?.startsWith('https://') ? cover : null,
+        cover,
         timestamp: !nowPlaying && Number.isFinite(seconds) && seconds > 0 ? seconds * 1000 : null,
         nowPlaying,
       }]

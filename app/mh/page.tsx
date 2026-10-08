@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
-import Image from 'next/image'
 
+import AlbumCover from '@/app/mh/album-cover'
 import { getListeningHistory } from '@/app/_lib/lastfm-history'
 
 export const metadata: Metadata = {
@@ -23,19 +23,10 @@ export default async function ListeningHistoryPage() {
 
       {tracks.length ? (
         <ol className='divide-y divide-[var(--color-rurikon-border)]'>
-          {tracks.map((track, index) => (
+          {tracks.map((track) => (
             <li key={`${track.timestamp ?? 'live'}-${track.title}-${track.artist}`} className='flex items-center gap-3 py-3'>
               {track.cover ? (
-                <Image
-                  src={track.cover}
-                  alt=''
-                  width={48}
-                  height={48}
-                  sizes='48px'
-                  quality={70}
-                  priority={index < 4}
-                  className='h-12 w-12 shrink-0 rounded-md object-cover'
-                />
+                <AlbumCover src={track.cover} title={track.title} />
               ) : (
                 <span aria-hidden='true' className='h-12 w-12 shrink-0 rounded-md bg-[var(--surface-soft)]' />
               )}
