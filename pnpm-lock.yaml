@@ -889,6 +889,17 @@ packages:
       - supports-color
     dev: false
 
+  /@mdx-js/react@3.1.1(@types/react@18.3.26)(react@0.0.0-experimental-408b38ef-20251023):
+    resolution: {integrity: sha512-f++rKLQgUVYDAtECQ6fn/is15GkEH9+nZPM3MS0RcxVqoTfawHvDlSCH7JbMhAM6uJ32v3eXLvLmLvjGu7PTQw==}
+    peerDependencies:
+      '@types/react': '>=16'
+      react: '>=16'
+    dependencies:
+      '@types/mdx': 2.0.13
+      '@types/react': 18.3.26
+      react: 0.0.0-experimental-408b38ef-20251023
+    dev: false
+
   /@napi-rs/wasm-runtime@0.2.12:
     resolution: {integrity: sha512-ZVWUcfwY4E/yPitQJl481FjFo3K22D6qF0DuFH6Y/nbnE11GY5uguDxZMGXPQ8WQ0128MXQD7TnfHyK4oWoIJQ==}
     requiresBuild: true
@@ -921,6 +932,7 @@ packages:
         optional: true
     dependencies:
       '@mdx-js/loader': 3.1.1
+      '@mdx-js/react': 3.1.1(@types/react@18.3.26)(react@0.0.0-experimental-408b38ef-20251023)
       source-map: 0.7.6
     dev: false
 
