@@ -18,7 +18,7 @@ type GalleryLightboxProps = {
 }
 
 const SWIPE_THRESHOLD_PX = 54
-const LIGHTBOX_SLIDE_MS = 260
+const LIGHTBOX_SLIDE_MS = 280
 
 function resolveDateText(image: GalleryGridImage): string {
   const parsedFromFilename = parseGalleryFilenameDate(image.src)
@@ -42,18 +42,19 @@ export default function GalleryLightbox({
   const [isDragging, setIsDragging] = useState(false)
   const [isSettling, setIsSettling] = useState(false)
   const viewerFrameRef = useRef<HTMLDivElement | null>(null)
+  const sliderRef = useRef<HTMLDivElement | null>(null)
   const touchStartRef = useRef<{ x: number; y: number } | null>(null)
   const preloadedImagesRef = useRef<Set<string>>(new Set())
   const viewerWidthRef = useRef(0)
-  const navTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const pendingIndexRef = useRef<number | null>(null)
+  const settleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const transitionTargetRef = useRef<number | null>(null)
 
-  const clearNavTimer = useCallback(() => {
-    if (navTimerRef.current) {
-      clearTimeout(navTimerRef.current)
-      navTimerRef.current = null
+  const clearSettleTimer = useCallback(() => {
+    if (settleTimerRef.current) {
+      clearTimeout(settleTimerRef.current)
+      settleTimerRef.current = null
     }
-    pendingIndexRef.current = null
+    transitionTargetRef.current = null
   }, [])
 
   const updateViewerWidth = useCallback(() => {
@@ -74,39 +75,29 @@ export default function GalleryLightbox({
   }, [])
 
   const closeViewer = useCallback(() => {
-    clearNavTimer()
+    clearSettleTimer()
     setSlideOffsetPx(0)
     setIsDragging(false)
     setIsSettling(false)
     onClose()
-  }, [clearNavTimer, onClose])
+  }, [clearSettleTimer, onClose])
 
   const resetSlidePosition = useCallback(() => {
-    clearNavTimer()
+    clearSettleTimer()
     setIsDragging(false)
     setIsSettling(true)
     setSlideOffsetPx(0)
-
-    navTimerRef.current = setTimeout(() => {
+    settleTimerRef.current = setTimeout(() => {
       setIsSettling(false)
-      navTimerRef.current = null
+      settleTimerRef.current = null
     }, LIGHTBOX_SLIDE_MS)
-  }, [clearNavTimer])
+  }, [clearSettleTimer])
 
   const goToIndex = useCallback((nextIndex: number) => {
     if (!activeImage) return
 
-    // If a previous navigation is still pending, commit it immediately so
-    // rapid navigation cannot desync the shown image from activeIndex.
-    const pending = pendingIndexRef.current
-    const baseIndex = pending ?? activeIndex
-    if (pending !== null) {
-      clearNavTimer()
-      onSelectIndex(pending)
-      setSlideOffsetPx(0)
-      setIsSettling(false)
-    }
-
+    if (isSettling) return
+    const baseIndex = activeIndex
     const next = Math.max(0, Math.min(nextIndex, images.length - 1))
     if (next === baseIndex) {
       resetSlidePosition()
@@ -121,24 +112,26 @@ export default function GalleryLightbox({
     const direction = next > baseIndex ? 1 : -1
     const width = viewerWidthRef.current || window.innerWidth
 
-    clearNavTimer()
     setIsDragging(false)
     setIsSettling(true)
     setSlideOffsetPx(direction > 0 ? -width : width)
-    pendingIndexRef.current = next
-
-    navTimerRef.current = setTimeout(() => {
-      pendingIndexRef.current = null
-      onSelectIndex(next)
+    clearSettleTimer()
+    transitionTargetRef.current = next
+    settleTimerRef.current = setTimeout(() => {
+      const destination = transitionTargetRef.current
+      if (destination === null) return
+      transitionTargetRef.current = null
+      onSelectIndex(destination)
       setSlideOffsetPx(0)
       setIsSettling(false)
-      navTimerRef.current = null
-    }, LIGHTBOX_SLIDE_MS)
+      settleTimerRef.current = null
+    }, LIGHTBOX_SLIDE_MS + 80)
   }, [
     activeImage,
     activeIndex,
-    clearNavTimer,
     images,
+    isSettling,
+    clearSettleTimer,
     onSelectIndex,
     preloadImage,
     resetSlidePosition,
@@ -205,7 +198,7 @@ export default function GalleryLightbox({
     updateViewerWidth()
 
     return () => {
-      clearNavTimer()
+      clearSettleTimer()
       html.style.overflow = previousHtmlOverflow
       html.style.overscrollBehavior = previousHtmlOverscrollBehavior
       body.style.overflow = previousBodyOverflow
@@ -218,7 +211,7 @@ export default function GalleryLightbox({
       body.style.paddingRight = previousBodyPaddingRight
       window.scrollTo(0, scrollY)
     }
-  }, [activeImage, clearNavTimer, updateViewerWidth])
+  }, [activeImage, clearSettleTimer, updateViewerWidth])
 
   useEffect(() => {
     if (!activeImage) return
@@ -247,9 +240,9 @@ export default function GalleryLightbox({
 
   useEffect(() => {
     return () => {
-      clearNavTimer()
+      clearSettleTimer()
     }
-  }, [clearNavTimer])
+  }, [clearSettleTimer])
 
   if (!activeImage || typeof document === 'undefined') {
     return null
@@ -268,7 +261,7 @@ export default function GalleryLightbox({
         role='dialog'
         aria-modal='true'
         aria-label={activeImage.title}
-        className='gallery-lightbox-enter relative h-full w-full'
+        className='gallery-lightbox-enter relative h-full w-full touch-pan-y'
         onTouchStart={(event) => {
           if (isSettling) return
           updateViewerWidth()
@@ -287,7 +280,7 @@ export default function GalleryLightbox({
 
           if (Math.abs(deltaX) < Math.abs(deltaY)) return
 
-          event.preventDefault()
+          if (event.cancelable) event.preventDefault()
 
           const width = viewerWidthRef.current || window.innerWidth
           const clamped = Math.max(-width * 0.92, Math.min(width * 0.92, deltaX))
@@ -296,11 +289,15 @@ export default function GalleryLightbox({
             (activeIndex === 0 && clamped > 0) ||
             (activeIndex === images.length - 1 && clamped < 0)
           ) {
-            setSlideOffsetPx(clamped * 0.32)
-            return
+          if (sliderRef.current) {
+            sliderRef.current.style.transform = `translate3d(calc(-100% + ${clamped * 0.32}px), 0, 0)`
           }
+          return
+        }
 
-          setSlideOffsetPx(clamped)
+          if (sliderRef.current) {
+            sliderRef.current.style.transform = `translate3d(calc(-100% + ${clamped}px), 0, 0)`
+          }
         }}
         onTouchEnd={(event) => {
           const touch = event.changedTouches[0]
@@ -387,6 +384,7 @@ export default function GalleryLightbox({
           className='absolute left-0 right-0 top-14 bottom-14 overflow-hidden px-2 sm:px-8'
         >
           <div
+            ref={sliderRef}
             className='flex h-full w-full'
             style={{
               transform: `translate3d(calc(-100% + ${slideOffsetPx}px), 0, 0)`,
@@ -395,6 +393,20 @@ export default function GalleryLightbox({
                   ? 'none'
                   : `transform ${LIGHTBOX_SLIDE_MS}ms cubic-bezier(0.22, 0.8, 0.2, 1)`,
               willChange: 'transform',
+            }}
+            onTransitionEnd={(event) => {
+              if (event.propertyName !== 'transform') return
+              const destination = transitionTargetRef.current
+              if (destination !== null) {
+                transitionTargetRef.current = null
+                onSelectIndex(destination)
+                setSlideOffsetPx(0)
+              }
+              setIsSettling(false)
+              if (settleTimerRef.current) {
+                clearTimeout(settleTimerRef.current)
+                settleTimerRef.current = null
+              }
             }}
           >
             {[previousImage, activeImage, nextImage].map((image, index) => (

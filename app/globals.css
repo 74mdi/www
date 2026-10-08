@@ -1,6 +1,5 @@
 @import 'tailwindcss';
 @source "../mdx-components.tsx";
-/* @import "./twoslash.css"; */
 
 @layer utilities {
   .font-thin {

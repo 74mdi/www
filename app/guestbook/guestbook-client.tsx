@@ -675,7 +675,12 @@ export default function GuestbookClient() {
       </section>
 
       <section style={{ contentVisibility: 'auto' }}>
-        <h2 className='text-rurikon-600 font-medium'>Recent entries</h2>
+        <header className='mb-2 flex items-baseline justify-between gap-3'>
+          <h2 className='m-0 text-rurikon-600 font-medium'>Recent entries</h2>
+          <span className='text-xs tabular-nums text-rurikon-300'>
+            {entries.length}{entries.length === 100 ? '+' : ''}
+          </span>
+        </header>
         {!entriesTableAvailable ? (
           <p className='mt-3 text-rurikon-400'>
             Entries table not found. Create <code>guestbook_entries</code> in
@@ -690,7 +695,7 @@ export default function GuestbookClient() {
             {entries.map((entry) => (
               <li
                 key={entry.id}
-                className='py-4'
+                className='py-4 first:pt-3'
                 style={{ contentVisibility: 'auto' }}
               >
                 <article className='flex gap-3'>
@@ -721,7 +726,7 @@ export default function GuestbookClient() {
                       </span>
                       <time
                         dateTime={entry.created_at}
-                        className='text-rurikon-300 text-sm'
+                        className='text-rurikon-300 text-xs sm:text-sm'
                       >
                         {formatDate(entry.created_at)}
                       </time>

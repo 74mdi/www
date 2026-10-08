@@ -42,7 +42,7 @@ export default function GuestbookPage() {
           Guestbook
         </h1>
         <p className='max-w-prose text-rurikon-400'>
-          khlili msg wla ktb aya haja qidqbqmofyigqvchkcvqyie
+          Leave a message, a thought, or a small hello.
         </p>
       </header>
 
