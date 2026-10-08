@@ -16,12 +16,35 @@ type LastFmChartResponse = {
   topalbums?: { album?: LastFmChartItem[] | LastFmChartItem }
 }
 
+type LastFmRecentTrack = {
+  name?: string
+  artist?: LastFmArtistName
+  album?: { '#text'?: string }
+  image?: LastFmImage[]
+  date?: { uts?: string }
+  '@attr'?: { nowplaying?: string }
+}
+
+type LastFmRecentResponse = {
+  error?: number
+  recenttracks?: { track?: LastFmRecentTrack[] | LastFmRecentTrack }
+}
+
 type ChartItem = {
   name: string
   artist: string
   cover: string | null
   playCount: number
   url: string | null
+}
+
+export type ListeningHistoryTrack = {
+  title: string
+  artist: string
+  album: string
+  cover: string | null
+  timestamp: number | null
+  nowPlaying: boolean
 }
 
 export type ListeningCharts = {
@@ -33,7 +56,7 @@ export type ListeningCharts = {
 const LASTFM_ENDPOINT = 'https://ws.audioscrobbler.com/2.0/'
 const PLACEHOLDER_COVER_HASH = '2a96cbd8b46e442fc41c2b86b821562f'
 
-function asList(value: LastFmChartItem[] | LastFmChartItem | undefined): LastFmChartItem[] {
+function asList<T>(value: T[] | T | undefined): T[] {
   if (!value) return []
   return Array.isArray(value) ? value : [value]
 }
@@ -112,5 +135,48 @@ export async function getListeningCharts(): Promise<ListeningCharts> {
     tracks: normalizeItems(asList(trackData?.toptracks?.track), 'track'),
     artists: normalizeItems(asList(artistData?.topartists?.artist), 'artist'),
     albums: normalizeItems(asList(albumData?.topalbums?.album), 'album'),
+  }
+}
+
+export async function getListeningHistory(): Promise<ListeningHistoryTrack[]> {
+  const apiKey = process.env.LASTFM_API_KEY?.trim()
+  if (!apiKey) return []
+
+  const params = new URLSearchParams({
+    method: 'user.getrecenttracks',
+    user: process.env.LASTFM_USERNAME?.trim() || 'khrya',
+    api_key: apiKey,
+    format: 'json',
+    limit: '50',
+  })
+
+  try {
+    const response = await fetch(`${LASTFM_ENDPOINT}?${params}`, {
+      next: { revalidate: 60 },
+      headers: { Accept: 'application/json' },
+    })
+    if (!response.ok) return []
+
+    const payload = (await response.json()) as LastFmRecentResponse
+    if (payload.error) return []
+
+    return asList(payload.recenttracks?.track).flatMap((track) => {
+      const title = track.name?.trim()
+      if (!title) return []
+
+      const nowPlaying = track['@attr']?.nowplaying === 'true'
+      const seconds = Number(track.date?.uts)
+
+      return [{
+        title,
+        artist: artistName(track.artist) || 'Unknown artist',
+        album: track.album?.['#text']?.trim() || '',
+        cover: imageUrl(track.image),
+        timestamp: !nowPlaying && Number.isFinite(seconds) && seconds > 0 ? seconds * 1000 : null,
+        nowPlaying,
+      }]
+    })
+  } catch {
+    return []
   }
 }

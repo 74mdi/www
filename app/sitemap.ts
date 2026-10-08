@@ -34,6 +34,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'daily',
       priority: 0.6,
     },
+    {
+      url: `${siteUrl}/top`,
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.6,
+    },
   ]
 
   const thoughtRoutes: MetadataRoute.Sitemap = thoughtArticles.map((article) => ({

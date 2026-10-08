@@ -8,7 +8,8 @@
 - [Thoughts](https://7amdi.vercel.app/thoughts): Articles and notes on programming, design, and experiments.
 - [Gallery](https://7amdi.vercel.app/gallery): Personal photography.
 - [Guestbook](https://7amdi.vercel.app/guestbook): Messages left by visitors.
-- [Listening history](https://7amdi.vercel.app/mh): Recent Last.fm charts, including top tracks, artists, and albums from the past month.
+- [Listening history](https://7amdi.vercel.app/mh): Recently played tracks from Last.fm.
+- [Top music](https://7amdi.vercel.app/top): Top tracks, artists, and albums from the past month.
 
 ## Profiles
 
