@@ -11,9 +11,16 @@ type LastFmChartItem = {
 
 type LastFmChartResponse = {
   error?: number
+  message?: string
   toptracks?: { track?: LastFmChartItem[] | LastFmChartItem }
   topartists?: { artist?: LastFmChartItem[] | LastFmChartItem }
   topalbums?: { album?: LastFmChartItem[] | LastFmChartItem }
+}
+
+type LastFmInfoResponse = {
+  error?: number
+  artist?: LastFmChartItem
+  album?: LastFmChartItem
 }
 
 type LastFmRecentTrack = {
@@ -74,9 +81,11 @@ function imageUrl(images: LastFmImage[] | undefined): string | null {
     ...images.map((image) => image['#text']),
   ]
 
-  const candidate = candidates.find(
-    (url) => /^https?:\/\//i.test(url ?? '') && !url?.includes(PLACEHOLDER_COVER_HASH),
-  )
+  const candidate = candidates.find((url) => {
+    if (!/^https?:\/\//i.test(url ?? '')) return false
+    const normalized = url?.toLowerCase() ?? ''
+    return !normalized.includes(PLACEHOLDER_COVER_HASH)
+  })
   return candidate?.replace(/^http:\/\//i, 'https://') ?? null
 }
 
@@ -99,6 +108,58 @@ function normalizeItems(items: LastFmChartItem[], type: 'track' | 'artist' | 'al
       url: item.url?.startsWith('https://') ? item.url : null,
     }]
   })
+}
+
+async function fetchImageInfo(
+  apiKey: string,
+  method: 'artist.getinfo' | 'album.getinfo',
+  item: ChartItem,
+): Promise<string | null> {
+  const params = new URLSearchParams({
+    method,
+    api_key: apiKey,
+    format: 'json',
+  })
+  if (method === 'artist.getinfo') {
+    params.set('artist', item.name)
+  } else {
+    params.set('artist', item.artist)
+    params.set('album', item.name)
+  }
+
+  try {
+    const response = await fetch(`${LASTFM_ENDPOINT}?${params}`, {
+      next: { revalidate: 86400 },
+      headers: { Accept: 'application/json' },
+    })
+    if (!response.ok) return null
+    const payload = (await response.json()) as LastFmInfoResponse
+    if (payload.error) return null
+    const images = method === 'artist.getinfo' ? payload.artist?.image : payload.album?.image
+    return imageUrl(images)
+  } catch {
+    return null
+  }
+}
+
+async function fillMissingCovers(
+  apiKey: string,
+  items: ChartItem[],
+  method: 'artist.getinfo' | 'album.getinfo',
+): Promise<ChartItem[]> {
+  const missing = items.filter((item) => !item.cover)
+  if (!missing.length) return items
+
+  const resolved = await Promise.all(missing.map(async (item) => ({
+    key: `${item.name.toLocaleLowerCase()}\u0000${item.artist.toLocaleLowerCase()}`,
+    cover: await fetchImageInfo(apiKey, method, item),
+  })))
+  const covers = new Map(resolved.map((item) => [item.key, item.cover]))
+
+  return items.map((item) => ({
+    ...item,
+    cover: item.cover ?? covers.get(`${item.name.toLocaleLowerCase()}\u0000${item.artist.toLocaleLowerCase()}`) ?? null,
+  }))
 }
 
 async function fetchCharts(apiKey: string, method: string, limit: number, period: ListeningPeriod): Promise<LastFmChartResponse | null> {
@@ -137,10 +198,29 @@ export async function getListeningCharts(period: ListeningPeriod = 'overall'): P
     fetchCharts(apiKey, 'user.gettopalbums', 3, period),
   ])
 
+  const tracks = normalizeItems(asList(trackData?.toptracks?.track), 'track')
+  const artists = await fillMissingCovers(
+    apiKey,
+    normalizeItems(asList(artistData?.topartists?.artist), 'artist'),
+    'artist.getinfo',
+  )
+  const albums = await fillMissingCovers(
+    apiKey,
+    normalizeItems(asList(albumData?.topalbums?.album), 'album'),
+    'album.getinfo',
+  )
+  const artistCovers = new Map(artists.map((artist) => [artist.name.trim().toLocaleLowerCase(), artist.cover]))
+
   return {
-    tracks: normalizeItems(asList(trackData?.toptracks?.track), 'track'),
-    artists: normalizeItems(asList(artistData?.topartists?.artist), 'artist'),
-    albums: normalizeItems(asList(albumData?.topalbums?.album), 'album'),
+    tracks: tracks.map((track) => ({
+      ...track,
+      cover: track.cover ?? artistCovers.get(track.artist.trim().toLocaleLowerCase()) ?? null,
+    })),
+    artists,
+    albums: albums.map((album) => ({
+      ...album,
+      cover: album.cover ?? artistCovers.get(album.artist.trim().toLocaleLowerCase()) ?? null,
+    })),
     moreArtistsUrl,
   }
 }
