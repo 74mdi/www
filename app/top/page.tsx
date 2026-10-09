@@ -31,7 +31,7 @@ function ArtistTile({ artist, featured = false }: { artist: ChartItem; featured?
       src={artist.cover}
       title={artist.name}
       loading={featured ? 'eager' : 'lazy'}
-      className={`group relative block min-h-0 min-w-0 overflow-hidden bg-[#171717] ${featured ? 'row-span-2' : ''}`}
+      className={`group relative block min-w-0 overflow-hidden bg-[#171717] ${featured ? 'col-span-2 aspect-[2/1] sm:row-span-2 sm:aspect-auto' : 'aspect-square'}`}
       imageClassName='absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.025]'
     >
       <span className='absolute inset-0 bg-gradient-to-t from-black/70 via-black/5 to-black/0' />
@@ -72,7 +72,7 @@ export default async function TopMusicPage({
       </header>
 
       {artistTiles.length ? (
-        <div className='grid h-[24rem] grid-cols-2 grid-rows-2 sm:h-[28rem]'>
+        <div className='grid grid-cols-2 gap-0 sm:grid-cols-4 sm:grid-rows-2 sm:aspect-[2/1]'>
           {artistTiles.map((artist, index) => (
             <ArtistTile key={`${artist.name}-${index}`} artist={artist} featured={index === 0} />
           ))}

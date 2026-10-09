@@ -21,6 +21,12 @@ type LastFmInfoResponse = {
   error?: number
   artist?: LastFmChartItem
   album?: LastFmChartItem
+  track?: { album?: LastFmChartItem }
+}
+
+type LastFmArtistAlbumsResponse = {
+  error?: number
+  topalbums?: { album?: LastFmChartItem[] | LastFmChartItem }
 }
 
 type LastFmRecentTrack = {
@@ -142,6 +148,66 @@ async function fetchImageInfo(
   }
 }
 
+async function fetchAlbumCoverForTrack(apiKey: string, track: ChartItem): Promise<string | null> {
+  const params = new URLSearchParams({
+    method: 'track.getinfo',
+    artist: track.artist,
+    track: track.name,
+    api_key: apiKey,
+    format: 'json',
+    autocorrect: '1',
+  })
+
+  try {
+    const response = await fetch(`${LASTFM_ENDPOINT}?${params}`, {
+      next: { revalidate: 86400 },
+      headers: { Accept: 'application/json' },
+    })
+    if (!response.ok) return null
+    const payload = (await response.json()) as LastFmInfoResponse
+    if (payload.error) return null
+    return imageUrl(payload.track?.album?.image)
+  } catch {
+    return null
+  }
+}
+
+async function fetchArtistAlbumCover(apiKey: string, artistName: string): Promise<string | null> {
+  const params = new URLSearchParams({
+    method: 'artist.gettopalbums',
+    artist: artistName,
+    api_key: apiKey,
+    format: 'json',
+    limit: '1',
+    autocorrect: '1',
+  })
+
+  try {
+    const response = await fetch(`${LASTFM_ENDPOINT}?${params}`, {
+      next: { revalidate: 86400 },
+      headers: { Accept: 'application/json' },
+    })
+    if (!response.ok) return null
+    const payload = (await response.json()) as LastFmArtistAlbumsResponse
+    if (payload.error) return null
+    const album = asList(payload.topalbums?.album)[0]
+    if (!album) return null
+    const cover = imageUrl(album.image)
+    if (cover) return cover
+    const name = album.name?.trim()
+    if (!name) return null
+    return fetchImageInfo(apiKey, 'album.getinfo', {
+      name,
+      artist: artistName,
+      cover: null,
+      playCount: 0,
+      url: null,
+    })
+  } catch {
+    return null
+  }
+}
+
 async function fillMissingCovers(
   apiKey: string,
   items: ChartItem[],
@@ -198,28 +264,40 @@ export async function getListeningCharts(period: ListeningPeriod = 'overall'): P
     fetchCharts(apiKey, 'user.gettopalbums', 3, period),
   ])
 
-  const tracks = normalizeItems(asList(trackData?.toptracks?.track), 'track')
-  const artists = await fillMissingCovers(
-    apiKey,
-    normalizeItems(asList(artistData?.topartists?.artist), 'artist'),
-    'artist.getinfo',
-  )
-  const albums = await fillMissingCovers(
-    apiKey,
-    normalizeItems(asList(albumData?.topalbums?.album), 'album'),
-    'album.getinfo',
-  )
+  const rawTracks = normalizeItems(asList(trackData?.toptracks?.track), 'track')
+  const rawArtists = normalizeItems(asList(artistData?.topartists?.artist), 'artist')
+  const rawAlbums = normalizeItems(asList(albumData?.topalbums?.album), 'album')
+  const [tracksWithAlbumCovers, albums] = await Promise.all([
+    Promise.all(rawTracks.map(async (track) => ({
+      ...track,
+      cover: track.cover ?? await fetchAlbumCoverForTrack(apiKey, track),
+    }))),
+    fillMissingCovers(apiKey, rawAlbums, 'album.getinfo'),
+  ])
+
+  const albumsByArtist = new Map<string, string>()
+  for (const album of albums) {
+    if (album.cover && album.artist) {
+      const key = album.artist.trim().toLocaleLowerCase()
+      if (!albumsByArtist.has(key)) albumsByArtist.set(key, album.cover)
+    }
+  }
+  const artists = await Promise.all(rawArtists.map(async (artist) => {
+    const matchingAlbum = albumsByArtist.get(artist.name.trim().toLocaleLowerCase())
+    const cover = artist.cover ?? matchingAlbum ?? await fetchArtistAlbumCover(apiKey, artist.name)
+    return { ...artist, cover }
+  }))
   const artistCovers = new Map(artists.map((artist) => [artist.name.trim().toLocaleLowerCase(), artist.cover]))
 
   return {
-    tracks: tracks.map((track) => ({
+    tracks: tracksWithAlbumCovers.map((track) => ({
       ...track,
       cover: track.cover ?? artistCovers.get(track.artist.trim().toLocaleLowerCase()) ?? null,
     })),
     artists,
     albums: albums.map((album) => ({
       ...album,
-      cover: album.cover ?? artistCovers.get(album.artist.trim().toLocaleLowerCase()) ?? null,
+      cover: album.cover ?? albumsByArtist.get(album.artist.trim().toLocaleLowerCase()) ?? null,
     })),
     moreArtistsUrl,
   }
