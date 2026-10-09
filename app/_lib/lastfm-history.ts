@@ -51,7 +51,10 @@ export type ListeningCharts = {
   tracks: ChartItem[]
   artists: ChartItem[]
   albums: ChartItem[]
+  moreArtistsUrl: string
 }
+
+export type ListeningPeriod = 'overall' | '7day' | '1month' | '3month' | '6month' | '12month'
 
 const LASTFM_ENDPOINT = 'https://ws.audioscrobbler.com/2.0/'
 const PLACEHOLDER_COVER_HASH = '2a96cbd8b46e442fc41c2b86b821562f'
@@ -97,13 +100,13 @@ function normalizeItems(items: LastFmChartItem[], type: 'track' | 'artist' | 'al
   })
 }
 
-async function fetchCharts(apiKey: string, method: string, limit: number): Promise<LastFmChartResponse | null> {
+async function fetchCharts(apiKey: string, method: string, limit: number, period: ListeningPeriod): Promise<LastFmChartResponse | null> {
   const params = new URLSearchParams({
     method,
     user: process.env.LASTFM_USERNAME?.trim() || 'khrya',
     api_key: apiKey,
     format: 'json',
-    period: '1month',
+    period,
     limit: String(limit),
   })
 
@@ -121,20 +124,23 @@ async function fetchCharts(apiKey: string, method: string, limit: number): Promi
   }
 }
 
-export async function getListeningCharts(): Promise<ListeningCharts> {
+export async function getListeningCharts(period: ListeningPeriod = 'overall'): Promise<ListeningCharts> {
   const apiKey = process.env.LASTFM_API_KEY?.trim()
-  if (!apiKey) return { tracks: [], artists: [], albums: [] }
+  const username = process.env.LASTFM_USERNAME?.trim() || 'khrya'
+  const moreArtistsUrl = `https://www.last.fm/user/${encodeURIComponent(username)}/library/artists`
+  if (!apiKey) return { tracks: [], artists: [], albums: [], moreArtistsUrl }
 
   const [trackData, artistData, albumData] = await Promise.all([
-    fetchCharts(apiKey, 'user.gettoptracks', 10),
-    fetchCharts(apiKey, 'user.gettopartists', 3),
-    fetchCharts(apiKey, 'user.gettopalbums', 3),
+    fetchCharts(apiKey, 'user.gettoptracks', 10, period),
+    fetchCharts(apiKey, 'user.gettopartists', 5, period),
+    fetchCharts(apiKey, 'user.gettopalbums', 3, period),
   ])
 
   return {
     tracks: normalizeItems(asList(trackData?.toptracks?.track), 'track'),
     artists: normalizeItems(asList(artistData?.topartists?.artist), 'artist'),
     albums: normalizeItems(asList(albumData?.topalbums?.album), 'album'),
+    moreArtistsUrl,
   }
 }
 
