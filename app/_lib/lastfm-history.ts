@@ -74,9 +74,10 @@ function imageUrl(images: LastFmImage[] | undefined): string | null {
     ...images.map((image) => image['#text']),
   ]
 
-  return candidates.find(
-    (url) => url?.startsWith('https://') && !url.includes(PLACEHOLDER_COVER_HASH),
-  ) ?? null
+  const candidate = candidates.find(
+    (url) => /^https?:\/\//i.test(url ?? '') && !url?.includes(PLACEHOLDER_COVER_HASH),
+  )
+  return candidate?.replace(/^http:\/\//i, 'https://') ?? null
 }
 
 function artistName(value: LastFmArtistName | undefined): string {
